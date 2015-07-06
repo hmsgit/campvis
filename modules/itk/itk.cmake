@@ -4,8 +4,6 @@ IF(${ModuleEnabled})
     FIND_PACKAGE (ITK REQUIRED)
         
     IF(ITK_FOUND)
-        INCLUDE( ${ITK_USE_FILE} ) 
-    
         # Since we use ITK classes also in the core module, we need to set global include dirs and global external libs
         LIST(APPEND CampvisGlobalIncludeDirs ${ITK_INCLUDE_DIRS})
         LIST(APPEND CampvisGlobalExternalLibs ${ITK_LIBRARIES})

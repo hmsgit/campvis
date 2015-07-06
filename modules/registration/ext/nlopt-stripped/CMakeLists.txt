@@ -139,10 +139,7 @@ SET ( NLOPT_SOURCES
 	stogo/global.cc stogo/linalg.cc stogo/local.cc stogo/stogo.cc stogo/tools.cc stogo/global.h stogo/linalg.h stogo/local.h stogo/stogo_config.h stogo/stogo.h stogo/tools.h 
         )
 
-OPTION(NLOPT_BUILD_SHARED "Build NLOPT as a shared library" OFF )
-
-#FIXME: CAMPVIs currently does not support  shared linking of modules -> nlopt needs to be linked statically
-SET(NLOPT_BUILD_SHARED FALSE)
+OPTION(NLOPT_BUILD_SHARED "Build NLOPT as a shared library" ON)
 
 IF(NLOPT_BUILD_SHARED)
   ADD_DEFINITIONS(-DNLOPT_DLL)

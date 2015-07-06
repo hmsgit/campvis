@@ -53,6 +53,8 @@ namespace campvis {
     class ImageRepresentationGL;
     class GlReduction;
 
+namespace registration {
+
     /**
      * Computes a Similarity Measure using OpenGL
      */
@@ -162,6 +164,7 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+}
 }
 
 #endif // SIMILARITYMEASURE_H__

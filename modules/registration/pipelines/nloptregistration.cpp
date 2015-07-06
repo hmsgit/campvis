@@ -25,16 +25,34 @@
 #include "nloptregistration.h"
 
 #include "cgt/event/keyevent.h"
-#include "cgt/openglgarbagecollector.h"
 #include "cgt/opengljobprocessor.h"
 #include "cgt/painter.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/datastructures/renderdata.h"
+#include "core/datastructures/transformdata.h"
 #include "core/tools/glreduction.h"
 
 namespace campvis {
+namespace registration {
+    namespace {
+        cgt::mat4 euleranglesToMat4(const cgt::vec3& eulerAngles) {
+            float sinX = sin(eulerAngles.x);
+            float cosX = cos(eulerAngles.x);
+            float sinY = sin(eulerAngles.y);
+            float cosY = cos(eulerAngles.y);
+            float sinZ = sin(eulerAngles.z);
+            float cosZ = cos(eulerAngles.z);
+
+            cgt::mat4 toReturn(cosY * cosZ,   cosZ * sinX * sinY - cosX * sinZ,   sinX * sinZ + cosX * cosZ * sinY,   0.f,
+                cosY * sinZ,   sinX * sinY * sinZ + cosX * cosZ,   cosX * sinY * sinZ - cosZ * sinX,   0.f,
+                (-1) * sinY,   cosY * sinX,                        cosX * cosY,                        0.f,
+                0.f,           0.f,                                0.f,                                1.f);
+            return toReturn;
+        }
+    }
+
     static const GenericOption<nlopt::algorithm> optimizers[3] = {
         GenericOption<nlopt::algorithm>("cobyla", "COBYLA", nlopt::LN_COBYLA),
         GenericOption<nlopt::algorithm>("newuoa", "NEWUOA", nlopt::LN_NEWUOA),
@@ -52,6 +70,7 @@ namespace campvis {
         , _lsp()
         , _referenceReader()
         , _movingReader()
+        , _rsw(&_canvasSize)
         , _sm()
         , _ve(&_canvasSize)
         , _opt(0)
@@ -59,6 +78,7 @@ namespace campvis {
         addProcessor(&_lsp);
         addProcessor(&_referenceReader);
         addProcessor(&_movingReader);
+        addProcessor(&_rsw);
         addProcessor(&_sm);
         addProcessor(&_ve);
 
@@ -84,23 +104,28 @@ namespace campvis {
         _referenceReader.p_url.setValue("D:/Medical Data/SCR/Data/RegSweeps_phantom_cropped/-1S1median/Volume_2.mhd");
         _referenceReader.p_targetImageID.setValue("Reference Image");
         _referenceReader.p_targetImageID.addSharedProperty(&_sm.p_referenceId);
+        _referenceReader.p_targetImageID.addSharedProperty(&_rsw.p_sourceImageID);
 
         _movingReader.p_url.setValue("D:/Medical Data/SCR/Data/RegSweeps_phantom_cropped/-1S1median/Volume_3.mhd");
         _movingReader.p_targetImageID.setValue("Moving Image");
         _movingReader.p_targetImageID.addSharedProperty(&_sm.p_movingId);
+        _movingReader.p_targetImageID.addSharedProperty(&_rsw.p_movingImage);
+
+        _rsw.p_movingTransformationMatrix.setValue("trafoMatrix");
+        _rsw.p_targetImageID.setValue("RegistrationSliceView");
 
         _sm.p_differenceImageId.addSharedProperty(&_ve.p_inputVolume);
         _sm.p_metric.selectById("NCC");
 
         _ve.p_outputImage.setValue("volumeexplorer");
-        _renderTargetID.setValue("volumeexplorer");
+        _renderTargetID.setValue("RegistrationSliceView");
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(-1.f, 1.f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, .5f), cgt::col4(0, 0, 255, 255), cgt::col4(255, 255, 255, 0)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.5f, 1.f), cgt::col4(255, 255, 255, 0), cgt::col4(255, 0, 0, 255)));
-        MetaProperty* mp = static_cast<MetaProperty*>(_ve.getProperty("SliceExtractorProperties"));
-        static_cast<TransferFunctionProperty*>(mp->getProperty("transferFunction"))->replaceTF(dvrTF);
-        static_cast<TransferFunctionProperty*>(mp->getProperty("transferFunction"))->setAutoFitWindowToData(false);
+        MetaProperty* mp = dynamic_cast<MetaProperty*>(_ve.getProperty("SliceExtractorProperties"));
+        dynamic_cast<TransferFunctionProperty*>(mp->getProperty("TransferFunction"))->replaceTF(dvrTF);
+        dynamic_cast<TransferFunctionProperty*>(mp->getProperty("TransferFunction"))->setAutoFitWindowToData(false);
     }
 
     void NloptRegistration::deinit() {
@@ -110,14 +135,17 @@ namespace campvis {
         AutoEvaluationPipeline::deinit();
     }
 
-    void NloptRegistration::onProcessorValidated(AbstractProcessor* processor) {
-
-    }
-
     void NloptRegistration::onPerformOptimizationClicked() {
-        // Evaluation of the similarity measure needs an OpenGL context, so we need to create an OpenGL job for this.
-        cgt::GLContextScopedLock lockGuard(_canvas);
-        performOptimization();
+        // we want the registration to be performed in a background thread and not in the signal_manager's thread.
+        std::thread registrationThread([this] () {
+            // Evaluation of the similarity measure needs an OpenGL context, so we need to acquire the canvas' context.
+            // An alternative solution would be to specialize the pipeline and overload the executePipeline() method.
+            // Then the registration would be performed in the pipeline's thread, which is probably the mor beautiful
+            // solution. 
+            cgt::GLContextScopedLock lockGuard(this->_canvas);
+            this->performOptimization();
+        });
+
     }
 
     void NloptRegistration::performOptimization() {
@@ -195,18 +223,15 @@ namespace campvis {
 
         // perform interactive update if wished
         if (mfd->_object->p_liveUpdate.getValue()) {
-            // compute difference image
-            mfd->_object->_sm.generateDifferenceImage(mfd->_object->_data, mfd->_reference, mfd->_moving, translation, rotation);
+            cgt::mat4 trafoMatrix = cgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
+            mfd->_object->getDataContainer().addData("trafoMatrix", new TransformData(trafoMatrix));
 
-            // render difference volume
-            mfd->_object->_ve.process(mfd->_object->getDataContainer());
+            // render slice view
+            mfd->_object->_rsw.process(mfd->_object->getDataContainer());
 
             // update canvas
             mfd->_object->_canvas->getPainter()->paint();
         }
-
-        // clean up unused GL textures.
-        GLGC.deleteGarbage();
 
         return similarity;
     }
@@ -215,6 +240,10 @@ namespace campvis {
         if (_opt != 0)
             _opt->force_stop();
     }
+    
+}
 
+// Instantiate template to register the pipelines.
+template class PipelineRegistrar<registration::NloptRegistration>;
 
 }
