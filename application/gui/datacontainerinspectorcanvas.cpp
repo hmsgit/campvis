@@ -252,9 +252,10 @@ namespace campvis {
         if (_quad != 0 && _paintShader != 0) {
             // avoid recursive paints.
             if (! cgt::GlContextManager::getRef().checkWhetherThisThreadHasAcquiredOpenGlContext()) {
-                // TODO: check, whether this should be done in an extra thread
-                cgt::GLContextScopedLock lock(this);
-                paint();
+                std::thread backgroundThread([this] () {
+                    cgt::GLContextScopedLock lock(this);
+                    paint();
+                });
             }
         }
     }
