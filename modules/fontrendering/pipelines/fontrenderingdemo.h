@@ -28,7 +28,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 #include "modules/fontrendering/processors/textrenderer.h"
 
 
@@ -59,9 +58,6 @@ namespace fontrendering {
     };
 
 }
-
-// Instantiate template to register the pipelines.
-template class PipelineRegistrar<fontrendering::FontRenderingDemo>;
 
 }
 

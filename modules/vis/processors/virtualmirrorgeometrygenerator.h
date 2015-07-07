@@ -49,8 +49,10 @@ namespace campvis {
          **/
         virtual ~VirtualMirrorGeometryGenerator();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "VirtualMirrorGeometryGenerator"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "VirtualMirrorGeometryGenerator"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Generates proxy geometry for a virtual mirror."; };
         /// \see AbstractProcessor::getAuthor()

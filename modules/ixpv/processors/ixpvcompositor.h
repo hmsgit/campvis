@@ -62,8 +62,10 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "IxpvCompositor"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "IxpvCompositor"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs IXPV composition of a 3D volume rendering and a X-Ray image."; };
         /// \see AbstractProcessor::getAuthor()

@@ -16,6 +16,7 @@ IF(ModuleEnabled)
             modules/cudaconfidencemaps/core/*.cpp
             modules/cudaconfidencemaps/pipelines/*.cpp
             modules/cudaconfidencemaps/processors/*.cpp
+            modules/cudaconfidencemaps/*.cpp
         )
 
         # Header files (including GLSL files so that they'll appear in VS projects)

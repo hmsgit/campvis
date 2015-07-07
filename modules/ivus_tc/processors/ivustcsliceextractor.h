@@ -45,8 +45,10 @@ namespace campvis {
          **/
         virtual ~IvusTcSliceExtractor();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "IvusTcSliceExtractor"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "IvusTcSliceExtractor"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "IVUS Tissue Classification Slice Rendering with Predicate Histogram-based classification."; };
         /// \see AbstractProcessor::getAuthor()

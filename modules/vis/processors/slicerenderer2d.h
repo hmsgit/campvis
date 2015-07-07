@@ -41,7 +41,6 @@
 #include "core/properties/transferfunctionproperty.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -111,9 +110,6 @@ namespace campvis {
     private:
         cgt::ivec3 _lastImgSize;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<SliceRenderer2D>;
 }
 
 #endif // SLICERENDERER2D_H__

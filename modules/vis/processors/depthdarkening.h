@@ -32,7 +32,6 @@
 #include "core/properties/floatingpointproperty.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -63,9 +62,7 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
         
-        /** 
-         * To be used in ProcessorFactory static methods
-         */
+        /// To be used in ProcessorFactory static methods
         static const std::string getId() { return "DepthDarkening"; };
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return getId(); };
@@ -103,9 +100,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<DepthDarkening>;
 }
 
 #endif // DEPTHDARKENING_H__

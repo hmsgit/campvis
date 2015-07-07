@@ -64,8 +64,10 @@ namespace campvis {
         /// \see AbstractProcessor::deinit()
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "CampcomMhdReceiver"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "CampcomMhdReceiver"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Experimental demo implementation how to receive MHD files via CAMPCom."; };
         /// \see AbstractProcessor::getAuthor()

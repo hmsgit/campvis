@@ -66,8 +66,10 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "AdvancedUsFusion"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "AdvancedUsFusion"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Extracts a single slice from the input image and renders it using a transfer function."; };
         /// \see AbstractProcessor::getAuthor()

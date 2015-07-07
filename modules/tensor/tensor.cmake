@@ -5,6 +5,7 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/tensor/processors/*.cpp
 		modules/tensor/pipelines/*.cpp
+		modules/tensor/*.cpp
 	)
 
 	# Header files

@@ -69,8 +69,10 @@ namespace neuro {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "MultiVolumeMprRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "MultiVolumeMprRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs an MPR rendering of multiple images at the same time."; };
         /// \see AbstractProcessor::getAuthor()

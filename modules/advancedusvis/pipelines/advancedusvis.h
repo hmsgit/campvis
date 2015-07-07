@@ -28,7 +28,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 
 #include "modules/io/processors/genericimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
@@ -73,10 +72,6 @@ namespace campvis {
 
         QuadView _quadView;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<AdvancedUsVis>;
-
 }
 
 #endif // ADVANCEDUSVIS_H__

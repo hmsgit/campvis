@@ -26,12 +26,11 @@
 #define PROCESSORFACTORY_H__
 
 #include "cgt/logmanager.h"
-#include "cgt/singleton.h"
 
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
 
-#include "modules/modulesapi.h"
+#include "core/coreapi.h"
 
 #include <functional>
 #include <map>
@@ -54,7 +53,7 @@ namespace campvis {
      * 
      * \note    ProcessorFactory is a thread-safe lazy-instantiated singleton.
      */
-    class CAMPVIS_MODULES_API ProcessorFactory {
+    class CAMPVIS_CORE_API ProcessorFactory {
     public:
         /**
          * Returns a reference to the ProcessorFactory singleton.

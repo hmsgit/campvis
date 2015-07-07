@@ -26,12 +26,11 @@
 #define PIPELINEFACTORY_H__
 
 #include "cgt/logmanager.h"
-#include "cgt/singleton.h"
 
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
 
-#include "modules/modulesapi.h"
+#include "core/coreapi.h"
 
 #include <map>
 #include <string>
@@ -50,7 +49,7 @@ namespace campvis {
      * 
      * \note    PipelineFactory is a thread-safe lazy-instantiated singleton.
      */
-    class CAMPVIS_MODULES_API PipelineFactory {
+    class CAMPVIS_CORE_API PipelineFactory {
     public:
         /**
          * Returns a reference to the PipelineFactory singleton.

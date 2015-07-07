@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universitaet Muenchen
-//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -22,21 +22,13 @@
 // 
 // ================================================================================================
 
-in vec3 ex_TexCoord;
-out vec4 out_Color;
+#include "core/pipeline/pipelinefactory.h"
 
-#include "tools/texture3d.frag"
-#include "tools/transferfunction.frag"
+#include "modules/ivus_tc/pipelines/ivustcdemo.h"
 
-uniform sampler3D _texture;
-uniform TextureParameters3D _textureParams;
+namespace campvis {
 
-uniform sampler1D _transferFunction;
-uniform TFParameters1D _transferFunctionParams;
+    // explicitly instantiate templates to register the pipelines
+    template class PipelineRegistrar<IvusTcDemo>;
 
-uniform float _zTexCoord;
-
-void main() {
-    float intensity = texture(_texture, vec3(ex_TexCoord.xy, _zTexCoord)).r;
-    out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 }

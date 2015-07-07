@@ -35,8 +35,9 @@
 #include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
+#include "core/pipeline/pipelinefactory.h"
+#include "core/pipeline/processorfactory.h"
 #include "core/tools/stringutils.h"
-#include "modules/pipelinefactory.h"
 
 #include <QScrollBar>
 #include <QFileDialog>

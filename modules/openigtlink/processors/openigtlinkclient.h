@@ -74,8 +74,10 @@ namespace campvis {
         /// \see AbstractProcessor::deinit()
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "OpenIGTLinkClient"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "OpenIGTLinkClient"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "OpenIGTLink Client that can receive IMAGE and TRANSFORM messages"; };
         /// \see AbstractProcessor::getAuthor()

@@ -32,7 +32,6 @@
 
 #include "modules/modulesapi.h"
 #include "modules/vis/tools/voxelhierarchymapper.h"
-#include "modules/processorfactory.h"
 
 #include <string>
 
@@ -99,9 +98,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<AdvOptimizedRaycaster>;
 }
 
 #endif // AdvOptimizedRaycaster_H__

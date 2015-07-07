@@ -5,6 +5,7 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/ivus_tc/pipelines/*.cpp
 		modules/ivus_tc/processors/*.cpp
+		modules/ivus_tc/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)

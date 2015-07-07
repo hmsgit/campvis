@@ -30,8 +30,6 @@
 #include "core/properties/allproperties.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
@@ -92,10 +90,6 @@ namespace campvis {
 
         ButtonProperty p_execute;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<CmBatchGeneration>;
-
 }
 
 #endif // CMBATCHGENERATION_H__

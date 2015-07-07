@@ -16,6 +16,7 @@ IF(ModuleEnabled)
             modules/openigtlink/pipelines/*.cpp
             modules/openigtlink/processors/*.cpp
             modules/openigtlink/datastructures/*.cpp
+            modules/openigtlink/*.cpp
         )
 
         # Header files (including GLSL files so that they'll appear in VS projects)

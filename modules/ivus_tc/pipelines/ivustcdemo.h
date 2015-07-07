@@ -30,8 +30,6 @@
 #include "core/properties/allproperties.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/genericimagereader.h"
@@ -77,9 +75,6 @@ namespace campvis {
         IvusBatchReader _imageReader;
         VolumeExplorer _ve;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<IvusTcDemo>;
 }
 
 #endif // IVUSTCDEMO_H__

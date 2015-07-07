@@ -5,6 +5,7 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/ixpv/pipelines/*.cpp
 		modules/ixpv/processors/*.cpp
+		modules/ixpv/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)

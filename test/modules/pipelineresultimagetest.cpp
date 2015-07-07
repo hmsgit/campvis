@@ -32,10 +32,10 @@
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/abstractpipeline.h"
+#include "core/pipeline/pipelinefactory.h"
 #include "core/properties/allproperties.h"
 #include "core/tools/stringutils.h"
 
-#include "modules/pipelinefactory.h"
 #include "modules/devil/processors/devilimagewriter.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 

@@ -45,11 +45,11 @@
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractworkflow.h"
+#include "core/pipeline/pipelinefactory.h"
 #include "core/pipeline/pipelinepainter.h"
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/pipeline/visualizationprocessor.h"
 
-#include "modules/pipelinefactory.h"
 #include "qtjobprocessor.h"
 
 #include <QApplication>

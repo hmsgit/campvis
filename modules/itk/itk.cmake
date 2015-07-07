@@ -27,6 +27,7 @@ IF(${ModuleEnabled})
     FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
         modules/itk/pipelines/*.cpp
         modules/itk/processors/*.cpp
+        modules/itk/*.cpp
     )
 
     # Header files

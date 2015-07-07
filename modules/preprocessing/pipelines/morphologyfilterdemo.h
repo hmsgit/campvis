@@ -28,8 +28,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/preprocessing/processors/glmorphologyfilter.h"
@@ -64,10 +62,6 @@ namespace campvis {
         GlMorphologyFilter _morphologyFilter;
         VolumeExplorer _ve;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<MorphologyDemo>;
-
 }
 
 #endif // MORPHOLOGYFILTERDEMO_H__

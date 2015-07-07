@@ -27,7 +27,6 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 #include "modules/io/processors/genericimagereader.h"
 
 namespace campvis {
@@ -55,10 +54,6 @@ namespace workflowdemo {
         campvis::GenericImageReader _imageReader;
     };
 }
-
-// Instantiate template to register the pipelines.
-template class PipelineRegistrar<workflowdemo::ImageLoading>;
-
 }
 
 #endif // IMAGELOADING_H__

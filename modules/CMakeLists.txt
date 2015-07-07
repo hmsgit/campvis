@@ -8,14 +8,7 @@ WRITE_PIPELINE_REGISTRATION("gen_pipelineregistration.h")
 LIST(APPEND CampvisModulesHeaders
     modulesapi.h
     gen_pipelineregistration.h
-    pipelinefactory.h
-	processorfactory.h
 )
-LIST(APPEND CampvisModulesSources
-    pipelinefactory.cpp
-	processorfactory.cpp
-)
-
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 

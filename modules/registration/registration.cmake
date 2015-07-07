@@ -13,6 +13,7 @@ IF(${ModuleEnabled})
 		modules/registration/pipelines/*.cpp
 		modules/registration/processors/*.cpp
 		modules/registration/tools/*.cpp
+		modules/registration/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universitaet Muenchen
-//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -22,20 +22,19 @@
 // 
 // ================================================================================================
 
-layout(location = 0) in vec3 in_Position;        ///< incoming vertex position
-layout(location = 1) in vec3 in_TexCoord;        ///< incoming texture coordinate
-layout(location = 2) in vec4 in_Color;           ///< incoming color
+#include "core/pipeline/pipelinefactory.h"
+#include "core/pipeline/processorfactory.h"
 
-out vec3 vert_TexCoord;       ///< outgoing texture coordinate
-out vec4 vert_Color;          ///< outgoing color
-out vec4 vert_Position;       ///< outgoing world coordinates
+#include "modules/registration/pipelines/nloptregistration.h"
+#include "modules/registration/processors/registrationsliceview.h"
+#include "modules/registration/processors/similaritymeasure.h"
 
+namespace campvis {
 
+    // explicitly instantiate templates to register the pipelines
+    template class PipelineRegistrar<registration::NloptRegistration>;
 
-void main() {
-    vert_Position = vec4(in_Position, 1.0);
-    gl_Position = vert_Position;
+    template class SmartProcessorRegistrar<registration::RegistrationSliceView>;
+    template class ProcessorRegistrarSwitch<registration::SimilarityMeasure, false>;
 
-    vert_TexCoord = in_TexCoord;
-    vert_Color = in_Color;
 }

@@ -43,7 +43,6 @@
 #include "modules/vis/processors/sliceextractor.h"
 
 #include <vector>
-#include "modules/processorfactory.h"
 #include <memory>
 #include "core/datastructures/facegeometry.h"
 
@@ -229,9 +228,6 @@ namespace campvis {
         bool editVoxel;
         int insertNextVoxelAt;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<MicroscopyImageSegmentation>;
 }
 
 #endif // MICROSCOPYIMAGESEGMENTATION_H__

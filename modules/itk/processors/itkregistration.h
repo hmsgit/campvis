@@ -53,8 +53,10 @@ namespace campvis {
         **/
         virtual ~ItkRegistration();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "ItkRegistration"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "ItkRegistration"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs registration between 2 input images using ITK."; };
         /// \see AbstractProcessor::getAuthor()

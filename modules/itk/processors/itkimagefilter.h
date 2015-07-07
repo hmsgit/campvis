@@ -53,8 +53,10 @@ namespace campvis {
          **/
         virtual ~ItkImageFilter();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "ItkImageFilter"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "ItkImageFilter"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates the gradient volume for the given intensity volume."; };
         /// \see AbstractProcessor::getAuthor()

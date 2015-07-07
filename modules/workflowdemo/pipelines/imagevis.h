@@ -27,7 +27,6 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
@@ -56,10 +55,6 @@ namespace workflowdemo {
         VolumeExplorer _ve;
     };
 }
-
-// Instantiate template to register the pipelines.
-template class PipelineRegistrar<workflowdemo::ImageVis>;
-
 }
 
 #endif // IMAGEVIS_H__

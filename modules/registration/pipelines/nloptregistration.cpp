@@ -243,7 +243,4 @@ namespace registration {
     
 }
 
-// Instantiate template to register the pipelines.
-template class PipelineRegistrar<registration::NloptRegistration>;
-
 }

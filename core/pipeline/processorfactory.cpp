@@ -23,7 +23,6 @@
 // ================================================================================================
 
 #include "processorfactory.h"
-//#include "gen_processorregistration.h"
 
 #include <sstream>
 

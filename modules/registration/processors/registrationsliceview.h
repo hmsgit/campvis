@@ -50,8 +50,10 @@ namespace registration {
          **/
         virtual ~RegistrationSliceView();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "RegistrationSliceView"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "RegistrationSliceView"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Renders the slice of the moving image with respect to the fixed image for registration purposes."; };
         /// \see AbstractProcessor::getAuthor()

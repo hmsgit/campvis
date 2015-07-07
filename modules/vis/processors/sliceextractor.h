@@ -27,7 +27,6 @@
 
 #include "core/pipeline/slicerenderprocessor.h"
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace campvis {
     /**
@@ -68,9 +67,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<SliceExtractor>;
 }
 
 #endif // SLICEEXTRACTOR_H__

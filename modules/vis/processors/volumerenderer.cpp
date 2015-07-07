@@ -30,8 +30,8 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-
 #include "core/classification/simpletransferfunction.h"
+#include "core/pipeline/processorfactory.h"
 
 #include "cgt/opengljobprocessor.h"
 #include "core/tools/stringutils.h"

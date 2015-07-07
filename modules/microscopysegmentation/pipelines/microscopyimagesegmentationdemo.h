@@ -29,8 +29,6 @@
 
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/genericimagereader.h"
@@ -66,10 +64,6 @@ namespace campvis {
         GenericImageReader _imageReader; //GenericImageReader _imageReader;
         MicroscopyImageSegmentation _ve;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<MicroscopyImageSegmentationDemo>;
-
 }
 
 #endif // MICROSCOPYIMAGESEGMENTATIONDEMO_H__

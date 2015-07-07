@@ -30,8 +30,6 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -72,10 +70,6 @@ namespace campvis {
 
         IntProperty p_sliceNumber;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<TensorDemo>;
-
 }
 
 #endif // TENSORDEMO_H__

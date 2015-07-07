@@ -36,7 +36,6 @@
 #include "core/datastructures/geometrydata.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -131,9 +130,6 @@ namespace campvis {
         
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<VectorFieldRenderer>;
 }
 
 #endif // VECTORFIELDRENDERER_H__

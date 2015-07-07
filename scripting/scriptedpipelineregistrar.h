@@ -2,7 +2,7 @@
 #define SCRIPTEDPIPELINEREGISTRAR_H__
 
 #include "luapipeline.h"
-#include "modules/pipelinefactory.h"
+#include "code/pipeline/pipelinefactory.h"
 
 
 namespace campvis {
