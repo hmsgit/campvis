@@ -85,4 +85,11 @@ namespace campvis {
         //PipelineFactory::deinit();
     }
 
+    CAMPVIS_CORE_API std::string completePath(const std::string& filename) {
+        if (! cgt::ShaderManager::isInited())
+            return "";
+
+        return ShdrMgr.completePath(filename);
+    }
+
 }

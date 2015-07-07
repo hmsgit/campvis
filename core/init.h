@@ -47,9 +47,18 @@ namespace campvis {
     CAMPVIS_CORE_API void init(cgt::GLCanvas* backgroundGlContext, const std::vector<std::string>& searchPaths = std::vector<std::string>());
 
     /**
-     *
+     * Deinitializes the CAMPVis core stuff.
      */
     CAMPVIS_CORE_API void deinit();
+
+
+    /**
+     * Searches in all search paths for the given file and returns valid filename including complete path.
+     * If file is not found in search path, an empty string is returned.
+     * \note    The function is just a proxy for ShaderManager::completePath.
+     * \param   filename    The file name to search for in search paths.
+     */
+    CAMPVIS_CORE_API std::string completePath(const std::string& filename);
 }
 
 
