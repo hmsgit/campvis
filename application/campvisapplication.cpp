@@ -50,7 +50,7 @@
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/pipeline/visualizationprocessor.h"
 
-#include "qtjobprocessor.h"
+#include "application/tools/qtjobprocessor.h"
 
 #include <QApplication>
 

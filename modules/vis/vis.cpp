@@ -33,7 +33,10 @@
 #include "modules/vis/pipelines/volumeexplorerdemo.h"
 #include "modules/vis/pipelines/volumerendererdemo.h"
 
+#include "modules/vis/processors/advoptimizedraycaster.h"
+#include "modules/vis/processors/contextpreservingraycaster.h"
 #include "modules/vis/processors/depthdarkening.h"
+#include "modules/vis/processors/drrraycaster.h"
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/geometryrenderer.h"
 #include "modules/vis/processors/mprrenderer.h"
@@ -41,6 +44,7 @@
 #include "modules/vis/processors/proxygeometrygenerator.h"
 #include "modules/vis/processors/quadview.h"
 #include "modules/vis/processors/rendertargetcompositor.h"
+#include "modules/vis/processors/simpleraycaster.h"
 #include "modules/vis/processors/sliceextractor.h"
 #include "modules/vis/processors/slicerenderer2d.h"
 #include "modules/vis/processors/slicerenderer3d.h"
@@ -60,7 +64,10 @@ namespace campvis {
     template class PipelineRegistrar<VolumeRendererDemo>;
     template class PipelineRegistrar<VolumeExplorerDemo>;
 
+    template class SmartProcessorRegistrar<AdvOptimizedRaycaster>;
+    template class SmartProcessorRegistrar<ContextPreservingRaycaster>;
     template class SmartProcessorRegistrar<DepthDarkening>;
+    template class SmartProcessorRegistrar<DRRRaycaster>;
     template class SmartProcessorRegistrar<EEPGenerator>;
     template class SmartProcessorRegistrar<GeometryRenderer>;
     template class SmartProcessorRegistrar<MprRenderer>;
@@ -68,6 +75,7 @@ namespace campvis {
     template class SmartProcessorRegistrar<ProxyGeometryGenerator>;
     template class SmartProcessorRegistrar<QuadView>;
     template class SmartProcessorRegistrar<RenderTargetCompositor>;
+    template class SmartProcessorRegistrar<SimpleRaycaster>;
     template class SmartProcessorRegistrar<SliceExtractor>;
     template class SmartProcessorRegistrar<SliceRenderer2D>;
     template class SmartProcessorRegistrar<SliceRenderer3D>;
