@@ -30,8 +30,11 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "glue/globalluatable.h"
-#include "glue/luavmstate.h"
+#include "scripting/glue/luatable.h"
+#include "scripting/glue/globalluatable.h"
+#include "scripting/glue/metatableluatable.h"
+#include "scripting/glue/regularluatable.h"
+#include "scripting/glue/luavmstate.h"
 
 
 namespace campvis {

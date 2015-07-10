@@ -29,6 +29,8 @@
 #include <memory>
 #include <string>
 #include "scripting/swigluarun.h"
+#include "scripting/glue/globalluatable.h"
+#include "scripting/glue/metatableluatable.h"
 #include "tbb/recursive_mutex.h"
 
 extern "C" {
@@ -39,8 +41,6 @@ extern "C" {
 
 
 namespace campvis {
-
-    class GlobalLuaTable;
 
     /**
      * The Lua state managed by LuaVmState has to be protected with a mutex because it's not
@@ -177,8 +177,9 @@ namespace campvis {
          */
         void logLuaError();
 
-        lua_State* _luaState;               ///< Lua state managed by LuaVmState
-        LuaStateMutexType _luaStateMutex;   ///< Mutex guarding access to the above Lua state
+        lua_State* _luaState;                               ///< Lua state managed by LuaVmState
+        std::shared_ptr<GlobalLuaTable> _globalLuaTable;    ///< Pointer to global Lua table of this VM
+        LuaStateMutexType _luaStateMutex;                   ///< Mutex guarding access to the above Lua state
     };
 
     template<typename T>

@@ -23,9 +23,10 @@
 // ================================================================================================
 
 #include "globalluatable.h"
+#include "luavmstate.h"
 
-#include "regularluatable.h"
-
+#include "cgt/assert.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
 
@@ -39,11 +40,7 @@ namespace campvis {
         // Each Lua VM has a global table
         return true;
     }
-
-    std::shared_ptr<LuaTable> GlobalLuaTable::getTable(const std::string& name) {
-        return std::shared_ptr<LuaTable>(new RegularLuaTable(this->shared_from_this(), name));
-    }
-
+    
     void GlobalLuaTable::callInstanceMethod(const std::string& name) {
         this->pushField(name);
         _luaVmState.callLuaFunc(1, 0);
@@ -53,4 +50,22 @@ namespace campvis {
         LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
         lua_getglobal(_luaVmState.rawState(), name.c_str());
     }
+
+    void GlobalLuaTable::popRecursive() {
+        LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
+        lua_pop(_luaVmState.rawState(), 1);
+    }
+
+    void GlobalLuaTable::populateValueMap() {
+        _valueMap.clear();
+        _discoveredTables.clear();
+        LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
+        lua_State* L = _luaVmState.rawState();
+
+        // load global lua table onto stack
+        lua_getglobal(L, "_G");
+        iterateOverTableAndPopulateValueMap(L);
+        lua_pop(L, 1);
+    }
+
 }

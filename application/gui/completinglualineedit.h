@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -22,43 +22,51 @@
 // 
 // ================================================================================================
 
-#ifndef GLOBALLUATABLE_H__
-#define GLOBALLUATABLE_H__
+#ifndef COMPLETINGLUALINEEDIT_H__
+#define COMPLETINGLUALINEEDIT_H__
 
-#include "luatable.h"
+#include <QCompleter>
+#include <QLineEdit>
+
+#include "scripting/glue/luatable.h"
 
 namespace campvis {
 
-    /**
-     * Class representing global Lua tables.
-     *
-     * Global tables store references to all objects that live in the global scope of a Lua VM. As
-     * a result, they must be used in order to interact with Lua states and access user-defined
-     * values.
-     */
-    class GlobalLuaTable : public LuaTable {
+    // FIXME: clean up, add documentation
+
+    class LuaCompleter : public QCompleter {
     public:
-        /**
-         * Creates a new GlobalLuaTable.
-         *
-         * \param   luaVmState  Reference to the LuaVmState object from which the table originates
-         */
-        GlobalLuaTable(LuaVmState& luaVmState);
+        LuaCompleter(LuaVmState* luaVmState, QWidget* parent);
 
-        /**
-         * Virtual destructor.
-         */
-        virtual ~GlobalLuaTable();
+        virtual ~LuaCompleter();
 
-        virtual bool isValid() override;
-        virtual void callInstanceMethod(const std::string& name) override;
-        
-    protected:
-        virtual void pushField(const std::string& name) override;
-        virtual void popRecursive() override;
-        virtual void populateValueMap() override;
+        virtual QStringList splitPath(const QString& path) const override;
+
+    private:
+        LuaVmState* _luaVmState;
     };
 
+    class CompletingLuaLineEdit : public QLineEdit {
+        Q_OBJECT;
+
+    public:
+        CompletingLuaLineEdit(LuaVmState* luaVmState, QWidget* parent);
+
+        virtual ~CompletingLuaLineEdit();
+
+        void setCompleter(LuaCompleter* completer);
+        LuaCompleter* completer() const;
+
+    protected:
+        void keyPressEvent(QKeyEvent *e);
+
+    private slots:
+        void insertCompletion(QString completitionString);
+
+    private:
+        LuaCompleter* _completer;
+
+    };
 }
 
-#endif // GLOBALLUATABLE_H__
+#endif // COMPLETINGLUALINEEDIT_H__

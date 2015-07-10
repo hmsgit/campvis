@@ -38,7 +38,7 @@ LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_LUA_MODS_PATH=\"${CampvisLuaModu
 LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_LUA_SCRIPTS_PATH=\"${CampvisLuaModulesDirectory}?.lua\"")
 SET(CampvisGlobalDefinitions "${CampvisGlobalDefinitions}" PARENT_SCOPE)
 
-SET(CampvisBindingDirs ext/cgt core)
+SET(CampvisBindingDirs ext/cgt core application)
 
 # Look for bindings for all enabled CAMPVis modules
 FOREACH(ModName ${CampvisModules})
@@ -70,7 +70,7 @@ MACRO(DECLARE_LUA_MODULE InterfaceFile)
     SET_SOURCE_FILES_PROPERTIES(${InterfaceFile} PROPERTIES SWIG_FLAGS "-I${CampvisHome}")
     LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
     SWIG_ADD_MODULE(${LuaModName} lua ${InterfaceFile})
-    SWIG_LINK_LIBRARIES(${LuaModName} cgt campvis-core campvis-modules ${CampvisGlobalExternalLibs})
+    SWIG_LINK_LIBRARIES(${LuaModName} cgt campvis-core campvis-modules campvis-application ${CampvisGlobalExternalLibs})
 
     SET(LuaModFullPath "${CampvisLuaModulesDirectory}${LuaModShortName}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
@@ -126,8 +126,7 @@ ADD_LIBRARY(campvis-scripting ${CampvisSharedStaticModulesFix}
     ${CampvisScriptingSources} ${CampvisScriptingHeaders}
 )
 
-ADD_DEPENDENCIES(campvis-scripting ${CampvisLuaModules})
-TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules cgt ${CampvisGlobalExternalLibs})
+#ADD_DEPENDENCIES(campvis-scripting ${CampvisLuaModules})
 TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules cgt ${CampvisGlobalExternalLibs})
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)

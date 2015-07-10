@@ -23,19 +23,12 @@
 // ================================================================================================
 
 #include "regularluatable.h"
+#include "luavmstate.h"
 
-// Add property luas to ensure build
-// TODO: find a better way
-#include "scripting/luagen/properties/boolpropertylua.h"
-#include "scripting/luagen/properties/floatpropertylua.h"
-#include "scripting/luagen/properties/intpropertylua.h"
-#include "scripting/luagen/properties/optionpropertylua.h"
-#include "scripting/luagen/properties/stringpropertylua.h"
-#include "scripting/luagen/properties/colorpropertylua.h"
-#include "scripting/luagen/properties/datanamepropertylua.h"
-#include "scripting/luagen/properties/metapropertylua.h"
-#include "scripting/luagen/properties/propertycollectionluascriptgenerator.h"
-#include "scripting/luagen/properties/transferfunctionpropertylua.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "core/tools/stringutils.h"
+
 
 namespace campvis {
 
@@ -43,7 +36,8 @@ namespace campvis {
         : LuaTable(parent->_luaVmState)
         , _parent(parent)
         , _name(name)
-    {}
+    {
+    }
 
     RegularLuaTable::~RegularLuaTable() {}
 
@@ -64,34 +58,51 @@ namespace campvis {
         return result;
     }
 
-    std::shared_ptr<LuaTable> RegularLuaTable::getTable(const std::string& name) {
-        return std::shared_ptr<LuaTable>(new RegularLuaTable(this->shared_from_this(), name));
-    }
-
     void RegularLuaTable::callInstanceMethod(const std::string& name) {
+        LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
         _parent->pushField(_name);
-
-        {
-            LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
-            lua_getfield(_luaVmState.rawState(), -1, name.c_str());
-        }
-
+        
+        // FIXME: not sure whether this really works for deeply nested instance methods, the second pushField() call looks suspicious!
+        lua_getfield(_luaVmState.rawState(), -1, name.c_str());
         _parent->pushField(_name);
-        _luaVmState.callLuaFunc(1, 0);
+        _luaVmState.callLuaFunc(1, 0); // probably we want a "lua_getfield(_luaVmState.rawState(), -2, name.c_str())" here
 
-        {
-            LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
-            // Pop the table
-            lua_pop(_luaVmState.rawState(), 1);
-        }
+        _parent->popRecursive();
     }
-
+    
     void RegularLuaTable::pushField(const std::string& name) {
-        _parent->pushField(_name);
-
-        {
+        auto it = _valueMap.find(name);
+        if (it != _valueMap.end()) {
             LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
-            lua_getfield(_luaVmState.rawState(), -1, name.c_str());
+            lua_State* L = _luaVmState.rawState();
+            _parent->pushField(_name);
+
+            if (it->second.keyIsNumber)
+                lua_pushnumber(L, StringUtils::fromString<double>(name));
+            else
+                lua_pushstring(L, name.c_str());
+            lua_gettable(L, -2);
+        }
+        else {
+            cgtAssert(false, "Field not in valueMap, this should not happen.");
         }
     }
+    
+    void RegularLuaTable::popRecursive() {
+        LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
+        lua_pop(_luaVmState.rawState(), 1);
+        _parent->popRecursive();
+    }
+
+    void RegularLuaTable::populateValueMap() {
+        _valueMap.clear();
+        LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
+        lua_State* L = _luaVmState.rawState();
+
+        // load this table's name onto stack
+        _parent->pushField(_name);
+        iterateOverTableAndPopulateValueMap(L);
+        _parent->popRecursive();
+    }
+
 }

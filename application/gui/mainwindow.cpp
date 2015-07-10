@@ -44,9 +44,11 @@
 
 #include <fstream>
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+#include "scripting/glue/globalluatable.h"
 #include "scripting/luagen/properties/propertycollectionluascriptgenerator.h"
 #include "scripting/luagen/properties/abstractpropertylua.h"
-
+#endif
 
 namespace campvis {
 
@@ -446,6 +448,10 @@ namespace campvis {
         if (_application->getLuaVmState() != nullptr) {
             cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             _application->getLuaVmState()->execString(cmd.toStdString());
+
+            _application->getLuaVmState()->getGlobalTable()->updateValueMap();
+            _scriptingConsoleWidget->_editCommand->setCompleter(new LuaCompleter(_application->getLuaVmState(), _scriptingConsoleWidget->_editCommand));
+            _scriptingConsoleWidget->_luaTreeWidget->update(_application->getLuaVmState());
         }
 #endif
     }

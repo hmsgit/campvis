@@ -14,6 +14,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/properties/allproperties.h"
 #include "core/pipeline/abstractprocessor.h"
+#include "core/pipeline/abstractworkflow.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/classification/tfgeometry1d.h"
@@ -477,7 +478,30 @@ namespace campvis {
         virtual void addProcessor(AbstractProcessor* processor);
 
         void addEventListenerToBack(cgt::EventListener* e);
+        virtual void executePipeline();
     };
+
+    class AbstractWorkflow : public HasPropertyCollection {
+    public:
+        AbstractWorkflow(const std::string& title);
+        virtual ~AbstractWorkflow();
+
+        virtual std::vector<AbstractPipeline*> getPipelines() = 0;
+        virtual const std::string getName() const = 0;
+
+        virtual void init();
+        virtual void deinit();
+
+        DataContainer* getDataContainer();
+
+        virtual bool isStageAvailable(int stage) const;
+        int getCurrentStageId() const;
+        void setCurrentStage(int stage);
+
+        sigslot::signal2<int, int> s_stageChanged;
+        sigslot::signal0 s_stageAvailabilityChanged;
+    };
+
 
     /* VisualizationProcessor */
 
@@ -488,6 +512,22 @@ namespace campvis {
     };
 }
 
+%inline{
+namespace campvis {
+    class LuaPipeline : public campvis::AutoEvaluationPipeline {
+    public:
+        const std::string _name;
+
+        LuaPipeline(const std::string& name, campvis::DataContainer* dc)
+            : campvis::AutoEvaluationPipeline(dc)
+            , _name(name)
+        {
+        };
+
+        virtual const std::string getName() const { return _name; };
+    };
+}
+}
 
 %luacode {
   function campvis.newPipeline (name, o)
@@ -500,5 +540,5 @@ namespace campvis {
     return o
   end
 
-  print("Module campvis loaded")
+  print("Module campvis-core loaded")
 }

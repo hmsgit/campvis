@@ -24,6 +24,8 @@
 
 #include "scriptingwidget.h"
 
+#include <QCompleter>
+#include <QDirModel>
 #include <QKeyEvent>
 
 namespace campvis {
@@ -34,6 +36,7 @@ namespace campvis {
         , _editCommand(nullptr)
         , _btnExecute(nullptr)
         , _btnClear(nullptr)
+        , _luaTreeWidget(nullptr)
         , _currentPosition(-1)
     {
         setupGUI();
@@ -54,14 +57,20 @@ namespace campvis {
     void ScriptingWidget::setupGUI() {
         setWindowTitle(tr("Scripting Console"));
 
-        QVBoxLayout* mainLayout = new QVBoxLayout(this);
+        QHBoxLayout* mainLayout = new QHBoxLayout(this);
+
+        QVBoxLayout* leftColumnLayout = new QVBoxLayout();
+        mainLayout->addLayout(leftColumnLayout);
+
+        _luaTreeWidget = new LuaTableTreeWidget(this);
+        mainLayout->addWidget(_luaTreeWidget);
 
         QHBoxLayout* controlsLayout = new QHBoxLayout();
-        mainLayout->addLayout(controlsLayout);
+        leftColumnLayout->addLayout(controlsLayout);
 
         _consoleDisplay = new QTextEdit(this);
         _consoleDisplay->setReadOnly(true);
-        mainLayout->addWidget(_consoleDisplay);
+        leftColumnLayout->addWidget(_consoleDisplay);
 
         // Use the system's default monospace font at the default size in the log viewer
         QFont monoFont = QFont("Monospace");
@@ -69,7 +78,7 @@ namespace campvis {
         monoFont.setPointSize(QFont().pointSize() + 1);
 
         _consoleDisplay->document()->setDefaultFont(monoFont);
-        _editCommand = new QLineEdit(this);
+        _editCommand = new CompletingLuaLineEdit(nullptr, this);
         _editCommand->setPlaceholderText(tr("Enter Lua commands here..."));
         _editCommand->installEventFilter(this);
         controlsLayout->addWidget(_editCommand);

@@ -34,7 +34,7 @@
 #include <vector>
 
 #include "core/datastructures/datacontainer.h"
-
+#include "application/applicationapi.h"
 
 #ifdef CAMPVIS_HAS_SCRIPTING
 #include "scripting/glue/luavmstate.h"
@@ -65,7 +65,7 @@ namespace campvis {
      *  5. call deinit()
      *  6. You can now safely destroy your CampVisApplication
      */
-    class CampVisApplication : public QApplication {
+    class CAMPVIS_APPLICATION_API CampVisApplication : public QApplication {
     friend class MainWindow;
 
     public:

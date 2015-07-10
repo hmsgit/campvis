@@ -49,7 +49,7 @@
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/pipeline/visualizationprocessor.h"
 
-#include "application/tools/qtjobprocessor.h"
+#include "tools/qtjobprocessor.h"
 
 #include <QApplication>
 
@@ -115,9 +115,11 @@ namespace campvis {
                 LERROR("Error setting up Lua VM.");
 
             // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
+            if (! _luaVmState->execString("require(\"cgt\")"))
+                LERROR("Error setting up Lua VM.");
             if (! _luaVmState->execString("require(\"campvis\")"))
                 LERROR("Error setting up Lua VM.");
-            if (! _luaVmState->execString("require(\"cgt\")"))
+            if (! _luaVmState->execString("require(\"application\")"))
                 LERROR("Error setting up Lua VM.");
 
             if (! _luaVmState->execString("pipelines = {}"))
@@ -125,6 +127,9 @@ namespace campvis {
 
             if (! _luaVmState->execString("inspect = require 'inspect'"))
                 LERROR("Error setting up Lua VM.");
+
+            if (! _luaVmState->injectGlobalObjectPointer(this, "campvis::CampVisApplication *", "application"))
+                LERROR("Could not inject the pipeline into the Lua VM.");
 #endif
         }
 
@@ -163,7 +168,7 @@ namespace campvis {
                     addPipeline(pipelinesToAdd[i].toStdString(), p);
             }
         }
-        
+
         _initialized = true;
     }
 
@@ -239,7 +244,6 @@ namespace campvis {
 
 #ifdef CAMPVIS_HAS_SCRIPTING
         if (! _luaVmState->injectObjectPointerToTable(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", static_cast<int>(_pipelines.size())))
-        //if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", name))
             LERROR("Could not inject the pipeline into the Lua VM.");
 
         if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", pipeline->getName()))
@@ -296,7 +300,7 @@ namespace campvis {
         for (auto it = _pipelines.begin(); it != _pipelines.end(); ++it) {
             for (auto pit = (*it)->getProcessors().cbegin(); pit != (*it)->getProcessors().cend(); ++pit) {
                 if (VisualizationProcessor* tester = dynamic_cast<VisualizationProcessor*>(*pit)) {
-                	tester->invalidate(AbstractProcessor::INVALID_RESULT);
+                    tester->invalidate(AbstractProcessor::INVALID_RESULT);
                 }
             }
         }
@@ -316,3 +320,4 @@ namespace campvis {
     }
 
 }
+

@@ -30,6 +30,8 @@
 #include "cgt/painter.h"
 #include "tbb/mutex.h"
 
+#include "application/gui/completinglualineedit.h"
+#include "application/gui/luatablewidget.h"
 #include "application/tools/bufferinglog.h"
 #include "application/gui/loghighlighter.h"
 
@@ -76,6 +78,9 @@ namespace campvis {
          */
         void deinit();
 
+        LuaTableTreeWidget* _luaTreeWidget; ///< Tree widget showing the global Lua variables
+        CompletingLuaLineEdit* _editCommand;            ///< Text field to enter Lua commands
+
     protected:
         /**
          * Setup the the log viewer's GUI
@@ -110,7 +115,6 @@ namespace campvis {
 
     private:
         QTextEdit* _consoleDisplay;         ///< Text edit to hold the console output
-        QLineEdit* _editCommand;            ///< Text field to enter Lua commands
         QPushButton* _btnExecute;           ///< Button to execute command
         QPushButton* _btnClear;             ///< Button to clear the console output
 

@@ -25,16 +25,18 @@
 #ifndef LUATABLE_H__
 #define LUATABLE_H__
 
+#include <map>
 #include <memory>
+#include <set>
 #include <string>
 
-#include "luavmstate.h"
-
+struct lua_State;
 
 namespace campvis {
-
-    class RegularLuaTable;
+    class LuaVmState;
     class GlobalLuaTable;
+    class MetatableLuaTable;
+    class RegularLuaTable;
 
     /**
      * Base class for all Lua tables.
@@ -55,21 +57,53 @@ namespace campvis {
      */
     class LuaTable : public std::enable_shared_from_this<LuaTable>
     {
-        friend RegularLuaTable;
         friend GlobalLuaTable;
+        friend MetatableLuaTable;
+        friend RegularLuaTable;
 
     public:
+        /// Struct storing information about a single value in this Lua table
+        struct ValueStruct {
+            /// Lua type of the value
+            int luaType;
+
+            /// If the value is of type LUA_TTABLE, carries the pointer to corresponding LuaTable object. 
+            /// However, this variable is lazy-initialized.
+            std::shared_ptr<RegularLuaTable> luaTable;
+
+            /// If the value has a metatable, carries the pointer to the corresponding MetatableLuaTable object.
+            /// However, this variable is lazy-initialized. You can check for existing metatable (without 
+            /// instantiating one) with the hasMetatable field.
+            std::shared_ptr<MetatableLuaTable> luaMetatable;
+
+            /// Flag whether the corresponding key should be treated as number instead of as string. 
+            /// This avoids confusing lua_next() during table iteration when implicitly converting number
+            /// keys into string keys through calling lua_tostring().
+            /// This would acutally better fit into the key, but then map lookup would be more troublesome.
+            bool keyIsNumber;
+
+            /// Flag whether this field has a Lua metatable. This flag allows for a cheap check for a 
+            /// metatable without forcing to actually lazy-instantiate the MetatableLuaTable object.
+            bool hasMetatable;
+        };
+
         /**
          * Creates a new LuaTable.
          *
          * \param   luaVmState  Reference to the LuaVmState object from which the table originates
          */
-        LuaTable(LuaVmState& luaVmState) : _luaVmState(luaVmState) {}
+        LuaTable(LuaVmState& luaVmState);
 
         /**
          * Virtual destructor.
          */
-        virtual ~LuaTable() {}
+        virtual ~LuaTable();
+
+        /**
+         * Returns the LuaVmState of this table
+         * \return  _luaVmState
+         */
+        LuaVmState& getLuaVmState() { return _luaVmState; }
 
         /**
          * Checks if this Lua table is valid.
@@ -82,14 +116,41 @@ namespace campvis {
         virtual bool isValid() = 0;
 
         /**
-         * Returns a subtable of this Lua table.
+         * Returns a subtable of this Lua table if existent.
          *
-         * This method creates and returns an object representing a named Lua table nested in this
-         * table.
+         * If this table has a subtable with the given name, it returns a pointer to the corresponding
+         * RegularLuaTable object. This is lazy-instantiated if needed. If no such field exists, 
+         * a nullptr is returned.
          *
-         * \param   name  Name of the subtable to return
+         * \param   name  Name of the subtable to return.
+         * \return  A pointer to a RegularLuaTable object for the given subtable; nullptr if no such 
+         *          table exists.
          */
-        virtual std::shared_ptr<LuaTable> getTable(const std::string& name) = 0;
+        std::shared_ptr<RegularLuaTable> getTable(const std::string& name);
+
+        /**
+         * Returns the Lua metatable of the given field if existent.
+         *
+         * If this table has a field with the given name, which has a metatable, it returns a pointer 
+         * to the corresponding MetatableLuaTable object. This is lazy-instantiated if needed. 
+         * If no such metatable exists, a nullptr is returned.
+         *
+         * \param   name  Name of the field for which to return the metatable.
+         * \return  A pointer to the MetatableLuaTable object for the given field; nullptr if no 
+         *          metatable exists.
+         */
+        std::shared_ptr<MetatableLuaTable> getMetatable(const std::string& name);
+
+        /**
+         * Checks whether the given field has a Lua metatable. 
+         * 
+         * This method allows for checking for metatable without forcing to lazy-instantiate 
+         * the MetatableLuaTable object as it would be done through getMetatable(name)
+         * 
+         * \param   name  Name of the field for which to return the metatable.
+         * \return  True if the corresponding field has a metatable
+         */
+        bool hasMetatable(const std::string& name) const;
 
         /**
          * Calls this table's instance method.
@@ -100,11 +161,16 @@ namespace campvis {
          * \param   name  Name of the instance method to call
          */
         virtual void callInstanceMethod(const std::string& name) = 0;
+        
+        /**
+         * Updates the value map caching the current state of this table.
+         * \return  The number of fields of this Lua table.
+         */
+        virtual size_t updateValueMap();
 
-    protected:
+
         /**
          * Pushes a field of this Lua table onto the Lua VM's stack.
-         *
          * This helper method is used to set up Lua's stack in order to access nested tables or
          * call methods.
          *
@@ -112,8 +178,50 @@ namespace campvis {
          */
         virtual void pushField(const std::string& name) = 0;
 
-        LuaVmState& _luaVmState;   ///< Reference to the LuaVmState from which the table originates
+        /**
+         * When calling pushField() or pushMetatable() on deep table hierarchies, the Lua stack is 
+         * populated with one value for each level. popRecursive() takes care of cleaning up the 
+         * Lua stack according to the table hierarchy. It pops as many values from the stack as 
+         * there were pushed during pushField().
+         */
+        virtual void popRecursive() = 0;
+
+        /**
+         * Returns the value map of this table.
+         * You can use it to traverse over the fields of this table.
+         * \return  _valueMap
+         */
+        const std::map<std::string, ValueStruct>& getValueMap() const;
+
+    protected:
+        /**
+         * Populates _valueMap with the contents of this Lua table.
+         */
+        virtual void populateValueMap() = 0;
+
+        /**
+         * The actual Lua table traversal for populating the value map is the same for all table types.
+         * Therefore, we have this base method here, which can be called from the child classes
+         * after they successfully set up the stack.
+         * 
+         * \param L     Lua state to use during table traversal.
+         */
+        void iterateOverTableAndPopulateValueMap(lua_State* L);
+
+        /// Reference to the LuaVmState from which the table originates
+        LuaVmState& _luaVmState;
+
+        /// value map of this lua table, mirroring the contents.
+        std::map<std::string, ValueStruct> _valueMap;
+        /// Map of already discovered tables to avoid endless loops through cyclic tables.
+        static std::map<void*, std::weak_ptr<LuaTable>> _discoveredTables;
     };
+
 }
+
+// we always need these three types when handling with LuaTables, so include their definitions here
+#include "metatableluatable.h"
+#include "regularluatable.h"
+#include "globalluatable.h"
 
 #endif // LUATABLE_H__
