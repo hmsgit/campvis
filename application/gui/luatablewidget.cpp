@@ -152,6 +152,13 @@ namespace campvis {
         , _thisTable(thisTable)
         , _isMetatable(isMetatable)
     {
+        // this casting here is not really that beautiful, but does it's job:
+        // somehow, we need to get the parent table to check for the metatable.
+        auto ltit = dynamic_cast<LuaTreeItemTable*>(getParent());
+        if (ltit && ltit->_thisTable->hasMetatable(_name)) {
+            new LuaTreeItemTable(true, ltit->_thisTable->getMetatable(name), name, LUA_TTABLE, this);
+        }
+
         auto& valueMap = thisTable->getValueMap();
         for (auto it = valueMap.cbegin(); it != valueMap.cend(); ++it) {
             const std::string& itemName = it->first;
