@@ -102,4 +102,8 @@ namespace campvis {
         _parent->popRecursive();
     }
 
+    LuaTable* MetatableLuaTable::getParentTable() {
+        return _parent.get();
+    }
+
 }

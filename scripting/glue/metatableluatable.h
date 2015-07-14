@@ -33,6 +33,7 @@ namespace campvis {
         virtual void pushField(const std::string& name) override;
         virtual void popRecursive() override;
         virtual void populateValueMap() override;
+        virtual LuaTable* getParentTable() override;
 
     private:
         std::shared_ptr<LuaTable> _parent;  ///< Lua table in which this metatable is stored

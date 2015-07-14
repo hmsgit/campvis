@@ -49,10 +49,13 @@ namespace campvis {
     }
 
     std::shared_ptr<RegularLuaTable> LuaTable::getTable(const std::string& name) {
+        // check whether this table has a field of given name and of type LUA_TTABLE
         auto it = _valueMap.find(name);
-        if (it != _valueMap.end()) {
-            if (!it->second.luaTable)
-                it->second.luaTable = std::shared_ptr<RegularLuaTable>(new RegularLuaTable(this->shared_from_this(), name));
+        if (it != _valueMap.end() && it->second.luaType == LUA_TTABLE) {
+            // check whether the corresponding table needs to be initialized
+            if (!it->second.luaTable) {
+                it->second.luaTable = std::make_shared<RegularLuaTable>(this->shared_from_this(), name);
+            }
 
             return it->second.luaTable;
         }
@@ -61,10 +64,12 @@ namespace campvis {
     }
 
     std::shared_ptr<MetatableLuaTable> LuaTable::getMetatable(const std::string& name) {
+        // check whether this table has a field of given name, which has a metatable
         auto it = _valueMap.find(name);
-        if (it != _valueMap.end()) {
+        if (it != _valueMap.end() && it->second.hasMetatable) {
+            // check whether the corresponding table needs to be initialized
             if (!it->second.luaMetatable)
-                it->second.luaMetatable = std::shared_ptr<MetatableLuaTable>(new MetatableLuaTable(this->shared_from_this(), name));
+                it->second.luaMetatable = std::make_shared<MetatableLuaTable>(this->shared_from_this(), name);
 
             return it->second.luaMetatable;
         }
@@ -94,8 +99,8 @@ namespace campvis {
     
     void LuaTable::iterateOverTableAndPopulateValueMap(lua_State* L) {
         void* tablePtr = hvalue(index2addr(L, -1));
-        if (_discoveredTables.find(tablePtr) == _discoveredTables.end()) {
-            _discoveredTables.insert(std::make_pair(tablePtr, shared_from_this()));
+        if (!getParentTable() || !getParentTable()->checkIfAlreadyDiscovered(tablePtr)) {
+            _luaTablePointer = tablePtr;
 
             // iterate over table
             for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
@@ -128,8 +133,16 @@ namespace campvis {
                     getTable(name);
             }
         }
+        else {
+            ValueStruct vs = { LUA_TNIL, nullptr, nullptr, false, false };
+            _valueMap.insert(std::make_pair("...", vs));
+        }
     }
 
-    std::map<void*, std::weak_ptr<LuaTable>> LuaTable::_discoveredTables;
+    bool LuaTable::checkIfAlreadyDiscovered(void* luaTablePointer) {
+        LuaTable* parent = getParentTable();
+        return (_luaTablePointer == luaTablePointer) 
+            || ((parent != nullptr) ? parent->checkIfAlreadyDiscovered(luaTablePointer) : false);
+    }
 
 }

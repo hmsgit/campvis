@@ -58,7 +58,6 @@ namespace campvis {
 
     void GlobalLuaTable::populateValueMap() {
         _valueMap.clear();
-        _discoveredTables.clear();
         LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
         lua_State* L = _luaVmState.rawState();
 
@@ -66,6 +65,10 @@ namespace campvis {
         lua_getglobal(L, "_G");
         iterateOverTableAndPopulateValueMap(L);
         lua_pop(L, 1);
+    }
+
+    LuaTable* GlobalLuaTable::getParentTable() {
+        return nullptr;
     }
 
 }

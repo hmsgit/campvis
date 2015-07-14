@@ -208,13 +208,30 @@ namespace campvis {
          */
         void iterateOverTableAndPopulateValueMap(lua_State* L);
 
+        /**
+         * Returns this LuaTable's parent LuaTable.
+         * To be implemented in sub classes. Used to detect cyclic table loops.
+         */
+        virtual LuaTable* getParentTable() = 0;
+
+        /**
+         * Checks whether the Lua table with the given Lua VM raw pointer has already been discovered.
+         * Use this method to detect cyclic table loops. It recursively checks all parent tables 
+         * whether they correspond to the given raw pointer.
+         * \param   luaTablePointer Raw pointer to the Lua table in the Lua VM.
+         * \return  True if one of the parents of corresponds to the given Lua VM raw pointer.
+         */
+        bool checkIfAlreadyDiscovered(void* luaTablePointer);
+
+
         /// Reference to the LuaVmState from which the table originates
         LuaVmState& _luaVmState;
 
+        /// Raw pointer to the Lua table in the Lua VM. Used to detect cyclic table loops.
+        void* _luaTablePointer;
+
         /// value map of this lua table, mirroring the contents.
         std::map<std::string, ValueStruct> _valueMap;
-        /// Map of already discovered tables to avoid endless loops through cyclic tables.
-        static std::map<void*, std::weak_ptr<LuaTable>> _discoveredTables;
     };
 
 }
