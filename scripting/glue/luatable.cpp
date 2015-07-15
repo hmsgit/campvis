@@ -42,6 +42,8 @@ namespace campvis {
 
     LuaTable::LuaTable(LuaVmState& luaVmState) 
         : _luaVmState(luaVmState) 
+        , _luaTablePointer(nullptr)
+        , _tableDiscovered(false)
     {}
 
     LuaTable::~LuaTable() {
@@ -49,6 +51,9 @@ namespace campvis {
     }
 
     std::shared_ptr<RegularLuaTable> LuaTable::getTable(const std::string& name) {
+        if (! _tableDiscovered)
+            populateValueMap();
+
         // check whether this table has a field of given name and of type LUA_TTABLE
         auto it = _valueMap.find(name);
         if (it != _valueMap.end() && it->second.luaType == LUA_TTABLE) {
@@ -64,6 +69,9 @@ namespace campvis {
     }
 
     std::shared_ptr<MetatableLuaTable> LuaTable::getMetatable(const std::string& name) {
+        if (! _tableDiscovered)
+            populateValueMap();
+
         // check whether this table has a field of given name, which has a metatable
         auto it = _valueMap.find(name);
         if (it != _valueMap.end() && it->second.hasMetatable) {
@@ -78,6 +86,9 @@ namespace campvis {
     }
 
     bool LuaTable::hasMetatable(const std::string& name) const {
+        if (! _tableDiscovered)
+            const_cast<LuaTable*>(this)->populateValueMap();
+
         auto it = _valueMap.find(name);
         if (it != _valueMap.end())
             return it->second.hasMetatable;
@@ -91,13 +102,15 @@ namespace campvis {
     }
     
     const std::map<std::string, LuaTable::ValueStruct>& LuaTable::getValueMap() const {
-        if (_valueMap.empty())
+        if (! _tableDiscovered)
             const_cast<LuaTable*>(this)->populateValueMap();
 
         return _valueMap;
     }
     
     void LuaTable::iterateOverTableAndPopulateValueMap(lua_State* L) {
+        _tableDiscovered = true;
+
         void* tablePtr = hvalue(index2addr(L, -1));
         if (!getParentTable() || !getParentTable()->checkIfAlreadyDiscovered(tablePtr)) {
             _luaTablePointer = tablePtr;
@@ -113,7 +126,6 @@ namespace campvis {
                     name = lua_tostring(L, -2);
                 }
                 else if (lua_type(L, -2) == LUA_TNUMBER) {
-                    continue;
                     name = StringUtils::toString(lua_tonumber(L, -2));
                     keyIsNumber = true;
                 }
@@ -128,9 +140,6 @@ namespace campvis {
 
                 ValueStruct vs = { luaType, nullptr, nullptr, keyIsNumber, hasMetatable };
                 _valueMap.insert(std::make_pair(name, vs));
-
-                if (luaType == LUA_TTABLE)
-                    getTable(name);
             }
         }
         else {

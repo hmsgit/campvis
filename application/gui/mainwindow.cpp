@@ -451,7 +451,7 @@ namespace campvis {
 
             _application->getLuaVmState()->getGlobalTable()->updateValueMap();
             _scriptingConsoleWidget->_editCommand->setCompleter(new LuaCompleter(_application->getLuaVmState(), _scriptingConsoleWidget->_editCommand));
-            _scriptingConsoleWidget->_luaTreeWidget->update(_application->getLuaVmState());
+            _scriptingConsoleWidget->_luaTreeWidget->update(_application->getLuaVmState(), LuaTreeItem::FULL_MODEL);
         }
 #endif
     }

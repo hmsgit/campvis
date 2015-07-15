@@ -69,9 +69,10 @@ namespace campvis {
 
 // = TreeModel items ==============================================================================
 
-    LuaTreeItem::LuaTreeItem(const std::string& name, int type, TreeItem* parent /*= nullptr*/) : TreeItem(parent)
+    LuaTreeItem::LuaTreeItem(ModelStyle modelStyle, const std::string& name, int type, TreeItem* parent /*= nullptr*/) : TreeItem(parent)
         , _name(name)
         , _type(type) 
+        , _modelStyle(modelStyle)
     {
     }
 
@@ -120,12 +121,12 @@ namespace campvis {
 
 // ================================================================================================
 
-    LuaTreeItemLeaf::LuaTreeItemLeaf(std::shared_ptr<LuaTable> parentTable, const std::string& name, int type, TreeItem* parent)
-        : LuaTreeItem(name, type, parent)
+    LuaTreeItemLeaf::LuaTreeItemLeaf(ModelStyle modelStyle, std::shared_ptr<LuaTable> parentTable, const std::string& name, int type, TreeItem* parent)
+        : LuaTreeItem(modelStyle, name, type, parent)
         , _parentTable(parentTable)
     {
         if (parentTable->hasMetatable(_name)) {
-            new LuaTreeItemTable(true, parentTable->getMetatable(name), name, LUA_TTABLE, this);
+            new LuaTreeItemTable(_modelStyle, true, parentTable->getMetatable(name), name, LUA_TTABLE, this);
         }
     }
 
@@ -147,8 +148,8 @@ namespace campvis {
 
 // ================================================================================================
 
-    LuaTreeItemTable::LuaTreeItemTable(bool isMetatable, std::shared_ptr<LuaTable> thisTable, const std::string& name, int type, TreeItem* parent) 
-        : LuaTreeItem(name, type, parent)
+    LuaTreeItemTable::LuaTreeItemTable(ModelStyle modelStyle, bool isMetatable, std::shared_ptr<LuaTable> thisTable, const std::string& name, int type, TreeItem* parent) 
+        : LuaTreeItem(modelStyle, name, type, parent)
         , _thisTable(thisTable)
         , _isMetatable(isMetatable)
     {
@@ -156,22 +157,56 @@ namespace campvis {
         // somehow, we need to get the parent table to check for the metatable.
         auto ltit = dynamic_cast<LuaTreeItemTable*>(getParent());
         if (ltit && ltit->_thisTable->hasMetatable(_name)) {
-            new LuaTreeItemTable(true, ltit->_thisTable->getMetatable(name), name, LUA_TTABLE, this);
+            new LuaTreeItemTable(_modelStyle, true, ltit->_thisTable->getMetatable(name), name, LUA_TTABLE, this);
         }
 
-        auto& valueMap = thisTable->getValueMap();
-        for (auto it = valueMap.cbegin(); it != valueMap.cend(); ++it) {
-            const std::string& itemName = it->first;
-            int luaType = it->second.luaType;
-        
-            if (itemName == "_G")
-                continue;
+        // fill the table with values depending on model style
+        if (_modelStyle == FULL_MODEL) {
+            auto& valueMap = thisTable->getValueMap();
+            for (auto it = valueMap.cbegin(); it != valueMap.cend(); ++it) {
+                const std::string& itemName = it->first;
+                int luaType = it->second.luaType;
 
-            LuaTreeItem* lti = nullptr;
-            if (luaType == LUA_TTABLE) 
-                lti = new LuaTreeItemTable(false, thisTable->getTable(itemName), itemName, luaType, this);
-            else 
-                lti = new LuaTreeItemLeaf(thisTable, itemName, luaType, this);
+                if (itemName == "_G")
+                    continue;
+
+                LuaTreeItem* lti = nullptr;
+                if (luaType == LUA_TTABLE) 
+                    lti = new LuaTreeItemTable(_modelStyle, false, thisTable->getTable(itemName), itemName, luaType, this);
+                else 
+                    lti = new LuaTreeItemLeaf(_modelStyle, thisTable, itemName, luaType, this);
+            }
+        }
+        else if (_modelStyle == COMPLETER_MODEL) {
+            auto& valueMap = thisTable->getValueMap();
+            if (! _isMetatable) {
+                // for regular tables, just explore the whole table
+                for (auto it = valueMap.cbegin(); it != valueMap.cend(); ++it) {
+                    const std::string& itemName = it->first;
+                    int luaType = it->second.luaType;
+
+                    if (itemName == "_G")
+                        continue;
+
+                    LuaTreeItem* lti = nullptr;
+                    if (luaType == LUA_TTABLE) 
+                        lti = new LuaTreeItemTable(_modelStyle, false, thisTable->getTable(itemName), itemName, luaType, this);
+                    else 
+                        lti = new LuaTreeItemLeaf(_modelStyle, thisTable, itemName, luaType, this);
+                }
+            }
+            else {
+                // for metatables, just gather all instance methods
+                auto fnTable = thisTable->getTable(".fn");
+                if (fnTable) {
+                    recursiveGatherSwigMethods(thisTable, this);
+                }
+
+                auto instanceTable = thisTable->getTable(".instance");
+                if (instanceTable) {
+                    recursiveGatherSwigMethods(instanceTable, this);
+                }
+            }
         }
     }
 
@@ -181,10 +216,42 @@ namespace campvis {
 
     QVariant LuaTreeItemTable::getData(int column, int role) const {
         if (_isMetatable && column == COLUMN_NAME && (role == Qt::EditRole || role == Qt::DisplayRole)) {
-            return QVariant("[Metatable]");
+            switch (_modelStyle) {
+                case FULL_MODEL:
+                    return QVariant("[Metatable]");
+                case COMPLETER_MODEL:
+                    return QVariant("[Methods]");
+            }
         }
         else {
             return LuaTreeItem::getData(column, role);
+        }
+    }
+
+    void LuaTreeItemTable::recursiveGatherSwigMethods(const std::shared_ptr<LuaTable>& baseTable, TreeItem* parent) {
+        // first get functions
+        auto fnTable = baseTable->getTable(".fn");
+        if (fnTable) {
+            auto& valueMap = fnTable->getValueMap();
+            for (auto it = valueMap.cbegin(); it != valueMap.cend(); ++it) {
+                const std::string& itemName = it->first;
+                int luaType = it->second.luaType;
+                if (luaType == LUA_TFUNCTION && itemName.substr(0, 2) != "__") 
+                    new LuaTreeItemLeaf(_modelStyle, fnTable, itemName, luaType, parent);
+            }
+        }
+
+        // now walk through base classes and recursively gather their methods
+        auto basesTable = baseTable->getTable(".bases");
+        if (basesTable) {
+            auto& valueMap = basesTable->getValueMap();
+            for (auto it = valueMap.cbegin(); it != valueMap.cend(); ++it) {
+                const std::string& itemName = it->first;
+                int luaType = it->second.luaType;
+
+                if (luaType == LUA_TTABLE)
+                    recursiveGatherSwigMethods(basesTable->getTable(itemName), parent);
+            }
         }
     }
 
@@ -287,7 +354,7 @@ namespace campvis {
         return 3;
     }
 
-    void LuaTableTreeModel::setData(LuaVmState* luaVmState) {
+    void LuaTableTreeModel::setData(LuaVmState* luaVmState, LuaTreeItem::ModelStyle modelStyle) {
         beginResetModel();
 
         _itemMap.clear();
@@ -295,7 +362,7 @@ namespace campvis {
         _rootItem = new LuaTreeRootItem();
 
         if (luaVmState)
-            new LuaTreeItemTable(false, luaVmState->getGlobalTable(), "[Global Variables]", LUA_TTABLE, _rootItem);
+            new LuaTreeItemTable(modelStyle, false, luaVmState->getGlobalTable(), "[Global Variables]", LUA_TTABLE, _rootItem);
 
         endResetModel();
     }
@@ -312,12 +379,13 @@ namespace campvis {
 
     }
 
-    void LuaTableTreeWidget::update(LuaVmState* luaVmState) {
+    void LuaTableTreeWidget::update(LuaVmState* luaVmState, LuaTreeItem::ModelStyle modelStyle) {
         // clear selection before setting the new data or we will encounter random crashes...
         selectionModel()->clear();
 
         // set new data
-        _treeModel->setData(luaVmState);
+        _treeModel->setData(luaVmState, modelStyle);
+        expandToDepth(0);
 
         // adjust view
         resizeColumnToContents(0);

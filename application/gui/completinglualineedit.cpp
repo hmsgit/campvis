@@ -38,7 +38,7 @@ namespace campvis {
         , _luaVmState(luaVmState)
     {
         auto luaTreeModel = new LuaTableTreeModel(this);
-        luaTreeModel->setData(_luaVmState);
+        luaTreeModel->setData(_luaVmState, LuaTreeItem::COMPLETER_MODEL);
         setModel(luaTreeModel);
     }
 
@@ -59,9 +59,7 @@ namespace campvis {
             }
             if (path[end] == ':') {
                 toReturn.push_back(path.mid(start, end-start));
-                toReturn.push_back("[Metatable]");
-                //toReturn.push_back(".instance");
-                toReturn.push_back(".fn");
+                toReturn.push_back("[Methods]");
                 start = end+1;
             }
         }

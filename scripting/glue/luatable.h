@@ -231,7 +231,10 @@ namespace campvis {
         void* _luaTablePointer;
 
         /// value map of this lua table, mirroring the contents.
-        std::map<std::string, ValueStruct> _valueMap;
+        mutable std::map<std::string, ValueStruct> _valueMap;
+
+        /// Flag whether the elements in this table have already been discovered (i.e. whether _valueMap was populated)
+        mutable bool _tableDiscovered;
     };
 
 }

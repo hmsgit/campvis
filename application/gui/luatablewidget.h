@@ -45,7 +45,9 @@ namespace campvis {
     /// Base class for LuaTableTreeWidget items
     class LuaTreeItem : public TreeItem {
     public:
-        LuaTreeItem(const std::string& name, int type, TreeItem* parent = nullptr);
+        enum ModelStyle { FULL_MODEL, COMPLETER_MODEL };
+
+        LuaTreeItem(ModelStyle modelStyle, const std::string& name, int type, TreeItem* parent = nullptr);
 
         // Virtual Destructor
         virtual ~LuaTreeItem() {}
@@ -54,8 +56,9 @@ namespace campvis {
         virtual QVariant getData(int column, int role) const;
 
     protected:
-        std::string _name;                      ///< Name of the variable
-        int _type;                              ///< Lua type of the variable
+        std::string _name;          ///< Name of the variable
+        int _type;                  ///< Lua type of the variable
+        ModelStyle _modelStyle;     ///< Model style for this tree item
 
     private:
         virtual QString getValue() const;
@@ -80,7 +83,7 @@ namespace campvis {
          * \param   type        Lua type of the variable
          * \param   parent      Parent TreeItem
          */
-        LuaTreeItemLeaf(std::shared_ptr<LuaTable> parentTable, const std::string& name, int type, TreeItem* parent);
+        LuaTreeItemLeaf(ModelStyle modelStyle, std::shared_ptr<LuaTable> parentTable, const std::string& name, int type, TreeItem* parent);
 
         /// Destructor
         virtual ~LuaTreeItemLeaf();
@@ -99,7 +102,7 @@ namespace campvis {
          * \param   type        Lua type of the variable
          * \param   parent      Parent TreeItem
          */
-        LuaTreeItemTable(bool isMetatable, std::shared_ptr<LuaTable> thisTable, const std::string& name, int type, TreeItem* parent);
+        LuaTreeItemTable(ModelStyle modelStyle, bool isMetatable, std::shared_ptr<LuaTable> thisTable, const std::string& name, int type, TreeItem* parent);
 
         /// Destructor
         virtual ~LuaTreeItemTable();
@@ -108,6 +111,8 @@ namespace campvis {
         virtual QVariant getData(int column, int role) const;
 
     private:
+        void recursiveGatherSwigMethods(const std::shared_ptr<LuaTable>& baseTable, TreeItem* parent);
+
         std::shared_ptr<LuaTable> _thisTable;    ///< this item's LuaTable
         bool _isMetatable;                      ///< Flag whether this item represents a Metatable (currently only used for printing purposes)
     };
@@ -124,7 +129,7 @@ namespace campvis {
         explicit LuaTableTreeModel(QObject *parent = 0);
         ~LuaTableTreeModel();
 
-        void setData(LuaVmState* luaVmState);
+        void setData(LuaVmState* luaVmState, LuaTreeItem::ModelStyle modelStyle);
 
         QVariant data(const QModelIndex &index, int role) const;
 
@@ -181,7 +186,7 @@ namespace campvis {
          * Updates the data in the tree view by the given collection of pipelines \a pipelines.
          * \param   pipelines   
          */
-        void update(LuaVmState* luaVmState);
+        void update(LuaVmState* luaVmState, LuaTreeItem::ModelStyle modelStyle);
 
 
 
