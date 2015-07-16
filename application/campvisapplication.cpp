@@ -72,9 +72,6 @@ namespace campvis {
         , _argc(argc)
         , _argv(argv)
     {
-        // Make Xlib and GLX thread safe under X11
-        QApplication::setAttribute(Qt::AA_X11InitThreads);
-
     }
 
     CampVisApplication::~CampVisApplication() {

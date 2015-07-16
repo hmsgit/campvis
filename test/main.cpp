@@ -80,10 +80,9 @@ void deinit() {
 GTEST_API_ int main(int argc, char **argv) {
     printf("Running main() from main.cpp\n");
 
-    app = new QApplication(argc, argv);
-
     // Make Xlib and GLX thread safe under X11
-    QApplication::setAttribute(Qt::AA_X11InitThreads);
+    QCoreApplication::setAttribute(Qt::AA_X11InitThreads);
+    app = new QApplication(argc, argv);
 
     testing::InitGoogleTest(&argc, argv);
     init();
