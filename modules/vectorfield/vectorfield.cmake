@@ -3,6 +3,7 @@
 IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
+        modules/vectorfield/*.cpp
 		modules/vectorfield/processors/*.cpp
 		modules/vectorfield/pipelines/*.cpp
 	)

@@ -87,15 +87,16 @@ GTEST_API_ int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     init();
     int ret;
-
+    
     std::thread testThread([&] () {
         cgt::GLContextScopedLock lock(_localContext);
         ret= RUN_ALL_TESTS();
 
-        app->exit();
     });
 
     app->exec();
+    testThread.join();
+    app->exit();
     deinit();
 
     delete app;

@@ -98,6 +98,9 @@ protected:
                 processors[i]->invalidate(AbstractProcessor::INVALID_RESULT);
             }
         }
+        else {
+            FAIL() << "Could not instantiate pipeline '" << _pipelineName << "'";
+        }
     }
 
     void execute() {
@@ -211,3 +214,4 @@ TEST_F(PipelineWriteResultImageTest, TensorDemo) {
 }
 
 #endif
+
