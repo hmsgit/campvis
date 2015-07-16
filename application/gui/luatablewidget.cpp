@@ -135,13 +135,21 @@ namespace campvis {
     
     QString LuaTreeItemLeaf::getValue() const {
         QString toReturn;
+        lua_State* L = _parentTable->getLuaVmState().rawState();
+        LuaStateMutexType::scoped_lock lock(_parentTable->getLuaVmState().getMutex());
         if (_type == LUA_TSTRING || _type == LUA_TNUMBER) {
-            lua_State* L = _parentTable->getLuaVmState().rawState();
-            LuaStateMutexType::scoped_lock lock(_parentTable->getLuaVmState().getMutex());
 
             _parentTable->pushField(_name);
             toReturn = QString(lua_tostring(L, -1));
             _parentTable->popRecursive();
+        }
+        else if (_type == LUA_TUSERDATA) {
+            auto mt = _parentTable->getMetatable(_name);
+            if (mt) {
+                mt->pushField(".type");
+                toReturn = "[" + QString(lua_tostring(L, -1)) + "]";
+                mt->popRecursive();
+            }
         }
         return toReturn;
     }

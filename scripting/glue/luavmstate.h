@@ -30,7 +30,6 @@
 #include <string>
 #include "scripting/swigluarun.h"
 #include "scripting/glue/globalluatable.h"
-#include "scripting/glue/metatableluatable.h"
 #include "tbb/recursive_mutex.h"
 
 extern "C" {

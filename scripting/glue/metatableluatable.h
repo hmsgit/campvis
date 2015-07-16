@@ -29,9 +29,10 @@ namespace campvis {
         virtual bool isValid() override;
         virtual void callInstanceMethod(const std::string& name) override;
         
-    protected:
         virtual void pushField(const std::string& name) override;
         virtual void popRecursive() override;
+
+    protected:
         virtual void populateValueMap() override;
         virtual LuaTable* getParentTable() override;
 
