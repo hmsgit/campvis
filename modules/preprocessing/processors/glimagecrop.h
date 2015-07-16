@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Constructs a new GlImageCrop Processor
          **/
-        GlImageCrop(IVec2Property* viewportSizeProp);
+        explicit GlImageCrop(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

@@ -47,7 +47,7 @@ namespace campvis {
         /**
          * Constructs a new PointPredicateRaycaster Processor
          **/
-        PointPredicateRaycaster(IVec2Property* viewportSizeProp);
+        explicit PointPredicateRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

@@ -51,7 +51,7 @@ namespace cgt {
      */
     class CGT_API VertexArrayObject {
     public:
-        VertexArrayObject(bool autoBind = true) throw (cgt::Exception);
+        explicit VertexArrayObject(bool autoBind = true) throw (cgt::Exception);
 
         /**
          * Destructor, deletes the whole VAO.

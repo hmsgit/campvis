@@ -43,7 +43,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        IvusTcDemo(DataContainer* dc);
+        explicit IvusTcDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor

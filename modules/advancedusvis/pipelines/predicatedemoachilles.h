@@ -50,7 +50,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        PredicateDemoAchilles(DataContainer* dc);
+        explicit PredicateDemoAchilles(DataContainer* dc);
 
         /**
          * Virtual Destructor

@@ -54,7 +54,7 @@ namespace campvis {
         /**
          * Constructs a new ScanlineDistributionComputation Processor
          **/
-        ScanlineDistributionComputation(IVec2Property* viewportSizeProp);
+        explicit ScanlineDistributionComputation(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

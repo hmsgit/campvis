@@ -45,7 +45,7 @@ namespace fontrendering {
         /**
          * Constructs a new TextRenderer Processor.
          **/
-        TextRenderer(IVec2Property* viewportSizeProp);
+        explicit TextRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

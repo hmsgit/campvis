@@ -40,7 +40,7 @@ namespace campvis {
         /**
          * Creates a VisualizationPipeline. 
          */
-        AdvancedUsVis(DataContainer* dc);
+        explicit AdvancedUsVis(DataContainer* dc);
 
         /**
          * Virtual Destructor

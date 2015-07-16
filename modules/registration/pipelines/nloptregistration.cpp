@@ -137,7 +137,7 @@ namespace registration {
 
     void NloptRegistration::onPerformOptimizationClicked() {
         // we want the registration to be performed in a background thread and not in the signal_manager's thread.
-        std::thread registrationThread([this] () {
+        std::thread([this] () {
             // Evaluation of the similarity measure needs an OpenGL context, so we need to acquire the canvas' context.
             // An alternative solution would be to specialize the pipeline and overload the executePipeline() method.
             // Then the registration would be performed in the pipeline's thread, which is probably the mor beautiful

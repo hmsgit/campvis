@@ -55,7 +55,7 @@ namespace campvis {
         /**
          * Constructs a new AdvOptimizedRaycaster Processor
          **/
-        AdvOptimizedRaycaster(IVec2Property* viewportSizeProp);
+        explicit AdvOptimizedRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

@@ -56,7 +56,7 @@ namespace campvis {
 
         // Pair of DataNameProperty for output image ID and OptionProperty for image type
         struct OutputPropertyPair {
-            OutputPropertyPair(size_t index);;
+            explicit OutputPropertyPair(size_t index);;
 
             DataNameProperty _imageId;
             GenericOptionProperty<std::string> _imageType;

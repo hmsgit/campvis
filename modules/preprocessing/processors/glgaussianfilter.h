@@ -49,7 +49,7 @@ namespace campvis {
         /**
          * Constructs a new GlGaussianFilter Processor
          **/
-        GlGaussianFilter(IVec2Property* viewportSizeProp);
+        explicit GlGaussianFilter(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

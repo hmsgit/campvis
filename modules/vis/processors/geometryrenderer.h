@@ -53,7 +53,7 @@ namespace campvis {
         /**
          * Constructs a new GeometryRenderer Processor
          **/
-        GeometryRenderer(IVec2Property* viewportSizeProp);
+        explicit GeometryRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

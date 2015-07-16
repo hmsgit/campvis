@@ -31,7 +31,6 @@
 #include "modules/itk/core/itktypetraits.h"
 
 #include <itkImage.h>
-#include <itkImportImageFilter.h>
 
 #include <cstring>  // needed for memcpy
 

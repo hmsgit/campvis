@@ -53,7 +53,7 @@ namespace campvis {
         /**
          * Constructs a new AdvancedUsFusion Processor
          **/
-        AdvancedUsFusion(IVec2Property* viewportSizeProp);
+        explicit AdvancedUsFusion(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

@@ -40,7 +40,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        SliceVis(DataContainer* dc);
+        explicit SliceVis(DataContainer* dc);
 
         /**
          * Virtual Destructor

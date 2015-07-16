@@ -48,7 +48,7 @@ namespace campvis {
         /**
          * Constructs a new ContextPreservingRaycaster Processor
          **/
-        ContextPreservingRaycaster(IVec2Property* viewportSizeProp);
+        explicit ContextPreservingRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

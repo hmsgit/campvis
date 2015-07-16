@@ -47,7 +47,7 @@ namespace campvis {
         /**
          * Constructs a new EEPGenerator Processor
          **/
-        EEPGenerator(IVec2Property* viewportSizeProp);
+        explicit EEPGenerator(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

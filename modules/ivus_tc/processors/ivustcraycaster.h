@@ -47,7 +47,7 @@ namespace campvis {
         /**
          * Constructs a new IvusTcRaycaster Processor
          **/
-        IvusTcRaycaster(IVec2Property* viewportSizeProp);
+        explicit IvusTcRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

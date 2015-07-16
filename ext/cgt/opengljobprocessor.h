@@ -73,6 +73,10 @@ namespace cgt {
             ~ScopedSynchronousGlJobExecution();
 
         private:
+            // disable copying
+            explicit ScopedSynchronousGlJobExecution(const ScopedSynchronousGlJobExecution& rhs);
+            ScopedSynchronousGlJobExecution& operator=(ScopedSynchronousGlJobExecution rhs);
+
             cgt::GLContextScopedLock* _lock;
         };
 

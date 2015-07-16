@@ -38,7 +38,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        StreamingOIGTLDemo(DataContainer *dc);
+        explicit StreamingOIGTLDemo(DataContainer *dc);
 
         /**
          * Virtual Destructor

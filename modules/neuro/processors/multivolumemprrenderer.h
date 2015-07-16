@@ -56,7 +56,7 @@ namespace neuro {
         /**
          * Constructs a new MultiVolumeMprRenderer Processor
          **/
-        MultiVolumeMprRenderer(IVec2Property* viewportSizeProp);
+        explicit MultiVolumeMprRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

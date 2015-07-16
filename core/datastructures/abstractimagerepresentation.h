@@ -46,7 +46,7 @@ namespace campvis {
          * Creates a new abstract representation for the image \a parent.
          * \param   parent  Image this representation represents, must not be 0.
          */
-        AbstractImageRepresentation(ImageData* parent);
+        explicit AbstractImageRepresentation(ImageData* parent);
 
         /**
          * Virtual Destructor.

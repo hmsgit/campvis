@@ -48,7 +48,7 @@ namespace campvis {
         /**
          * Constructs a new GlMorphologyFilter Processor
          **/
-        GlMorphologyFilter(IVec2Property* viewportSizeProp);
+        explicit GlMorphologyFilter(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

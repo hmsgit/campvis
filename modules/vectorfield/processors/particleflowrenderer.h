@@ -59,7 +59,7 @@ namespace campvis {
         /**
          * Constructs a new ParticleFlowRenderer Processor
          **/
-        ParticleFlowRenderer(IVec2Property* viewportSizeProp);
+        explicit ParticleFlowRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

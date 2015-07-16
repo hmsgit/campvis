@@ -51,7 +51,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        PredicateDemoCarotid2(DataContainer* dc);
+        explicit PredicateDemoCarotid2(DataContainer* dc);
 
         /**
          * Virtual Destructor

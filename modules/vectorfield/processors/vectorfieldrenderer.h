@@ -58,7 +58,7 @@ namespace campvis {
         /**
          * Constructs a new VectorFieldRenderer Processor
          **/
-        VectorFieldRenderer(IVec2Property* viewportSizeProp);
+        explicit VectorFieldRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

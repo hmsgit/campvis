@@ -39,7 +39,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        AdvDVRVis(DataContainer* dc);
+        explicit AdvDVRVis(DataContainer* dc);
 
         /**
          * Virtual Destructor

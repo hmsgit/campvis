@@ -43,7 +43,7 @@
 namespace campvis {
     namespace {
         struct checkExtension {
-            checkExtension(const std::string& str) : _str(str) {}
+            explicit checkExtension(const std::string& str) : _str(str) {}
 
             bool operator()(const std::pair<AbstractImageReader*, MetaProperty*>& v) const { 
                 return v.first->acceptsExtension(this->_str); 

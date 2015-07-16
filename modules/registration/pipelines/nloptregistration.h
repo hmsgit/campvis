@@ -49,7 +49,7 @@ namespace registration {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        NloptRegistration(DataContainer* dc);
+        explicit NloptRegistration(DataContainer* dc);
 
         /**
          * Virtual Destructor

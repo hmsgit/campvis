@@ -43,7 +43,7 @@ namespace registration {
         /**
          * Constructs a new RegistrationSliceView Processor
          **/
-        RegistrationSliceView(IVec2Property* viewportSizeProp);
+        explicit RegistrationSliceView(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

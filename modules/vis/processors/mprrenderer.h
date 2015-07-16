@@ -47,7 +47,7 @@ namespace campvis {
         /**
          * Constructs a new MprRenderer Processor
          **/
-        MprRenderer(IVec2Property* viewportSizeProp);
+        explicit MprRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

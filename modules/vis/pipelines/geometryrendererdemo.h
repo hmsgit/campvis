@@ -40,7 +40,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        GeometryRendererDemo(DataContainer* dc);
+        explicit GeometryRendererDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor

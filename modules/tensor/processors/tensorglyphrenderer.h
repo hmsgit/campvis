@@ -64,7 +64,7 @@ namespace campvis {
         /**
          * Constructs a new TensorGlyphRenderer Processor
          **/
-        TensorGlyphRenderer(IVec2Property* viewportSizeProp);
+        explicit TensorGlyphRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

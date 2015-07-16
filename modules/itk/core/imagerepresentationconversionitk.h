@@ -36,6 +36,8 @@
 
 #include "modules/itk/core/genericimagerepresentationitk.h"
 
+#include <itkImportImageFilter.h>
+
 namespace campvis {
 
 // = Declare converter classes ====================================================================

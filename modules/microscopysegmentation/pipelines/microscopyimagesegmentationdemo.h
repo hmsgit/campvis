@@ -41,7 +41,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        MicroscopyImageSegmentationDemo(DataContainer* dc);
+        explicit MicroscopyImageSegmentationDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor

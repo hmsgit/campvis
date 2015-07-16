@@ -37,7 +37,7 @@ namespace workflowdemo {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        ImageLoading(DataContainer* dc);
+        explicit ImageLoading(DataContainer* dc);
 
         /**
          * Virtual Destructor

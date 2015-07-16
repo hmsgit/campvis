@@ -48,7 +48,7 @@ namespace campvis {
          * Creates a new PropertyCollectionWidget.
          * \param   parent  Parent widget, may be 0.
          */
-        PropertyCollectionWidget(QWidget* parent = 0);
+        explicit PropertyCollectionWidget(QWidget* parent = 0);
 
         /**
          * Destructor.

@@ -56,7 +56,7 @@ namespace campvis {
          * Creates a new empty DataContainer
          * \param   name    The name of the new DataContainer
          */
-        DataContainer(const std::string& name);
+        explicit DataContainer(const std::string& name);
 
         /**
          * Destructor of the DataContainer. Will disconnect all DataHandles from this container.

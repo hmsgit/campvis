@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Constructs a new GlGradientVolumeGenerator Processor
          **/
-        GlGradientVolumeGenerator(IVec2Property* viewportSizeProp);
+        explicit GlGradientVolumeGenerator(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

@@ -47,7 +47,7 @@ namespace campvis {
         /**
          * Constructs a new GlImageResampler Processor
          **/
-        GlImageResampler(IVec2Property* viewportSizeProp);
+        explicit GlImageResampler(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

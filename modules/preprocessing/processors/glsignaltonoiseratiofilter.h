@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Constructs a new GlSignalToNoiseRatioFilter Processor
          **/
-        GlSignalToNoiseRatioFilter(IVec2Property* viewportSizeProp);
+        explicit GlSignalToNoiseRatioFilter(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

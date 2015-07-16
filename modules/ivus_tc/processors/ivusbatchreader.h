@@ -41,7 +41,7 @@ namespace campvis {
         /**
          * Constructs a new IvusBatchReader Processor
          **/
-        IvusBatchReader(IVec2Property* viewportSizeProp);
+        explicit IvusBatchReader(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

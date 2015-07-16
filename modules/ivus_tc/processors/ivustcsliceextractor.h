@@ -38,7 +38,7 @@ namespace campvis {
         /**
          * Constructs a new IvusTcSliceExtractor Processor
          **/
-        IvusTcSliceExtractor(IVec2Property* viewportSizeProp);
+        explicit IvusTcSliceExtractor(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

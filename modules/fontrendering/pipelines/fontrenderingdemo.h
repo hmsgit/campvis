@@ -39,7 +39,7 @@ namespace fontrendering {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        FontRenderingDemo(DataContainer* dc);
+        explicit FontRenderingDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor

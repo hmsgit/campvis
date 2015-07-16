@@ -44,7 +44,7 @@ namespace campvis {
         /**
         * Constructs a new ItkSegmentation Processor
         **/
-        ItkSegmentation(IVec2Property* viewportSizeProp);
+        explicit ItkSegmentation(IVec2Property* viewportSizeProp);
 
         /**
         * Destructor

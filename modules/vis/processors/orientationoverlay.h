@@ -55,7 +55,7 @@ namespace campvis {
         /**
          * Constructs a new OrientationOverlay Processor
          **/
-        OrientationOverlay(IVec2Property* viewportSizeProp);
+        explicit OrientationOverlay(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

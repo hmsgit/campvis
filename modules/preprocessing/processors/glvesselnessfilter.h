@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Constructs a new GlVesselnessFilter Processor
          **/
-        GlVesselnessFilter(IVec2Property* viewportSizeProp);
+        explicit GlVesselnessFilter(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

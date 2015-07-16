@@ -60,7 +60,7 @@ namespace campvis {
         /**
          * Constructs a new TrackballCameraProvider Processor
          **/
-        TrackballCameraProvider(IVec2Property* canvasSize);
+        explicit TrackballCameraProvider(IVec2Property* canvasSize);
 
         /**
          * Destructor

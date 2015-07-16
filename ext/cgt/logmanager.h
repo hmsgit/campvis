@@ -182,7 +182,7 @@ template class CGT_API Singleton<LogManager>;
  */
 class CGT_API LogManager : public Singleton<LogManager> {
 public:
-    LogManager(const std::string& logDir = "");
+    explicit LogManager(const std::string& logDir = "");
     ~LogManager();
 
     /// Initialize logmanager, put all logfiles in logDir

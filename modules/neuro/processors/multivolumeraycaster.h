@@ -62,7 +62,7 @@ namespace neuro {
         /**
          * Constructs a new MultiVolumeRaycaster Processor
          **/
-        MultiVolumeRaycaster(IVec2Property* viewportSizeProp);
+        explicit MultiVolumeRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

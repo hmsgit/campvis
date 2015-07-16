@@ -48,7 +48,7 @@ namespace campvis {
         /**
          * Constructs a new GlIntensityQuantizer Processor
          **/
-        GlIntensityQuantizer(IVec2Property* viewportSizeProp);
+        explicit GlIntensityQuantizer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

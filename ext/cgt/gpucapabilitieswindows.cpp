@@ -900,8 +900,6 @@ bool GpuCapabilitiesWindows::createVersionStringFromDigits(FileVersion &fileVers
     return true;
 }
 
-std::string GpuCapabilitiesWindows::loggerCat_ = "cgt.GpuCapabilitiesWindows";
-
 } // namespace cgt
 
 #endif //WIN32

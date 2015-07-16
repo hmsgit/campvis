@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Constructs a new UsFanRenderer Processor
          **/
-        UsFanRenderer(IVec2Property* viewportSizeProp);
+        explicit UsFanRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

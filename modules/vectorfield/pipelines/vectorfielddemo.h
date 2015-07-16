@@ -44,7 +44,7 @@ namespace campvis {
         /**
          * Small demo pipeline for vector field visualization.
          */
-        VectorFieldDemo(DataContainer* dc);
+        explicit VectorFieldDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor

@@ -44,7 +44,7 @@ namespace campvis {
         /**
          * Constructs a new QuadView Processor
          **/
-        QuadView(IVec2Property* viewportSizeProp);
+        explicit QuadView(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

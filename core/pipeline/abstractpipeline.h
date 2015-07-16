@@ -67,7 +67,7 @@ namespace campvis {
          * \param   dc  Pointer to the DataContainer containing local working set of data for this 
          *              pipeline, must not be 0, must be valid the whole lifetime of this pipeline.
          */
-        AbstractPipeline(DataContainer* dc);
+        explicit AbstractPipeline(DataContainer* dc);
 
         /**
          * Virtual Destructor

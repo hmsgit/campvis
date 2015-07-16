@@ -40,7 +40,7 @@ namespace campvis {
         /**
         * Creates a AutoEvaluationPipeline.
         */
-        ItkSegmentationDemo(DataContainer* dc);
+        explicit ItkSegmentationDemo(DataContainer* dc);
 
         /**
         * Virtual Destructor

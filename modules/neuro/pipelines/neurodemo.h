@@ -43,7 +43,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        NeuroDemo(DataContainer* dc);
+        explicit NeuroDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor

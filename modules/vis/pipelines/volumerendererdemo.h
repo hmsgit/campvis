@@ -39,7 +39,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        VolumeRendererDemo(DataContainer* dc);
+        explicit VolumeRendererDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor

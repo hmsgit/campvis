@@ -58,7 +58,7 @@ namespace campvis {
      */
     class CAMPVIS_MODULES_API ContourObject {
     public:
-        ContourObject(std::string name);
+        explicit ContourObject(std::string name);
         virtual ~ContourObject();
         ContourObject& operator=(const ContourObject& rhs);
         void addObject();

@@ -49,7 +49,7 @@ namespace campvis {
         /**
          * Constructs a new DepthDarkening Processor
          **/
-        DepthDarkening(IVec2Property* viewportSizeProp);
+        explicit DepthDarkening(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

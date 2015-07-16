@@ -40,7 +40,7 @@ namespace workflowdemo {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        ImageFiltering(DataContainer* dc);
+        explicit ImageFiltering(DataContainer* dc);
 
         /**
          * Virtual Destructor

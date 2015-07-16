@@ -50,7 +50,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        CudaConfidenceMapsDemo(DataContainer *dc);
+        explicit CudaConfidenceMapsDemo(DataContainer *dc);
 
         /**
          * Virtual Destructor

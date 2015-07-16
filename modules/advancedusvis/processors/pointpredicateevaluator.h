@@ -49,7 +49,7 @@ namespace campvis {
         /**
          * Constructs a new PointPredicateEvaluator Processor
          **/
-        PointPredicateEvaluator(IVec2Property* viewportSizeProp);
+        explicit PointPredicateEvaluator(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

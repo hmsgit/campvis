@@ -45,7 +45,7 @@ namespace campvis {
          * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
          * \param   raycaster           Raycaster to use for rendering, must not be 0, VolumeRenderer will take ownership.
          **/
-        PredicateVolumeExplorer(IVec2Property* viewportSizeProp);
+        explicit PredicateVolumeExplorer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

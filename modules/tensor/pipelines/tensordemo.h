@@ -44,7 +44,7 @@ namespace campvis {
         /**
          * Small demo pipeline for tensor data visualization.
          */
-        TensorDemo(DataContainer* dc);
+        explicit TensorDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor

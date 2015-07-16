@@ -57,7 +57,7 @@ namespace campvis {
         /**
         * Constructs a new SliceRenderer2D Processor
         **/
-        SliceRenderer2D(IVec2Property* viewportSizeProp);
+        explicit SliceRenderer2D(IVec2Property* viewportSizeProp);
 
         /**
         * Destructor

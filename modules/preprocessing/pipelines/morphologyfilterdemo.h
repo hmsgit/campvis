@@ -39,7 +39,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        MorphologyDemo(DataContainer* dc);
+        explicit MorphologyDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor
