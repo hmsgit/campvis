@@ -94,7 +94,6 @@ GTEST_API_ int main(int argc, char **argv) {
 
     });
 
-    app->exec();
     testThread.join();
     app->exit();
     deinit();
