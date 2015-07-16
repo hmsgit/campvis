@@ -36,7 +36,6 @@ namespace campvis {
         , _editCommand(nullptr)
         , _btnExecute(nullptr)
         , _btnClear(nullptr)
-        , _luaTreeWidget(nullptr)
         , _currentPosition(-1)
     {
         setupGUI();
@@ -61,9 +60,6 @@ namespace campvis {
 
         QVBoxLayout* leftColumnLayout = new QVBoxLayout();
         mainLayout->addLayout(leftColumnLayout);
-
-        _luaTreeWidget = new LuaTableTreeWidget(this);
-        mainLayout->addWidget(_luaTreeWidget);
 
         QHBoxLayout* controlsLayout = new QHBoxLayout();
         leftColumnLayout->addLayout(controlsLayout);

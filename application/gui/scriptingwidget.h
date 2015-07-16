@@ -31,7 +31,6 @@
 #include "tbb/mutex.h"
 
 #include "application/gui/completinglualineedit.h"
-#include "application/gui/luatablewidget.h"
 #include "application/tools/bufferinglog.h"
 #include "application/gui/loghighlighter.h"
 
@@ -78,7 +77,6 @@ namespace campvis {
          */
         void deinit();
 
-        LuaTableTreeWidget* _luaTreeWidget; ///< Tree widget showing the global Lua variables
         CompletingLuaLineEdit* _editCommand;            ///< Text field to enter Lua commands
 
     protected:

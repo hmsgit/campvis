@@ -48,6 +48,7 @@ namespace campvis {
     class DataContainerInspectorWidget;
     class DataContainerInspectorCanvas;
     class MdiDockableWindow;
+    class LuaTableTreeWidget;
 
     /**
      * Main Window for the CAMPVis application.
@@ -217,6 +218,7 @@ namespace campvis {
 
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         ScriptingWidget* _scriptingConsoleWidget;           ///< Widget showing the scripting console (if available)
+        LuaTableTreeWidget* _luaTreeWidget;                 ///< Tree widget showing the global Lua variables
         WorkflowControllerWidget* _workflowWidget;          ///< Widget showing the workflow controller
         
         QComboBox* _cbProcessorFactory;                      ///< Combobox for selecting the Processor from the ProcessorFactory

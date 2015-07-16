@@ -48,6 +48,7 @@
 #include "scripting/glue/globalluatable.h"
 #include "scripting/luagen/properties/propertycollectionluascriptgenerator.h"
 #include "scripting/luagen/properties/abstractpropertylua.h"
+#include "application/gui/luatablewidget.h"
 #endif
 
 namespace campvis {
@@ -70,6 +71,7 @@ namespace campvis {
         , _selectedDataContainer(0)
         , _logViewer(0)
         , _scriptingConsoleWidget(nullptr)
+        , _luaTreeWidget(nullptr)
         , _workflowWidget(nullptr)
     {
         cgtAssert(_application != 0, "Application must not be 0.");
@@ -88,7 +90,11 @@ namespace campvis {
 
         setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
         setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+#ifdef CAMPVIS_HAS_SCRIPTING
+        setCorner(Qt::BottomRightCorner, Qt::BottomDockWidgetArea);
+#else
         setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+#endif
         setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 
         setTabPosition(Qt::TopDockWidgetArea, QTabWidget::North);
@@ -171,8 +177,13 @@ namespace campvis {
         _scriptingConsoleWidget = new ScriptingWidget(this);
         ui.scriptingConsoleDock->setWidget(_scriptingConsoleWidget);
         connect(_scriptingConsoleWidget, SIGNAL(s_commandExecuted(const QString&)), this, SLOT(onLuaCommandExecuted(const QString&)));
+
+        _luaTreeWidget = new LuaTableTreeWidget(this);
+        ui.scriptingInspectorDock->setWidget(_luaTreeWidget);
+
 #else
         ui.scriptingConsoleDock->setVisible(false);
+        ui.scriptingInspectorDock->setVisible(false);
 #endif
 
         _workflowWidget = new WorkflowControllerWidget(_application, this);
@@ -451,7 +462,7 @@ namespace campvis {
 
             _application->getLuaVmState()->getGlobalTable()->updateValueMap();
             _scriptingConsoleWidget->_editCommand->setCompleter(new LuaCompleter(_application->getLuaVmState(), _scriptingConsoleWidget->_editCommand));
-            _scriptingConsoleWidget->_luaTreeWidget->update(_application->getLuaVmState(), LuaTreeItem::FULL_MODEL);
+            _luaTreeWidget->update(_application->getLuaVmState(), LuaTreeItem::FULL_MODEL);
         }
 #endif
     }

@@ -23,7 +23,7 @@
 // ================================================================================================
 
 #include "completinglualineedit.h"
-#include "application/gui/scriptingwidget.h"
+#include "application/gui/luatablewidget.h"
 
 #include <QAbstractItemModel>
 #include <QAbstractItemView>
