@@ -61,9 +61,4 @@ namespace campvis {
         const_cast<ImageData*>(_parent)->addRepresentation(this);
     }
 
-    AbstractImageRepresentation& AbstractImageRepresentation::operator=(const AbstractImageRepresentation& rhs) {
-        return *this;
-    }
-
-
 }

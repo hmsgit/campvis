@@ -59,7 +59,6 @@ namespace campvis {
         }
 
         _property->s_changed.connect(this, &AbstractPropertyWidget::onPropertyChanged);
-        // cppcheck-suppress pureVirtualCall
         connect(this, SIGNAL(s_propertyChanged(const AbstractProperty*)), this, SLOT(updateWidgetFromProperty()));
     }
 

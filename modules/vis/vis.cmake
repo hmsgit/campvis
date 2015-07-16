@@ -6,6 +6,7 @@ IF(${ModuleEnabled})
 		modules/vis/pipelines/*.cpp
 		modules/vis/processors/*.cpp
 		modules/vis/tools/*.cpp
+		modules/vis/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)

@@ -63,6 +63,7 @@ namespace campvis {
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _arrowGeometry(nullptr)
+        , _shader(nullptr)
     {
         addProperty(p_inputVectors, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_camera);

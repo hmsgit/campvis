@@ -28,8 +28,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/advancedusvis/processors/pointpredicateevaluator.h"
@@ -52,7 +50,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        PredicateDemoAchilles(DataContainer* dc);
+        explicit PredicateDemoAchilles(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -92,10 +90,6 @@ namespace campvis {
         PredicateVolumeExplorer _ve;
 
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<PredicateDemoAchilles>;
-
 }
 
 #endif // PredicateDemoAchilles_H__

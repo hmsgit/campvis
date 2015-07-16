@@ -28,7 +28,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/itk/processors/itkreader.h"
@@ -41,7 +40,7 @@ namespace campvis {
         /**
         * Creates a AutoEvaluationPipeline.
         */
-        ItkSegmentationDemo(DataContainer* dc);
+        explicit ItkSegmentationDemo(DataContainer* dc);
 
         /**
         * Virtual Destructor
@@ -65,10 +64,6 @@ namespace campvis {
         ItkImageFilter _itkFilter;
         ItkSegmentation _itkSegmentation;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<ItkSegmentationDemo>;
-
 }
 
 #endif // ITKSEGMENTATIONDEMO_H__

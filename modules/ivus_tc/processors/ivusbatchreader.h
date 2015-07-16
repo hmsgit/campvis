@@ -41,7 +41,7 @@ namespace campvis {
         /**
          * Constructs a new IvusBatchReader Processor
          **/
-        IvusBatchReader(IVec2Property* viewportSizeProp);
+        explicit IvusBatchReader(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -54,8 +54,10 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "IvusBatchReader"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "IvusBatchReader"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Reads a batch of IVUS images from a directory and stacks them into a 3D volume."; };
         /// \see AbstractProcessor::getAuthor()

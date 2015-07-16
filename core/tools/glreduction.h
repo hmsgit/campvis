@@ -63,7 +63,7 @@ namespace campvis {
          * Constructor
          * \param   reductionOperator   Operation to be performed by reduction
          */
-        GlReduction(ReductionOperator reductionOperator);
+        explicit GlReduction(ReductionOperator reductionOperator);
 
         /**
          * Destructor

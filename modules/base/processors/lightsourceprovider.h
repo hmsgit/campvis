@@ -32,7 +32,7 @@
 #include "core/properties/floatingpointproperty.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
+#include "core/pipeline/processorfactory.h"
 
 namespace campvis {
     /**

@@ -34,6 +34,9 @@ using namespace campvis;
  * \return  0 if program exited successfully
  **/
 int main(int argc, char** argv) {
+    // Make Xlib and GLX thread safe under X11
+    QCoreApplication::setAttribute(Qt::AA_X11InitThreads);
+
     CampVisApplication app(argc, argv);
     app.init();
     int toReturn = app.run();

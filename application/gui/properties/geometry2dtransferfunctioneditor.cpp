@@ -219,7 +219,7 @@ namespace campvis {
         GLCtxtMgr.registerContextAndInitGlew(_canvas, "Geometry2DTransferFunctionEditor");
         GLCtxtMgr.releaseContext(_canvas, false);
 
-        _canvas->setPainter(this, false);
+        _canvas->setPainter(this);
         _layout->addWidget(_canvas, 1, 1, 3, 3);
 
         _lblIntensityLeft = new QLabel(QString::number(gtf->getIntensityDomain().x), this);

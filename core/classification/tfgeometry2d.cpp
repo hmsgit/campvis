@@ -98,7 +98,7 @@ namespace campvis {
 
     namespace {
         struct KeyPointSorter {
-            KeyPointSorter(const cgt::vec2& center)
+            explicit KeyPointSorter(const cgt::vec2& center)
                 : _center(center)
             {};
 

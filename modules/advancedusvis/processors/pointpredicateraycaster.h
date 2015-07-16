@@ -47,15 +47,17 @@ namespace campvis {
         /**
          * Constructs a new PointPredicateRaycaster Processor
          **/
-        PointPredicateRaycaster(IVec2Property* viewportSizeProp);
+        explicit PointPredicateRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
          **/
         virtual ~PointPredicateRaycaster();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "PointPredicateRaycaster"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "PointPredicateRaycaster"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a predicate-based volume ray casting"; };
         /// \see AbstractProcessor::getAuthor()

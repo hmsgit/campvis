@@ -180,8 +180,8 @@ namespace campvis {
 
         // We don't want this data to be copied - clone() must be enough
         // (read: We are too lazy to implement a correct copy constructor / assignment-operator)
-         ImageRepresentationLocal(const ImageRepresentationLocal& rhs);
-         ImageRepresentationLocal& operator=(const ImageRepresentationLocal& rhs);
+        explicit ImageRepresentationLocal(const ImageRepresentationLocal& rhs);
+        ImageRepresentationLocal& operator=(const ImageRepresentationLocal& rhs);
     };
 
 }

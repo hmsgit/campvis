@@ -30,7 +30,6 @@
 #include "core/properties/numericproperty.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -45,7 +44,7 @@ namespace campvis {
         /**
          * Constructs a new QuadView Processor
          **/
-        QuadView(IVec2Property* viewportSizeProp);
+        explicit QuadView(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -87,9 +86,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<QuadView>;
 }
 
 #endif // QUADVIEW_H__

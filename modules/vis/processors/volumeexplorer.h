@@ -38,7 +38,6 @@
 #include "modules/modulesapi.h"
 #include "modules/vis/processors/volumerenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
-#include "modules/processorfactory.h"
 
 #include <memory>
 
@@ -184,9 +183,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<VolumeExplorer>;
 }
 
 #endif // VOLUMEEXPLORER_H__

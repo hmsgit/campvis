@@ -7,6 +7,7 @@ IF(${ModuleEnabled})
 		modules/advancedusvis/pipelines/*.cpp
 		modules/advancedusvis/processors/*.cpp
 		modules/advancedusvis/properties/*.cpp
+		modules/advancedusvis/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)

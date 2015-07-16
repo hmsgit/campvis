@@ -265,7 +265,7 @@ ENDMACRO(LIST_SUBDIRECTORIES)
 
 # copies the passed debug and release DLLs to bin/Debug and bin/Release, resp.
 MACRO(COPY_EXTERNAL_DLLS DebugDLLs ReleaseDLLs failOnError)
-    MESSAGE(STATUS "Copying external DLLs")
+    MESSAGE(STATUS "* Copying external DLLs")
     
     SET(debug_dir "${CMAKE_BINARY_DIR}/bin/Debug")
     IF(NOT EXISTS ${debug_dir})

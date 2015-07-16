@@ -34,3 +34,5 @@ IF(CAMPVIS_ADD_INSTALL_TARGET)
 	)
 ENDIF()
 
+
+INSTALL(TARGETS sigslot DESTINATION exports EXPORT campvis-targets)

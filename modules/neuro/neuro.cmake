@@ -6,6 +6,7 @@ IF(${ModuleEnabled})
 		modules/neuro/pipelines/*.cpp
 		modules/neuro/processors/*.cpp
 		modules/neuro/tools/*.cpp
+		modules/neuro/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)

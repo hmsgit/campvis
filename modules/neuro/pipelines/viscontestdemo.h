@@ -30,8 +30,6 @@
 #include "core/pipeline/viewportsplitter.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/dti/processors/fiberreader.h"
@@ -47,7 +45,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        ViscontestDemo(DataContainer* dc);
+        explicit ViscontestDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -93,10 +91,6 @@ namespace campvis {
         MWheelToNumericPropertyEventListener _slicePositionEventHandler;
 
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<ViscontestDemo>;
-
 }
 
 #endif // VISCONTESTDEMO_H__

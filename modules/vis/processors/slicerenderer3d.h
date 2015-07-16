@@ -31,7 +31,6 @@
 #include "core/properties/allproperties.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -48,7 +47,7 @@ namespace campvis {
         /**
          * Constructs a new SliceRenderer3D Processor
          **/
-        SliceRenderer3D(IVec2Property* viewportSizeProp);
+        explicit SliceRenderer3D(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -93,9 +92,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<SliceRenderer3D>;
 }
 
 #endif // SLICERENDERER3D_H__

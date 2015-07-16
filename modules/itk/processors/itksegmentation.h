@@ -44,7 +44,7 @@ namespace campvis {
         /**
         * Constructs a new ItkSegmentation Processor
         **/
-        ItkSegmentation(IVec2Property* viewportSizeProp);
+        explicit ItkSegmentation(IVec2Property* viewportSizeProp);
 
         /**
         * Destructor
@@ -54,8 +54,10 @@ namespace campvis {
         /// \see AbstractEventHandler::execute()
         virtual void onEvent(cgt::Event* e);
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "ItkSegmentation"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "ItkSegmentation"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a segmentation on input image using ITK."; };
         /// \see AbstractProcessor::getAuthor()

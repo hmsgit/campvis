@@ -39,6 +39,7 @@
 #include "core/tools/quadrenderer.h"
 
 namespace campvis {
+namespace registration {
 
     static const GenericOption<std::string> metrics[5] = {
         GenericOption<std::string>("SUM", "Sum"),
@@ -335,6 +336,5 @@ namespace campvis {
         return w2t * cgt::mat4::createTranslation(halfDiagonal) * registrationInverse * cgt::mat4::createTranslation(-halfDiagonal) * t2w;
     }
 
-
-
+}
 }

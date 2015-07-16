@@ -37,7 +37,6 @@
 #include "core/properties/optionproperty.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -56,7 +55,7 @@ namespace campvis {
         /**
          * Constructs a new OrientationOverlay Processor
          **/
-        OrientationOverlay(IVec2Property* viewportSizeProp);
+        explicit OrientationOverlay(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -106,9 +105,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<OrientationOverlay>;
 }
 
 #endif // ORIENTATIONOVERLAY_H__

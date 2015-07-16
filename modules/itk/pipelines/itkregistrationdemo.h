@@ -28,7 +28,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/vis/processors/volumeexplorer.h"
@@ -42,7 +41,7 @@ namespace campvis {
         /**
         * Creates a AutoEvaluationPipeline.
         */
-        ItkRegistrationDemo(DataContainer* dc);
+        explicit ItkRegistrationDemo(DataContainer* dc);
 
         /**
         * Virtual Destructor
@@ -66,10 +65,6 @@ namespace campvis {
         VolumeExplorer _ve;
         ItkRegistration _itkRegistration;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<ItkRegistrationDemo>;
-
 }
 
 #endif // ITKREGISTRATIONDEMO_H__

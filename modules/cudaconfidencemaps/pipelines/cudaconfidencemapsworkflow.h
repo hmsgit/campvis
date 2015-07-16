@@ -29,7 +29,6 @@
 
 #include "modules/modulesapi.h"
 #include "modules/cudaconfidencemaps/pipelines/cudaconfidencemapsdemo.h"
-#include "modules/pipelinefactory.h"
 
 namespace campvis {
 
@@ -66,8 +65,6 @@ namespace campvis {
         MetaProperty p_pipelineProperties;
         CudaConfidenceMapsDemo* _demoPipeline;
     };
-
-    template class WorkflowRegistrar<CudaConfidenceMapsWorkflow>;
 }
 
 #endif // CUDACONFIDENCEMAPSWORKFLOW_H__

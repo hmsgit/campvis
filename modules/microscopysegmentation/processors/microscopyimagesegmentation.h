@@ -43,7 +43,6 @@
 #include "modules/vis/processors/sliceextractor.h"
 
 #include <vector>
-#include "modules/processorfactory.h"
 #include <memory>
 #include "core/datastructures/facegeometry.h"
 
@@ -59,9 +58,9 @@ namespace campvis {
      */
     class CAMPVIS_MODULES_API ContourObject {
     public:
-        ContourObject(std::string name);
+        explicit ContourObject(std::string name);
         virtual ~ContourObject();
-        ContourObject* operator=(const ContourObject& rhs);
+        ContourObject& operator=(const ContourObject& rhs);
         void addObject();
 
         StringProperty _objectName;
@@ -229,9 +228,6 @@ namespace campvis {
         bool editVoxel;
         int insertNextVoxelAt;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<MicroscopyImageSegmentation>;
 }
 
 #endif // MICROSCOPYIMAGESEGMENTATION_H__

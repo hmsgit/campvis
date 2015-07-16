@@ -31,8 +31,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
 
@@ -42,7 +40,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        SliceVis(DataContainer* dc);
+        explicit SliceVis(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -74,10 +72,6 @@ namespace campvis {
         TransFuncWindowingEventListener _tfWindowingHandler;
 
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<SliceVis>;
-
 }
 
 #endif // SLICEVIS_H__

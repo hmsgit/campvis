@@ -33,6 +33,7 @@
 #include "cgt/logmanager.h"
 
 namespace cgt {
+class GLCanvas;
 
 class CGT_API InitFeature {
 public:
@@ -59,7 +60,7 @@ public:
 CGT_API void init(InitFeature::Features featureset = InitFeature::ALL, LogLevel logLevel = Info);
 /// init GLEW and OpenGL-dependent singletons of cgt.
 /// to be called when OpenGL context already exists.
-CGT_API void initGL(InitFeature::Features featureset = InitFeature::ALL);
+CGT_API void initGL(GLCanvas* backgroundGlContext, InitFeature::Features featureset = InitFeature::ALL);
 
 /// deinit the singletons of cgt
 CGT_API void deinit();

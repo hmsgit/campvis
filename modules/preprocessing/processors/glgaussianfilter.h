@@ -34,7 +34,6 @@
 #include "core/properties/optionproperty.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class BufferObject;
@@ -50,7 +49,7 @@ namespace campvis {
         /**
          * Constructs a new GlGaussianFilter Processor
          **/
-        GlGaussianFilter(IVec2Property* viewportSizeProp);
+        explicit GlGaussianFilter(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -102,9 +101,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<GlGaussianFilter>;
 }
 
 #endif // GLGAUSSIANFILTER_H__

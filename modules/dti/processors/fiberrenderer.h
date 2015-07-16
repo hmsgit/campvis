@@ -58,7 +58,7 @@ namespace dti {
         /**
          * Constructs a new FiberRenderer Processor
          **/
-        FiberRenderer(IVec2Property* viewportSizeProp);
+        explicit FiberRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

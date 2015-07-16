@@ -2,7 +2,7 @@ IF(NOT ModulesDirsParsed)
 
 # detect modules
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
-MESSAGE(STATUS "Detecting installed modules:")
+MESSAGE(STATUS "Detecting installed CAMPVis modules:")
 
 # collect list of directories in modules directories
 SET(ModulesDir ${CampvisHome}/modules)

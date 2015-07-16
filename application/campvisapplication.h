@@ -50,7 +50,6 @@ namespace campvis {
     class AbstractPipeline;
     class AbstractWorkflow;
     class MainWindow;
-    class CampVisPainter;
     class MdiDockableWindow;
     class LuaVmState;
 
@@ -70,12 +69,6 @@ namespace campvis {
     friend class MainWindow;
 
     public:
-        /// Record storing a pipeline together with its painter and Lua VM state.
-        struct PipelineRecord {
-            AbstractPipeline* _pipeline;
-            CampVisPainter* _painter;
-        };
-
         /**
          * Creates a new CampVisApplication.
          * \param   argc        number of passed arguments
@@ -167,7 +160,7 @@ namespace campvis {
         std::vector<AbstractWorkflow*> _workflows;
 
         /// All pipelines 
-        std::vector<PipelineRecord> _pipelines;
+        std::vector<AbstractPipeline*> _pipelines;
 
         /// Map of all pipelines with their MDI windows
         std::map<AbstractPipeline*, MdiDockableWindow*> _pipelineWindows;

@@ -95,6 +95,10 @@ namespace fontrendering {
 
 
     private:
+        // disable copying and assignment
+        explicit FontAtlas(const FontAtlas& rhs);
+        FontAtlas& operator=(FontAtlas rhs);
+
         /// Struct storing glyph parameters of each printable ASCII character
         struct {
             cgt::vec2 advance;          ///< Advance of this glyph

@@ -43,7 +43,7 @@ namespace campvis {
          * Creates a new DoubleAdjusterWidget.
          * \param   parent      parent Qt widget
          */
-        DoubleAdjusterWidget(QWidget* parent = 0);
+        explicit DoubleAdjusterWidget(QWidget* parent = 0);
 
         /**
          * Returns how many decimals the adjuster will use for displaying and doubleerpreting doubles.

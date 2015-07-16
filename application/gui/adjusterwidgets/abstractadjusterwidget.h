@@ -63,7 +63,7 @@ namespace campvis {
          * Creates a new AbstractAdjusterWidget.
          * \param   parent      parent Qt widget
          */
-        AbstractAdjusterWidget(QWidget* parent = 0);
+        explicit AbstractAdjusterWidget(QWidget* parent = 0);
 
         /**
          * Return the adjuster's current value.

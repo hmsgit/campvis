@@ -32,10 +32,10 @@
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/abstractpipeline.h"
+#include "core/pipeline/pipelinefactory.h"
 #include "core/properties/allproperties.h"
 #include "core/tools/stringutils.h"
 
-#include "modules/pipelinefactory.h"
 #include "modules/devil/processors/devilimagewriter.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 
@@ -97,6 +97,9 @@ protected:
             for (size_t i = 0; i < processors.size(); ++i) {
                 processors[i]->invalidate(AbstractProcessor::INVALID_RESULT);
             }
+        }
+        else {
+            FAIL() << "Could not instantiate pipeline '" << _pipelineName << "'";
         }
     }
 
@@ -211,3 +214,4 @@ TEST_F(PipelineWriteResultImageTest, TensorDemo) {
 }
 
 #endif
+

@@ -31,7 +31,6 @@
 #include "core/properties/transferfunctionproperty.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 #include <string>
 
@@ -49,7 +48,7 @@ namespace campvis {
         /**
          * Constructs a new ContextPreservingRaycaster Processor
          **/
-        ContextPreservingRaycaster(IVec2Property* viewportSizeProp);
+        explicit ContextPreservingRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -92,9 +91,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<ContextPreservingRaycaster>;
 }
 
 #endif // CONTEXTPRESERVINGRAYCASTER_H__

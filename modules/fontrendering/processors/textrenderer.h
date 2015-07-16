@@ -45,15 +45,17 @@ namespace fontrendering {
         /**
          * Constructs a new TextRenderer Processor.
          **/
-        TextRenderer(IVec2Property* viewportSizeProp);
+        explicit TextRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
          **/
         virtual ~TextRenderer();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "TextRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "TextRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Renders a text using OpenGL."; };
         /// \see AbstractProcessor::getAuthor()

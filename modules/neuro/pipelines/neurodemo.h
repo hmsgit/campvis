@@ -30,8 +30,6 @@
 #include "core/pipeline/viewportsplitter.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/genericimagereader.h"
@@ -45,7 +43,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        NeuroDemo(DataContainer* dc);
+        explicit NeuroDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -91,10 +89,6 @@ namespace campvis {
     private:
         std::vector<cgt::vec3> _mprBasePoints;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<NeuroDemo>;
-
 }
 
 #endif // NEURODEMO_H__

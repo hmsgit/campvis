@@ -56,7 +56,7 @@ namespace campvis {
 
         // Pair of DataNameProperty for output image ID and OptionProperty for image type
         struct OutputPropertyPair {
-            OutputPropertyPair(size_t index);;
+            explicit OutputPropertyPair(size_t index);;
 
             DataNameProperty _imageId;
             GenericOptionProperty<std::string> _imageType;
@@ -72,8 +72,10 @@ namespace campvis {
          **/
         virtual ~TensorAnalyzer();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "TensorAnalyzer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "TensorAnalyzer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs eigensystem decomposition of a tensor image and also computes different anisotropy measures."; };
         /// \see AbstractProcessor::getAuthor()

@@ -55,6 +55,7 @@ namespace campvis {
         , p_renderAChannel("RenderAChannel", "Render Alpha Channel", true)
         , p_geometryRendererProperties("GeometryRendererProperties", "GeometryRenderer Properties")
         , _texturesDirty(true)
+        , _geometriesDirty(true)
         , _dataContainer(nullptr)
         , _paintShader(nullptr)
         , _quad(nullptr)
@@ -114,7 +115,7 @@ namespace campvis {
         createQuad();
 
         // set this as painter to get notified when window size changes
-        setPainter(this, false);
+        setPainter(this);
         getEventHandler()->addEventListenerToFront(this);
 
         _geometryRenderer.init();
@@ -252,9 +253,10 @@ namespace campvis {
         if (_quad != 0 && _paintShader != 0) {
             // avoid recursive paints.
             if (! cgt::GlContextManager::getRef().checkWhetherThisThreadHasAcquiredOpenGlContext()) {
-                // TODO: check, whether this should be done in an extra thread
-                cgt::GLContextScopedLock lock(this);
-                paint();
+                std::thread([this] () {
+                    cgt::GLContextScopedLock lock(this);
+                    paint();
+                });
             }
         }
     }

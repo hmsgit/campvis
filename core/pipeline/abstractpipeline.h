@@ -38,11 +38,13 @@
 
 #include "core/coreapi.h"
 #include "core/datastructures/datacontainer.h"
+#include "core/pipeline/pipelinepainter.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/propertycollection.h"
 
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace cgt {
@@ -65,7 +67,7 @@ namespace campvis {
          * \param   dc  Pointer to the DataContainer containing local working set of data for this 
          *              pipeline, must not be 0, must be valid the whole lifetime of this pipeline.
          */
-        AbstractPipeline(DataContainer* dc);
+        explicit AbstractPipeline(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -126,6 +128,11 @@ namespace campvis {
          * To be implemented in the subclass.
          */
         virtual void executePipeline() = 0;
+        
+        /**
+         * Sets the resultDirty flag of this pipeline and starts its execution if necessary.
+         */
+        void setPipelineDirty();
 
         /**
          * Paints an additional overlay directly onto the frame buffer.
@@ -208,17 +215,18 @@ namespace campvis {
          */
         IVec2Property& getCanvasSize() {return _canvasSize;}
 
+        /**
+         * Returns this pipelines PipelinePainter.
+         * \return  _painter
+         */
+        const std::unique_ptr<PipelinePainter>& getPipelinePainter() const;
+
         /// Signal emitted at the end of AbstractPipeline::init()
         sigslot::signal0 s_init;
         /// Signal emitted at the beginning of AbstractPipeline::deinit()
         sigslot::signal0 s_deinit;
 
     protected:
-        /**
-         * Sets the resultDirty flag of this pipeline and starts its execution if necessary.
-         */
-        void setPipelineDirty();
-
         /**
          * Forces the execution of the given processor regardless of its invalidation or enabled state.
          * \param   processor   Processor to execute.
@@ -259,7 +267,8 @@ namespace campvis {
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
 
-        cgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
+        cgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline. We do *not* own this pointer.
+        std::unique_ptr<PipelinePainter> _painter;          ///< PipelinePainter used to paint this pipeline's result onto the canvas.
         IVec2Property _canvasSize;                          ///< original canvas size
         bool _ignoreCanvasSizeUpdate;
 

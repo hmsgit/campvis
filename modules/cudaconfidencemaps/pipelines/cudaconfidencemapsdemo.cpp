@@ -60,7 +60,7 @@ namespace campvis {
         , p_connectDisconnectButton("ConnectToIGTLink", "Connect/Disconnect")
         , p_resamplingScale("ResampleScale", "Resample Scale", 0.5f, 0.01f, 1.0f)
         , p_beta("Beta", "Beta", 80.0f, 1.0f, 200.0f)
-		, p_resetToDefault("ResetToDefault", "Reset Settings to Default")
+        , p_resetToDefault("ResetToDefault", "Reset Settings to Default")
         , p_collectStatistics("CollectStatistics", "Collect Statistics", false)
         , p_copyStatisticsToClipboard("CopyStatisticsToClipboard", "Copy Statistics To Clipboard as CSV")
         , p_showAdvancedOptions("ShowAdvancedOptions", "Advanced options...", false)
@@ -75,11 +75,9 @@ namespace campvis {
         , p_recordingDirectory("RecordingDirectory", "Recording output direcotry", "D:\\us_acquisitions\\")
         , p_enableRecording("EnableRecording", "Enable recording", false)
         , _recordedFrames(0)
+        , _filePrefix(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss_").toStdString()) // Calculate file prefix, using date, hour, minute and second of when the pipeline was created
         , _statisticsLastUpdateTime()
     {
-        // Calculate file prefix, using date, hour, minute and second of when the pipeline was created
-        _filePrefix = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss_").toStdString();
-
         addProcessor(&_usIgtlReader);
         addProcessor(&_usCropFilter);
         addProcessor(&_usPreBlur);
@@ -95,7 +93,7 @@ namespace campvis {
         addProperty(p_connectDisconnectButton);
         addProperty(p_resamplingScale);
         addProperty(p_beta);
-		addProperty(p_resetToDefault);
+        addProperty(p_resetToDefault);
         addProperty(p_collectStatistics);
         addProperty(p_copyStatisticsToClipboard);
 
@@ -176,7 +174,7 @@ namespace campvis {
 
         // Bind buttons to event handlers
         p_connectDisconnectButton.s_clicked.connect(this, &CudaConfidenceMapsDemo::toggleIGTLConnection);
-		p_resetToDefault.s_clicked.connect(this, &CudaConfidenceMapsDemo::resetSettingsToDefault);
+        p_resetToDefault.s_clicked.connect(this, &CudaConfidenceMapsDemo::resetSettingsToDefault);
         p_copyStatisticsToClipboard.s_clicked.connect(this, &CudaConfidenceMapsDemo::copyStatisticsToClipboard);
 
         // Bind pipeline proeprties to processor properties
@@ -407,14 +405,14 @@ namespace campvis {
             _usIgtlReader.p_disconnect.click();
     }
 
-	void CudaConfidenceMapsDemo::resetSettingsToDefault() {
-		p_resamplingScale.setValue(.5f);
-		p_gaussianFilterSize.setValue(2.5f);
-		p_gradientScaling.setValue(2.f);
-		p_alpha.setValue(2.f);
-		p_beta.setValue(80.f);
-		p_gamma.setValue(.05f);
-	}
+    void CudaConfidenceMapsDemo::resetSettingsToDefault() {
+        p_resamplingScale.setValue(.5f);
+        p_gaussianFilterSize.setValue(2.5f);
+        p_gradientScaling.setValue(2.f);
+        p_alpha.setValue(2.f);
+        p_beta.setValue(80.f);
+        p_gamma.setValue(.05f);
+    }
 
     void CudaConfidenceMapsDemo::copyStatisticsToClipboard() {
         // Copy statistics to the clipboard in CSV format

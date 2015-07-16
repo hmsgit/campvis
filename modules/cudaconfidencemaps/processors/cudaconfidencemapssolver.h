@@ -63,8 +63,10 @@ namespace campvis {
         /// \see AbstractProcessor::deinit()
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "CudaConfidenceMapsSolver"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "CudaConfidenceMapsSolver"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Solves the confidence maps problem iterativelly on the GPU"; };
         /// \see AbstractProcessor::getAuthor()

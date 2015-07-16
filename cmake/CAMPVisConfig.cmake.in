@@ -1,0 +1,23 @@
+# - Config file for the CAMPVis package
+# It defines the following variables
+
+#  CAMPVIS_INCLUDE_DIRS - include directories for FooBar
+#  CAMPVIS_LIBRARIES    - libraries to link against
+#  CAMPVIS_EXECUTABLE   - the bar executable
+
+# Compute paths
+get_filename_component(CAMPVIS_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(CAMPVIS_INCLUDE_DIRS "@CampvisGlobalIncludeDirs@;@CampvisModulesIncludeDirs@")
+
+SET(CAMPVIS_DEFINITIONS @CampvisGlobalDefinitions@)
+
+FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
+INCLUDE(${QT_USE_FILE})
+SET(CGT_WITH_QT true)
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+include("${CAMPVIS_CMAKE_DIR}/CAMPVisTargets.cmake")
+
+# These are IMPORTED targets created by FooBarTargets.cmake
+SET(CAMPVIS_CORE_LIBRARIES campvis-core)
+SET(CAMPVIS_MODULES_LIBRARIES campvis-modules)

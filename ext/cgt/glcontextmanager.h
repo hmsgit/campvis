@@ -126,7 +126,7 @@ namespace cgt {
      */
     class CGT_API GLContextScopedLock {
     public:
-        GLContextScopedLock(GLCanvas* context)
+        explicit GLContextScopedLock(GLCanvas* context)
             : _context(context)
         {
             if (_context) {

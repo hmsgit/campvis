@@ -52,8 +52,10 @@ namespace campvis {
          **/
         virtual ~ItkWatershedFilter();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "ItkWatershedFilter"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "ItkWatershedFilter"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs watershed image filter on input image using ITK."; };
         /// \see AbstractProcessor::getAuthor()

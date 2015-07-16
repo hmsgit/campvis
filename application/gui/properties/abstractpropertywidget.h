@@ -82,7 +82,7 @@ namespace campvis {
         /**
          * Gets called when the property has changed, so that widget can update its state.
          */
-        virtual void updateWidgetFromProperty() = 0;
+        virtual void updateWidgetFromProperty() {};
 
     signals:
         /**

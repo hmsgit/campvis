@@ -86,7 +86,7 @@ namespace campvis {
         /**
          * Default constructor
          */
-        AbstractWorkflow(const std::string& title);
+        explicit AbstractWorkflow(const std::string& title);
 
         /**
          * Default virtual destructor.

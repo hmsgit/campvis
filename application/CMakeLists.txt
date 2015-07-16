@@ -2,7 +2,7 @@ PROJECT(campvis-application)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 INCLUDE(../cmake/commonconf.cmake)
 
-MESSAGE(STATUS "Configuring CAMPVis Application")
+MESSAGE(STATUS "Configuring CAMPVis-Application")
 
 FILE(GLOB CampvisApplicationSources
     *.cpp
@@ -28,7 +28,6 @@ FILE(GLOB CampvisApplicationForms
 )
 
 SET(CampvisApplicationToBeMocced
-    qtjobprocessor.h
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
     gui/datacontainerinspectorwidget.h
@@ -64,8 +63,9 @@ SET(CampvisApplicationToBeMocced
     gui/properties/stringpropertywidget.h
     gui/properties/statuspropertywidget.h
     gui/properties/transferfunctionpropertywidget.h
-    tools/qtexteditlog.h
     tools/bufferinglog.h
+    tools/qtjobprocessor.h
+    tools/qtexteditlog.h
 )
 
 

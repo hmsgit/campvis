@@ -35,7 +35,6 @@
 #include "modules/vis/processors/proxygeometrygenerator.h"
 #include "modules/vis/processors/orientationoverlay.h"
 #include "modules/vis/processors/simpleraycaster.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -136,9 +135,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<VolumeRenderer>;
 }
 
 #endif // VOLUMERENDERER_H__

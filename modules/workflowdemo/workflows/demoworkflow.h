@@ -31,8 +31,6 @@
 #include "modules/workflowdemo/pipelines/imagefiltering.h"
 #include "modules/workflowdemo/pipelines/imagevis.h"
 
-#include "modules/pipelinefactory.h"
-
 namespace campvis {
 namespace workflowdemo {
 
@@ -79,7 +77,6 @@ namespace workflowdemo {
     };
 
 }
-template class WorkflowRegistrar<workflowdemo::DemoWorkflow>;
 }
 
 #endif // DEMOWORKFLOW_H__

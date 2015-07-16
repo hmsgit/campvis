@@ -6,6 +6,7 @@ MESSAGE(STATUS "Configuring CAMPVis Core")
 
 # glob sources from core directories
 FILE(GLOB CampvisCoreSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    *.cpp
     classification/*.cpp
     datastructures/*.cpp
     eventhandlers/*.cpp
@@ -59,3 +60,6 @@ IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisCoreSources ${CampvisHome} "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisCoreHeaders ${CampvisHome} "")
 ENDIF()
+
+
+INSTALL(TARGETS campvis-core DESTINATION exports EXPORT campvis-targets)

@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Constructs a new UsFanRenderer Processor
          **/
-        UsFanRenderer(IVec2Property* viewportSizeProp);
+        explicit UsFanRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -59,8 +59,10 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "UsFanRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "UsFanRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Enables to compute scan conversions of Ultrasound Images."; };
         /// \see AbstractProcessor::getAuthor()

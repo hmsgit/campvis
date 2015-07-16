@@ -46,7 +46,7 @@ namespace campvis {
          * Creates a new AbstractTFGeometryManipulator for the given Geometry1DTransferFunction.
          * \param   viewportSize    Viewport size (extent of the OpenGL rendering canvas)
          */
-        AbstractTFGeometryManipulator(const cgt::ivec2& viewportSize);
+        explicit AbstractTFGeometryManipulator(const cgt::ivec2& viewportSize);
 
         /**
          * Pure virtual Destructor

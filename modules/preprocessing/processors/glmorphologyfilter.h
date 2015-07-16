@@ -34,7 +34,6 @@
 #include "core/properties/stringproperty.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -49,7 +48,7 @@ namespace campvis {
         /**
          * Constructs a new GlMorphologyFilter Processor
          **/
-        GlMorphologyFilter(IVec2Property* viewportSizeProp);
+        explicit GlMorphologyFilter(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -102,9 +101,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<GlMorphologyFilter>;
 }
 
 #endif // GLMORPHOLOGYFILTER_H__

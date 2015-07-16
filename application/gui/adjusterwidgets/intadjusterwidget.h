@@ -42,7 +42,7 @@ namespace campvis {
          * Creates a new IntAdjusterWidget.
          * \param   parent      Parent Qt widget
          */
-        IntAdjusterWidget(QWidget* parent = 0);
+        explicit IntAdjusterWidget(QWidget* parent = 0);
 
         /**
          * Change the adjuster's current value.

@@ -37,7 +37,6 @@
 #include "core/datastructures/geometrydata.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class BufferObject;
@@ -60,7 +59,7 @@ namespace campvis {
         /**
          * Constructs a new ParticleFlowRenderer Processor
          **/
-        ParticleFlowRenderer(IVec2Property* viewportSizeProp);
+        explicit ParticleFlowRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -150,9 +149,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<ParticleFlowRenderer>;
 }
 
 #endif // PARTICLEFLOWRENDERER_H__

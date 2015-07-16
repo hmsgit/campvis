@@ -48,6 +48,8 @@ namespace campvis {
         , p_outputImage("OutputImage", "Output Image", "GlImageCrop.out", DataNameProperty::WRITE)
         , p_llf("Llf", "LLF of Cropped Region", cgt::ivec3(0), cgt::ivec3(0), cgt::ivec3(1))
         , p_urb("Urb", "URB of Cropped Region", cgt::ivec3(1), cgt::ivec3(0), cgt::ivec3(1))
+        , _shader2D(nullptr)
+        , _shader3D(nullptr)
     {
         addProperty(p_inputImage, INVALID_PROPERTIES | INVALID_RESULT);
         addProperty(p_outputImage);

@@ -30,9 +30,6 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
-#include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -47,7 +44,7 @@ namespace campvis {
         /**
          * Small demo pipeline for vector field visualization.
          */
-        VectorFieldDemo(DataContainer* dc);
+        explicit VectorFieldDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -89,9 +86,6 @@ namespace campvis {
         GenericOptionProperty<std::string> p_viewSelection;
         IntProperty p_time;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<VectorFieldDemo>;
 }
 
 #endif // VECTORFIELDDEMO_H__

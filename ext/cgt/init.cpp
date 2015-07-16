@@ -27,19 +27,21 @@
  **********************************************************************/
 
 #include "cgt/init.h"
-
 #include "cgt/cgt_gl.h"
 
 #include "cgt/assert.h"
-#include "cgt/singleton.h"
+#include "cgt/glcanvas.h"
+#include "cgt/glcontextmanager.h"
 #include "cgt/gpucapabilities.h"
 #ifdef _MSC_VER
     #include "cgt/gpucapabilitieswindows.h"
 #endif
+#include "cgt/opengljobprocessor.h"
 #include "cgt/shadermanager.h"
-#include "cgt/event/eventhandler.h"
-
+#include "cgt/singleton.h"
 #include "cgt/texturereadertga.h"
+
+#include "cgt/event/eventhandler.h"
 
 #ifdef CGT_HAS_DEVIL
 #include <IL/il.h>
@@ -86,7 +88,7 @@ void deinit() {
         LogManager::deinit();
 }
 
-void initGL(InitFeature::Features featureset) {
+void initGL(GLCanvas* backgroundGlContext, InitFeature::Features featureset) {
     if (featureset & InitFeature::SHADER_MANAGER) {
         featureset = (InitFeature::Features) (featureset | InitFeature::GPU_PROPERTIES | InitFeature::FILE_SYSTEM);
     }
@@ -94,15 +96,10 @@ void initGL(InitFeature::Features featureset) {
         featureset = (InitFeature::Features) (featureset | InitFeature::GPU_PROPERTIES | InitFeature::FILE_SYSTEM);
     }
 
-
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        // Problem: glewInit failed, something is seriously wrong.
-        cgtAssert(false, "glewInit failed");
-        std::cerr << "glewInit failed, error: " << glewGetErrorString(err) << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    LINFOC("cgt.init", "GLEW version:       " << glewGetString(GLEW_VERSION));
+    // init and register background context
+    GlContextManager::init();
+    OpenGLJobProcessor::init();
+    GlContextManager::getRef().registerContextAndInitGlew(backgroundGlContext, "CGT Background Context");
 
     if (featureset & InitFeature::GPU_PROPERTIES )
         GpuCapabilities::init();
@@ -115,14 +112,24 @@ void initGL(InitFeature::Features featureset) {
 }
 
 void deinitGL() {
-    if (GpuCapabilities::isInited())
-        GpuCapabilities::deinit();
+    GLCanvas* backgroundGlContext = GLJobProc.getContext();
+    {
+        // Deinit everything OpenGL related using the local context.
+        GLContextScopedLock lock(backgroundGlContext);
+
+        if (GpuCapabilities::isInited())
+            GpuCapabilities::deinit();
 #ifdef _MSC_VER
-    if (GpuCapabilitiesWindows::isInited())
-        GpuCapabilitiesWindows::deinit();
+        if (GpuCapabilitiesWindows::isInited())
+            GpuCapabilitiesWindows::deinit();
 #endif
-    if (ShaderManager::isInited())
-        ShaderManager::deinit();
+        if (ShaderManager::isInited())
+            ShaderManager::deinit();
+    }
+
+    GLJobProc.stop();
+    OpenGLJobProcessor::deinit();
+    GlContextManager::deinit();
 }
 
 } // namespace

@@ -25,10 +25,9 @@
 #include "dvrvis.h"
 
 #include "cgt/event/keyevent.h"
-#include "core/datastructures/imagedata.h"
-
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
+#include "core/datastructures/imagedata.h"
 
 namespace campvis {
 

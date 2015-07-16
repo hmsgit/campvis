@@ -27,6 +27,7 @@
 
 #include <string>
 
+#include "cgt/assert.h"
 #include "cgt/framebufferobject.h"
 #include "cgt/shadermanager.h"
 
@@ -74,6 +75,9 @@ namespace campvis {
         GLuint getMaxMipmapLevel() { return _maxMipmapLevel; }
 
     private:
+        // disable copying and assignment
+        explicit VoxelHierarchyMapper(const VoxelHierarchyMapper& rhs);
+        VoxelHierarchyMapper& operator=(VoxelHierarchyMapper rhs);
 
         void createXorBitmaskTexture();
 
@@ -107,7 +111,6 @@ namespace campvis {
         cgt::Texture* _hierarchyTexture;            ///< The OpenGL texture storing the voxel hierarchy
 
         std::unique_ptr<FaceGeometry> _quad;
-
 
         static std::string loggerCat_;
     };

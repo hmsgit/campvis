@@ -8,6 +8,20 @@ MESSAGE(STATUS "TUMVis Binary Directory: ${CampvisBinaryDir}")
 # include macros
 INCLUDE(${CampvisHome}/cmake/macros.cmake)
 
+# include packaging helper scripts
+INCLUDE(GenerateExportHeader)
+INCLUDE(CMakePackageConfigHelpers)
+
+# guard against in-source builds
+IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+	MESSAGE(FATAL_ERROR "In-source builds are strongly discouraged and therefore not allowed.")
+ENDIF()
+
+# guard against static builds
+IF(NOT BUILD_SHARED_LIBS)
+    MESSAGE(WARNING "Building static CAMPVis libraries is not officially supported and therefore strongly discouraged. Consider setting BUILD_SHARED_LIBS to ON unless you know what you're doing")
+ENDIF()
+
 # detect compiler and architecture
 IF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 9 2008")
     SET(CAMPVIS_MSVC2008 TRUE)
@@ -78,6 +92,11 @@ ENDIF()
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+# set install directories
+SET(CampvisIncludeInstallDir "include")
+SET(CampvisLibInstallDir "lib")
+
 
 # common include directories
 LIST(APPEND CampvisGlobalIncludeDirs "${CampvisHome}/ext")
@@ -151,6 +170,9 @@ ELSEIF(UNIX)
     LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
     LIST(APPEND CampvisGlobalDefinitions "-Wall -Wno-unused-local-typedefs -Wno-unused-variable -Wno-unknown-pragmas")
     LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")
+    
+    # dangerous!
+    LIST(APPEND CampvisGlobalDefinitions "-Wno-deprecated-declarations")
 ELSE()
 ENDIF(WIN32)
 

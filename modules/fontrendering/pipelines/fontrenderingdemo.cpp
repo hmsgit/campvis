@@ -26,6 +26,7 @@
 #include "cgt/shadermanager.h"
 
 namespace campvis {
+
     namespace fontrendering {
 
         FontRenderingDemo::FontRenderingDemo(DataContainer* dc)

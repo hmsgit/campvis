@@ -6,7 +6,6 @@
 #include "modules/vis/processors/volumeexplorer.h"
 #include "modules/vis/processors/volumerenderer.h"
 
-#include "modules/processorfactory.h"
 %}
 
 
@@ -48,32 +47,6 @@ namespace campvis {
         campvis::DataNameProperty p_outputImage;
         %mutable;
     };
-
-    /* ProcessorFactory */
-
-    class ProcessorFactory {
-    public:
-        static ProcessorFactory& getRef();
-        std::vector<std::string> getRegisteredProcessors() const;
-        AbstractProcessor* createProcessor(const std::string& id, IVec2Property* viewPortSizeProp = 0) const;
-    };
-    
-    /* Down casting or super classes.
-     * Down casting follows the order of declaration.
-     * Declare the classes as child first according to the class hierarchy.
-     */
-
-    /* Downcast the return value of HasPropertyCollection::getProperty to appropriate subclass */
-    %factory(AbstractProperty* campvis::ProcessorFactory::createProcessor,
-             campvis::SimpleRaycaster, campvis::OptimizedRaycaster, campvis::DRRRaycaster, campvis::ContextPreservingRaycaster, campvis::AdvOptimizedRaycaster,
-             campvis::SliceExtractor, SliceRenderer2D, SliceRenderer3D,
-             campvis::VolumeExplorer, campvis::VolumeRenderer, 
-             campvis::MicroscopyImageSegmentation, 
-             campvis::GlGaussianFilter, campvis::GlGradientVolumeGenerator, campvis::GlImageCrop, campvis::GlImageResampler, campvis::GlIntensityQuantizer, campvis::GlMorphologyFilter, 
-             campvis::GlSignalToNoiseRatioFilter, campvis::GlVesselnessFilter, campvis::TensorGlyphRenderer, campvis::ParticleFlowRenderer, 
-             campvis::VectorFieldRenderer,
-             campvis::QuadView, campvis::RenderTargetCompositor, campvis::VirtualMirrorCombine, 
-             campvis::DepthDarkening, campvis::EEPGenerator, campvis::GeometryRenderer, campvis::MprRenderer);
 
 }
 

@@ -47,15 +47,17 @@ namespace campvis {
         /**
          * Constructs a new IvusTcRaycaster Processor
          **/
-        IvusTcRaycaster(IVec2Property* viewportSizeProp);
+        explicit IvusTcRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
          **/
         virtual ~IvusTcRaycaster();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "IvusTcRaycaster"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "IvusTcRaycaster"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a Predicate Histogram-based volume ray casting for IVUS Tissue Classification."; };
         /// \see AbstractProcessor::getAuthor()

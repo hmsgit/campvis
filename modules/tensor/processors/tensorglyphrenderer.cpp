@@ -62,6 +62,7 @@ namespace campvis {
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
+        , _shader(nullptr)
         , _ellipsoidGeometry(nullptr)
         , _cubeGeometry(nullptr)
     {

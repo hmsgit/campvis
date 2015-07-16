@@ -51,6 +51,7 @@ namespace campvis {
         , p_flipMatrix("FlipMatrix", "Flip Matrix for Alignment (optional)", cgt::mat4::identity)
         , _cubeGeometry(nullptr)
         , _shader(nullptr)
+        , _passthroughShader(nullptr)
         , _textures(nullptr)
     {
         addProperty(p_camera);

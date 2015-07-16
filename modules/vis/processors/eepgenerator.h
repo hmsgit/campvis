@@ -33,7 +33,6 @@
 #include "core/properties/allproperties.h"
 
 #include "modules/modulesapi.h"
-#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -48,7 +47,7 @@ namespace campvis {
         /**
          * Constructs a new EEPGenerator Processor
          **/
-        EEPGenerator(IVec2Property* viewportSizeProp);
+        explicit EEPGenerator(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -104,9 +103,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
-    // Instantiate template to register the pipelines.
-    template class SmartProcessorRegistrar<EEPGenerator>;
 }
 
 #endif // EEPGENERATOR_H__

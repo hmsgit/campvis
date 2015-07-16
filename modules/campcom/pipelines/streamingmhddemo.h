@@ -36,7 +36,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        StreamingMhdDemo(DataContainer* dc);
+        explicit StreamingMhdDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor

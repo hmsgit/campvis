@@ -27,9 +27,7 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 
-
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/genericimagereader.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
@@ -41,7 +39,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        AdvDVRVis(DataContainer* dc);
+        explicit AdvDVRVis(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -62,9 +60,6 @@ namespace campvis {
         GlImageResampler _resampler;
         VolumeExplorer _ve;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<AdvDVRVis>;
 }
 
 #endif // AdvDVRVis_H__

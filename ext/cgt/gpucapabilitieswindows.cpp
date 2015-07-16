@@ -45,8 +45,7 @@ const std::string DRIVER_DLL_ATI = "atioglxx.dll";
 namespace cgt {
 
 GpuCapabilitiesWindows::GpuCapabilitiesWindows()
-    : loggerCat_("cgt.GpuCapabilitiesWindows")
-    , GpuCapabilities()
+    : GpuCapabilities()
     , videoRamSize_(-1)
 #ifdef CGT_WITH_WMI
     , pIWbemLocator_(0)

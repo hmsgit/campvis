@@ -29,8 +29,6 @@
 #include "modules/base/processors/trackballcameraprovider.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/volumerenderer.h"
@@ -41,7 +39,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        VolumeRendererDemo(DataContainer* dc);
+        explicit VolumeRendererDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -63,10 +61,6 @@ namespace campvis {
         MhdImageReader _imageReader;
         VolumeRenderer _vr;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<VolumeRendererDemo>;
-
 }
 
 #endif // VOLUMERENDERERDEMO_H__

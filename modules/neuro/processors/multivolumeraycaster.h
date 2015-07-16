@@ -62,7 +62,7 @@ namespace neuro {
         /**
          * Constructs a new MultiVolumeRaycaster Processor
          **/
-        MultiVolumeRaycaster(IVec2Property* viewportSizeProp);
+        explicit MultiVolumeRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -75,8 +75,10 @@ namespace neuro {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "MultiVolumeRaycaster"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "MultiVolumeRaycaster"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "One-processor-does-it-all implementation for raycasting multiple volumes at the same time"; };
         /// \see AbstractProcessor::getAuthor()

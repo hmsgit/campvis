@@ -26,7 +26,7 @@
 
 #include "cgt/assert.h"
 #include "application/campvisapplication.h"
-#include "application/qtjobprocessor.h"
+#include "application/tools/qtjobprocessor.h"
 
 #include <QLabel>
 #include <QGridLayout>

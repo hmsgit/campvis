@@ -6,6 +6,7 @@ IF(${ModuleEnabled})
 		modules/preprocessing/pipelines/*.cpp
 		modules/preprocessing/processors/*.cpp
 		modules/preprocessing/tools/*.cpp
+		modules/preprocessing/*.cpp
 	)
 
 	# Header files
