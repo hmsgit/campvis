@@ -170,6 +170,9 @@ ELSEIF(UNIX)
     LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
     LIST(APPEND CampvisGlobalDefinitions "-Wall -Wno-unused-local-typedefs -Wno-unused-variable -Wno-unknown-pragmas")
     LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")
+    
+    # dangerous!
+    LIST(APPEND CampvisGlobalDefinitions "-Wno-deprecated-declarations")
 ELSE()
 ENDIF(WIN32)
 
