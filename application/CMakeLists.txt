@@ -28,7 +28,6 @@ FILE(GLOB CampvisApplicationForms
 )
 
 SET(CampvisApplicationToBeMocced
-    qtjobprocessor.h
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
     gui/datacontainerinspectorwidget.h
@@ -64,8 +63,9 @@ SET(CampvisApplicationToBeMocced
     gui/properties/stringpropertywidget.h
     gui/properties/statuspropertywidget.h
     gui/properties/transferfunctionpropertywidget.h
-    tools/qtexteditlog.h
     tools/bufferinglog.h
+    tools/qtjobprocessor.h
+    tools/qtexteditlog.h
 )
 
 
