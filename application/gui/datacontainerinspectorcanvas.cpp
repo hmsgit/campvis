@@ -55,6 +55,7 @@ namespace campvis {
         , p_renderAChannel("RenderAChannel", "Render Alpha Channel", true)
         , p_geometryRendererProperties("GeometryRendererProperties", "GeometryRenderer Properties")
         , _texturesDirty(true)
+        , _geometriesDirty(true)
         , _dataContainer(nullptr)
         , _paintShader(nullptr)
         , _quad(nullptr)
@@ -252,7 +253,7 @@ namespace campvis {
         if (_quad != 0 && _paintShader != 0) {
             // avoid recursive paints.
             if (! cgt::GlContextManager::getRef().checkWhetherThisThreadHasAcquiredOpenGlContext()) {
-                std::thread backgroundThread([this] () {
+                std::thread([this] () {
                     cgt::GLContextScopedLock lock(this);
                     paint();
                 });

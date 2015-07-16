@@ -79,7 +79,7 @@ namespace cgt {
 
     private:
         /// Runnables are not copyable
-        Runnable(Runnable const&);
+        explicit Runnable(Runnable const&);
         /// Runnables are not copyable
         Runnable& operator =(Runnable const&);
 

@@ -60,7 +60,7 @@ namespace campvis {
     public:
         ContourObject(std::string name);
         virtual ~ContourObject();
-        ContourObject* operator=(const ContourObject& rhs);
+        ContourObject& operator=(const ContourObject& rhs);
         void addObject();
 
         StringProperty _objectName;

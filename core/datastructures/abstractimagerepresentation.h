@@ -106,7 +106,7 @@ namespace campvis {
 
     private:
         /// Not copy-constructable
-        AbstractImageRepresentation(const AbstractImageRepresentation& rhs);
+        explicit AbstractImageRepresentation(const AbstractImageRepresentation& rhs);
         /// Not assignable
         AbstractImageRepresentation& operator=(const AbstractImageRepresentation& rhs);
 

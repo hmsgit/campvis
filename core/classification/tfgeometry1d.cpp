@@ -40,6 +40,8 @@ namespace campvis {
     
     TFGeometry1D::TFGeometry1D(const std::vector<KeyPoint>& keyPoints)
         : _keyPoints(keyPoints)
+        , _tfRenderFace(nullptr)
+        , _tfEditorFace(nullptr)
     {
         std::sort(_keyPoints.begin(), _keyPoints.end());
     }

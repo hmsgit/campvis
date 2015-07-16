@@ -133,7 +133,7 @@ public:
 
 protected:
 
-    std::string loggerCat_;
+    static std::string loggerCat_;
 
 #ifdef CGT_WITH_WMI
 

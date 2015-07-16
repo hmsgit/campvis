@@ -63,7 +63,7 @@ namespace campvis {
          * Copy constructor
          * \param   rhs GeometryData to copy
          */
-        GeometryData(const GeometryData& rhs);
+        explicit GeometryData(const GeometryData& rhs);
 
         /**
          * Destructor, deletes VBOs/VAO if necessary.

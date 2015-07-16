@@ -43,7 +43,10 @@ namespace campvis {
     std::string VoxelHierarchyMapper::loggerCat_ = "CAMPVis.modules.vis.VoxelHierarchyMapper";
 
     VoxelHierarchyMapper::VoxelHierarchyMapper()
-        : _xorBitmaskShader(nullptr)
+        : _brickSize(0)
+        , _brickDepth(0)
+        , _maxMipmapLevel(0)
+        , _xorBitmaskShader(nullptr)
         , _hierarchyRendererShader(nullptr)
         , _mimapRendererShader(nullptr)
         , _fbo(nullptr)

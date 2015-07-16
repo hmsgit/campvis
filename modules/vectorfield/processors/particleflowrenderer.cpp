@@ -73,6 +73,7 @@ namespace campvis {
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , _shader(nullptr)
+        , _currentTime(0)
         , _positionBufferA(nullptr)
         , _positionBufferB(nullptr)
         , _velocityBufferA(nullptr)

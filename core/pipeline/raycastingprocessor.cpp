@@ -52,6 +52,8 @@ namespace campvis {
         , _customGlslVersion(customGlslVersion)
         , _shader(0)
         , _bindEntryExitDepthTextures(bindEntryExitDepthTextures)
+        , _minReduction(nullptr)
+        , _maxReduction(nullptr)
     {
         addProperty(p_sourceImageID, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES);
         addProperty(p_entryImageID);
