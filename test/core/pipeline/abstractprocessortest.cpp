@@ -108,6 +108,8 @@ TEST_F(AbstractProcessorTest, lockingTest) {
     this->_processor1.invalidate(AbstractProcessor::INVALID_RESULT);
     this->_processor1._togglePropertyDuringProcess = true;
     this->_processor1.process(this->_dataContainer);
+
+    sigslot::signal_manager::getRef().waitForSignalQueueFlushed();
     EXPECT_NE(AbstractProcessor::VALID, this->_processor1.getInvalidationLevel());
 
     {
