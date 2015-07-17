@@ -110,6 +110,10 @@ namespace campvis {
         return cgt::svec3(x, y, z);
     }
 
+    size_t ImageData::getNumRepresentations() const {
+        return _representations.size();
+    }
+
     void ImageData::clearRepresentations() {
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it)
             delete *it;

@@ -31,6 +31,7 @@
 #include "cgt/logmanager.h"
 #include "cgt/vector.h"
 
+
 #include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/abstractimagerepresentation.h"
@@ -168,6 +169,12 @@ namespace campvis {
          */
         template<typename T>
         const T* getRepresentation(bool performConversion = true) const;
+
+        /**
+         * Returns the number of currently stored representations.
+         * \return  _representations.size();
+         */
+        size_t getNumRepresentations() const;
 
     protected:
         template<typename T>

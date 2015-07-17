@@ -43,7 +43,6 @@
 #include "cgt/qt/qtthreadedcanvas.h"
 
 #include "core/init.h"
-#include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"
 
 QApplication *app;

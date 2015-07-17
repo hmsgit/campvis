@@ -40,7 +40,6 @@
 #include "application/gui/mdi/mdidockablewindow.h"
 
 #include "core/init.h"
-#include "core/tools/simplejobprocessor.h"
 #include "core/tools/stringutils.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"

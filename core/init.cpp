@@ -35,6 +35,7 @@
 
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/tools/quadrenderer.h"
+#include "core/tools/simplejobprocessor.h"
 
 namespace campvis {
 
@@ -42,6 +43,7 @@ namespace campvis {
         // start sigslot signal manager
         sigslot::signal_manager::init();
         sigslot::signal_manager::getRef().start();
+        SimpleJobProcessor::init();
 
         // Init CGT
         cgt::init(cgt::InitFeature::ALL, cgt::Debug);
@@ -81,6 +83,7 @@ namespace campvis {
         cgt::deinitGL();
         cgt::deinit();
 
+        SimpleJobProcessor::deinit();
         ImageRepresentationConverter::deinit();
         //PipelineFactory::deinit();
     }

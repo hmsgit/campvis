@@ -37,6 +37,7 @@
 #include "core/datastructures/geometrydatafactory.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/geometry1dtransferfunction.h"
+#include "core/tools/simplejobprocessor.h"
 
 #include "datacontainerinspectorwidget.h"
 
@@ -253,7 +254,7 @@ namespace campvis {
         if (_quad != 0 && _paintShader != 0) {
             // avoid recursive paints.
             if (! cgt::GlContextManager::getRef().checkWhetherThisThreadHasAcquiredOpenGlContext()) {
-                std::thread([this] () {
+                SimpleJobProc.enqueueJob([this] () {
                     cgt::GLContextScopedLock lock(this);
                     paint();
                 });

@@ -180,8 +180,6 @@ protected:
 TEST_F(SigslotTest, stressTest) {
     const int NUM_SIGNALS = 1000000;
 
-    sigslot::signal_manager::getRef().setSignalHandlingMode(sigslot::signal_manager::DEFAULT);
-
     tbb::parallel_for(tbb::blocked_range<int>(0, NUM_SIGNALS), [&] (const tbb::blocked_range<int>& range) {
         for (int i = range.begin(); i < range.end(); ++i) {
             sendRandomSignal();
@@ -191,9 +189,7 @@ TEST_F(SigslotTest, stressTest) {
     s_finished.emitSignal();
     while (! _isFinished)
         std::this_thread::yield();
-
-    sigslot::signal_manager::getRef().setSignalHandlingMode(sigslot::signal_manager::FORCE_DIRECT);
-
+    
     EXPECT_EQ(_countSent0, _countReceived0);
     EXPECT_EQ(_countSent1, _countReceived1);
     EXPECT_EQ(_countSent2, _countReceived2);
