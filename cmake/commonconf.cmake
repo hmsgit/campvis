@@ -173,6 +173,8 @@ ELSEIF(UNIX)
     
     # dangerous!
     LIST(APPEND CampvisGlobalDefinitions "-Wno-deprecated-declarations")
+    
+    LIST(APPEND CampvisGlobalExternalLibs "-pthread")
 ELSE()
 ENDIF(WIN32)
 
