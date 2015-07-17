@@ -125,8 +125,8 @@ ENDIF()
 
 
 
-ADD_EXECUTABLE(campvis "campvis.cpp")
-TARGET_LINK_LIBRARIES(campvis campvis-application ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+ADD_EXECUTABLE(campvis-gui "campvis.cpp")
+TARGET_LINK_LIBRARIES(campvis-gui campvis-application ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
 
 
 

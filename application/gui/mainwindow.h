@@ -26,6 +26,7 @@
 #define CAMPVISMAINWINDOW_H__
 
 #include "sigslot/sigslot.h"
+#include "application/applicationapi.h"
 #include "application/campvisapplication.h"
 #include "application/gui/mdi/mdidockarea.h"
 #include "application/gui/pipelinetreewidget.h"
@@ -54,7 +55,7 @@ namespace campvis {
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the CampVisApplication instance given during creation.
      */
-    class MainWindow : public QMainWindow, public sigslot::has_slots {
+    class CAMPVIS_APPLICATION_API MainWindow : public QMainWindow, public sigslot::has_slots {
         Q_OBJECT
 
     public:

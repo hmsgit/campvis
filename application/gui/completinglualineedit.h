@@ -28,6 +28,7 @@
 #include <QCompleter>
 #include <QLineEdit>
 
+#include "application/applicationapi.h"
 #include "scripting/glue/luatable.h"
 
 namespace campvis {

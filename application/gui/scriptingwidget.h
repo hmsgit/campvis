@@ -30,6 +30,7 @@
 #include "cgt/painter.h"
 #include "tbb/mutex.h"
 
+#include "application/applicationapi.h"
 #include "application/gui/completinglualineedit.h"
 #include "application/tools/bufferinglog.h"
 #include "application/gui/loghighlighter.h"
@@ -50,7 +51,7 @@ namespace campvis {
     /**
      * Qt widget providing a console-like interface to the Lua VM of CampvisApplication.
      */
-    class ScriptingWidget : public QWidget, cgt::Log {
+    class CAMPVIS_APPLICATION_API ScriptingWidget : public QWidget, cgt::Log {
         Q_OBJECT;
 
     public:

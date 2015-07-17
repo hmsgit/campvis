@@ -27,6 +27,9 @@
 
 #include "cgt/job.h"
 #include "cgt/singleton.h"
+
+#include "application/applicationapi.h"
+
 #include <QWidget>
 #include <functional>
 
@@ -45,7 +48,7 @@ namespace campvis {
      * });
      * \endcode
      */
-    class QtJobProcessor : public QWidget, public cgt::Singleton<QtJobProcessor> {
+    class CAMPVIS_APPLICATION_API QtJobProcessor : public QWidget, public cgt::Singleton<QtJobProcessor> {
         Q_OBJECT;
 
     public:

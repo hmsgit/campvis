@@ -34,7 +34,7 @@ namespace campvis {
     /**
      * Widget for a FloatProperty
      */
-    class FloatPropertyWidget : public AbstractPropertyWidget {
+    class CAMPVIS_APPLICATION_API FloatPropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT
 
     public:

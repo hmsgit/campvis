@@ -31,6 +31,7 @@
 #include <QVariant>
 #include <map>
 
+#include "application/applicationapi.h"
 #include "application/tools/treeitem.h"
 #include "application/gui/qtdatahandle.h"
 
@@ -43,7 +44,7 @@ namespace campvis {
 // = TreeModel items ==============================================================================
     
     /// Base class for LuaTableTreeWidget items
-    class LuaTreeItem : public TreeItem {
+    class CAMPVIS_APPLICATION_API LuaTreeItem : public TreeItem {
     public:
         enum ModelStyle { FULL_MODEL, COMPLETER_MODEL };
 
@@ -65,7 +66,7 @@ namespace campvis {
     };
 
     /// The Root Item
-    class LuaTreeRootItem : public TreeItem {
+    class CAMPVIS_APPLICATION_API LuaTreeRootItem : public TreeItem {
     public:
         LuaTreeRootItem(TreeItem* parent = 0);
         virtual ~LuaTreeRootItem();
@@ -75,7 +76,7 @@ namespace campvis {
     };
 
     /// Specialization for normal leafs
-    class LuaTreeItemLeaf : public LuaTreeItem {
+    class CAMPVIS_APPLICATION_API LuaTreeItemLeaf : public LuaTreeItem {
     public:
         /**
          * Creates a new TreeItem for a QtDataHandle
@@ -94,7 +95,7 @@ namespace campvis {
     };
     
     /// Specialization for normal table items
-    class LuaTreeItemTable : public LuaTreeItem {
+    class CAMPVIS_APPLICATION_API LuaTreeItemTable : public LuaTreeItem {
     public:
         /**
          * Creates a new TreeItem for a QtDataHandle
@@ -122,7 +123,7 @@ namespace campvis {
     /**
      * QItemModel for displaying a list of pipelines and their processors in the LuaTableTreeWidget.
      */
-    class LuaTableTreeModel : public QAbstractItemModel {
+    class CAMPVIS_APPLICATION_API LuaTableTreeModel : public QAbstractItemModel {
         Q_OBJECT
 
     public:
@@ -159,7 +160,7 @@ namespace campvis {
     /**
      * Qt widget for showing a list of pipelines and their processors in a QTreeView.
      */
-    class LuaTableTreeWidget : public QTreeView {
+    class CAMPVIS_APPLICATION_API LuaTableTreeWidget : public QTreeView {
         Q_OBJECT;
 
     public:

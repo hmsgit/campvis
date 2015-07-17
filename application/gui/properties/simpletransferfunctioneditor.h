@@ -25,7 +25,9 @@
 #ifndef SIMPLETRANSFERFUNCTIONEDITOR_H__
 #define SIMPLETRANSFERFUNCTIONEDITOR_H__
 
+#include "application/applicationapi.h"
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
+
 #include <QWidget>
 
 class QGridLayout;
@@ -38,7 +40,7 @@ namespace campvis {
     /**
      * Editor widget for a SimpleTransferFunction.
      */
-    class SimpleTransferFunctionEditor : public AbstractTransferFunctionEditor {
+    class CAMPVIS_APPLICATION_API SimpleTransferFunctionEditor : public AbstractTransferFunctionEditor {
         Q_OBJECT;
 
     public:

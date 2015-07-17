@@ -42,7 +42,7 @@ namespace campvis {
     /**
      * Widget for a DataNameProperty
      */
-    class DataNamePropertyWidget : public AbstractPropertyWidget {
+    class CAMPVIS_APPLICATION_API DataNamePropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT
 
     public:

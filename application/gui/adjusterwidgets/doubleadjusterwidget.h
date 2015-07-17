@@ -26,6 +26,7 @@
 #define DOUBLEADJUSTERWIDGET_H__
 
 #include "abstractadjusterwidget.h"
+#include "application/applicationapi.h"
 
 namespace campvis {
     /**
@@ -34,7 +35,7 @@ namespace campvis {
      * DoubleAdjusterWidget consists of a slider, which can be used to quickly change numeric values, and a spin box,
      * which is better suited for precise adjustments.
      */
-    class DoubleAdjusterWidget : public AbstractAdjusterWidget<double> {
+    class CAMPVIS_APPLICATION_API DoubleAdjusterWidget : public AbstractAdjusterWidget<double> {
 
         Q_OBJECT
 

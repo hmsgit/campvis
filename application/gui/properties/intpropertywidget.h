@@ -38,7 +38,7 @@ namespace campvis {
     /**
      * Widget for a IntProperty
      */
-    class IntPropertyWidget : public AbstractPropertyWidget {
+    class CAMPVIS_APPLICATION_API IntPropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT;
 
     public:

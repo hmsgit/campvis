@@ -26,6 +26,8 @@
 #define PROPERTYCOLLECTIONWIDGET_H__
 
 #include "sigslot/sigslot.h"
+#include "application/applicationapi.h"
+
 #include <QList>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -40,7 +42,7 @@ namespace campvis {
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
      */
-    class PropertyCollectionWidget : public QWidget, public sigslot::has_slots {
+    class CAMPVIS_APPLICATION_API PropertyCollectionWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:

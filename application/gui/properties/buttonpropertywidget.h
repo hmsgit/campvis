@@ -25,6 +25,7 @@
 #ifndef BUTTONPROPERTYWIDGET_H__
 #define BUTTONPROPERTYWIDGET_H__
 
+#include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/buttonproperty.h"
@@ -36,7 +37,7 @@ namespace campvis {
      * Widget for a Camera.
      * For now just offering read-access.
      */
-    class ButtonPropertyWidget : public AbstractPropertyWidget {
+    class CAMPVIS_APPLICATION_API ButtonPropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT;
 
     public:

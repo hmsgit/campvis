@@ -33,6 +33,7 @@
 #include "cgt/qt/qtthreadedcanvas.h"
 #include "tbb/mutex.h"
 
+#include "application/applicationapi.h"
 #include "application/gui/qtdatahandle.h"
 
 #include "core/properties/metaproperty.h"
@@ -62,7 +63,7 @@ namespace campvis {
     class GeometryData;
     class DataContainerInspectorWidget;
 
-    class DataContainerInspectorCanvas : public cgt::QtThreadedCanvas, cgt::Painter, public cgt::EventListener, public HasPropertyCollection {
+    class CAMPVIS_APPLICATION_API DataContainerInspectorCanvas : public cgt::QtThreadedCanvas, cgt::Painter, public cgt::EventListener, public HasPropertyCollection {
         Q_OBJECT;
 
     public:

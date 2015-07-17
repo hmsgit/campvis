@@ -25,8 +25,10 @@
 #ifndef OPTIONPROPERTYWIDGET_H__
 #define OPTIONPROPERTYWIDGET_H__
 
+#include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertywidgetfactory.h"
+
 #include "core/properties/optionproperty.h"
 
 class QComboBox;
@@ -37,7 +39,7 @@ namespace campvis {
     /**
      * Widget for a IntProperty
      */
-    class OptionPropertyWidget : public AbstractPropertyWidget {
+    class CAMPVIS_APPLICATION_API OptionPropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT;
 
     public:

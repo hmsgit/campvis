@@ -26,6 +26,7 @@
 #define MDIDOCKAREA_H__
 
 #include "mdidockablewindow.h"
+#include "application/gui/qtcolortools.h"
 
 #include <QMdiArea>
 
@@ -41,7 +42,7 @@ namespace campvis {
      * - dockable windows can be created using the addWidget method, which returns an
      *   MdiDockableWindow instance
      */
-    class MdiDockArea : public QMdiArea {
+    class CAMPVIS_APPLICATION_API MdiDockArea : public QMdiArea {
 
         Q_OBJECT
 

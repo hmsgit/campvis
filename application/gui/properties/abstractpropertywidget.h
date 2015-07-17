@@ -27,6 +27,9 @@
 
 #include "sigslot/sigslot.h"
 #include "tbb/atomic.h"
+
+#include "application/applicationapi.h"
+
 #include <QBoxLayout>
 #include <QLabel>
 #include <QWidget>
@@ -38,7 +41,7 @@ namespace campvis {
     /**
      * Abstract base class for property widgets.
      */
-    class AbstractPropertyWidget : public QWidget, public sigslot::has_slots {
+    class CAMPVIS_APPLICATION_API AbstractPropertyWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:

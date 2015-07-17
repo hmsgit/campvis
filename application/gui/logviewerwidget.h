@@ -29,6 +29,7 @@
 #include "cgt/painter.h"
 #include "tbb/mutex.h"
 
+#include "application/applicationapi.h"
 #include "application/tools/bufferinglog.h"
 #include "application/gui/loghighlighter.h"
 
@@ -44,7 +45,7 @@
 
 namespace campvis {
 
-    class LogViewerWidget : public QWidget {
+    class CAMPVIS_APPLICATION_API LogViewerWidget : public QWidget {
         Q_OBJECT;
 
     public:
