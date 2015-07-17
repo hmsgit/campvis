@@ -319,7 +319,7 @@ namespace campvis {
 #ifdef CAMPVIS_HAS_SCRIPTING
         const QString dialogCaption = QString::fromStdString("Select File");
         const QString directory = QString::fromStdString(".");
-        const QString fileFilter = tr("All files (*)");
+        const QString fileFilter = tr("Lua Scripts (*.lua)");
 
         QString filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
         if (filename != nullptr && _application->getLuaVmState() != nullptr) {
@@ -332,31 +332,29 @@ namespace campvis {
 #ifdef CAMPVIS_HAS_SCRIPTING
         const QString dialogCaption = QString::fromStdString("Save File as");
         const QString directory = QString::fromStdString(".");
-        const QString fileFilter = tr("All files (*)");
+        const QString fileFilter = tr("Lua Scripts (*.lua)");
 
         QString filename = QFileDialog::getSaveFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
 
         if (filename != nullptr) {
             if (_selectedProcessor != 0 && _selectedPipeline != 0) {
-                PropertyCollectionLuaScriptGenerator* _pcLua = new PropertyCollectionLuaScriptGenerator();
+                PropertyCollectionLuaScriptGenerator pcLua;
                 
-                std::string pipeScript = "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n";
+                std::string pipeScript = "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n";
                 for (size_t i = 0; i < _selectedPipeline->getProcessors().size(); i++) {
+                    pipeScript += "\n-- Restoring property state for " + _selectedPipeline->getProcessor(i)->getName() + " processor\n";
                     pipeScript += "proc = pipeline:getProcessor(" + StringUtils::toString(i) + ")\n";
-                    AbstractProcessor* proc = _selectedPipeline->getProcessor(int(i));
+                    AbstractProcessor* proc = _selectedPipeline->getProcessor(i);
 
-                    _pcLua->updatePropCollection(proc, &_selectedPipeline->getDataContainer());
-                    std::string res = _pcLua->getLuaScript(std::string(""), std::string("proc:"));
+                    pcLua.updatePropCollection(proc, &_selectedPipeline->getDataContainer());
+                    std::string res = pcLua.getLuaScript(std::string(""), std::string("proc:"));
                     pipeScript += res;
                 }
-                if (pipeScript != "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n") {
-                    std::ofstream file;
-                    file.open(filename.toStdString());
-                    file << pipeScript.c_str();
-                    file.close();
-                }
-                
-                delete _pcLua;
+
+                std::ofstream file;
+                file.open(filename.toStdString(), std::ofstream::out |std::ofstream::trunc);
+                file << pipeScript.c_str();
+                file.close();
             }
         }
 #endif

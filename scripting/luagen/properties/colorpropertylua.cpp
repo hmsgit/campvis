@@ -36,12 +36,14 @@ namespace campvis {
     }
 
     std::string ColorPropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
-        cgt::vec4 value = static_cast<ColorProperty*>(_property)->getValue();
+        const cgt::vec4& value = static_cast<ColorProperty*>(_property)->getValue();
         std::string ret = "";
-        ret += luaProc;
-        ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(cgt.vec4(" 
-            + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
-            + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
+        if (value != static_cast<ColorProperty*>(_property)->getDefaultValue()) {
+            ret += luaProc;
+            ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(cgt.vec4(" 
+                + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
+                + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
+        }
         return ret;
     }
 }

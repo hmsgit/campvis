@@ -465,7 +465,7 @@ namespace campvis {
         virtual void addProcessor(AbstractProcessor* processor);
         virtual void executePipeline() = 0;
         AbstractProcessor* getProcessor(const std::string& name) const;
-        AbstractProcessor* getProcessor(int index) const;
+        AbstractProcessor* getProcessor(size_t index) const;
 
         sigslot::signal0 s_init;
         sigslot::signal0 s_deinit;

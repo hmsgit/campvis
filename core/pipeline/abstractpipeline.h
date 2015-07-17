@@ -171,7 +171,7 @@ namespace campvis {
          * \param   index    The index of the processor to get
          * \return  The first processor whose name matches \a name, 0 if no such processor exists.
          */
-        AbstractProcessor* getProcessor(int index) const;
+        AbstractProcessor* getProcessor(size_t index) const;
 
         /**
          * Gets the flag whether this pipeline is currently enabled.

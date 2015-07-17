@@ -23,6 +23,7 @@
 // ================================================================================================
 
 #include "abstractproperty.h"
+#include "cgt/logmanager.h"
 
 namespace campvis {
 
@@ -49,12 +50,16 @@ namespace campvis {
     }
 
     void AbstractProperty::addSharedProperty(AbstractProperty* prop) {
-        cgtAssert(prop != 0, "Shared property must not be 0!");
+        cgtAssert(prop != nullptr, "Shared property must not be 0!");
         cgtAssert(prop != this, "Shared property must not be this!");
-        cgtAssert(typeid(this) == typeid(prop), "Shared property must be of the same type as this property.");
 
-        tbb::spin_mutex::scoped_lock lock(_localMutex);
-        _sharedProperties.insert(prop);
+        if (typeid(this) == typeid(prop)) {
+            tbb::spin_mutex::scoped_lock lock(_localMutex);
+            _sharedProperties.insert(prop);
+        }
+        else {
+            LERROR("Could not add " << prop->getName() << " as shared property of " << getName() << " since they are not of the same type.");
+        }
     }
 
     void AbstractProperty::removeSharedProperty(AbstractProperty* prop) {
