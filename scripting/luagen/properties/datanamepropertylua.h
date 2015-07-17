@@ -26,21 +26,15 @@
 #define DATANAMEPROPERTYLUA_H__
 
 #include "core/properties/datanameproperty.h"
+#include "scripting/scriptingapi.h"
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
 
-class QComboBox;
-class QLineEdit;
-
 namespace campvis {
-    class DataNameProperty;
-    class DataContainer;
-    class DataHandle;
-
     /**
      * Lua generator for a DataNameProperty
      */
-    class DataNamePropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API DataNamePropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new PropertyLua for the property \a property.

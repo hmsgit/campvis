@@ -26,6 +26,7 @@
 #define REGULARLUATABLE_H__
 
 #include "luatable.h"
+#include "scripting/scriptingapi.h"
 
 namespace campvis {
 
@@ -35,7 +36,7 @@ namespace campvis {
      * Regular tables can be defined by exclusion: any Lua table that is not a global table or a
      * metatable is a regular one. 
      */
-    class RegularLuaTable : public LuaTable {
+    class CAMPVIS_SCRIPTING_API RegularLuaTable : public LuaTable {
     public:
         /**
          * Creates a new RegularLuaTable.

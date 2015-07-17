@@ -26,6 +26,7 @@
 #define GLOBALLUATABLE_H__
 
 #include "luatable.h"
+#include "scripting/scriptingapi.h"
 
 namespace campvis {
 
@@ -36,7 +37,7 @@ namespace campvis {
      * a result, they must be used in order to interact with Lua states and access user-defined
      * values.
      */
-    class GlobalLuaTable : public LuaTable {
+    class CAMPVIS_SCRIPTING_API GlobalLuaTable : public LuaTable {
     public:
         /**
          * Creates a new GlobalLuaTable.

@@ -27,8 +27,9 @@
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
-//#include "abstracttransferfunctionlua.h"
+
 #include "core/properties/transferfunctionproperty.h"
+#include "scripting/scriptingapi.h"
 
 namespace campvis {
     class AbstractTransferFunctionEditor;
@@ -36,7 +37,7 @@ namespace campvis {
     /**
      * Widget for a TransferFunctionProperty
      */
-    class TransferFunctionPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API TransferFunctionPropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new Lua Property for the property \a property.

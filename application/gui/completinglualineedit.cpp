@@ -125,7 +125,7 @@ namespace campvis {
             return;
 
         QString textUnderCursor = text().left(cursorPosition());
-        size_t pos = textUnderCursor.toStdString().find_last_of(" ()[]{}");
+        int pos = int(textUnderCursor.toStdString().find_last_of(" ()[]{}"));
         QString completionPrefix = textUnderCursor.right(textUnderCursor.length() - pos - 1);
 
         bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
@@ -150,7 +150,7 @@ namespace campvis {
             return;
 
         QString textUnderCursor = text().left(cursorPosition());
-        size_t pos = textUnderCursor.toStdString().find_last_of(" .:()[]{}");
+        int pos = int(textUnderCursor.toStdString().find_last_of(" .:()[]{}"));
         if (pos == std::string::npos)
             pos = 0;
         else

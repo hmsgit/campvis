@@ -2,6 +2,7 @@
 #define METATABLELUATABLE_H__
 
 #include "luatable.h"
+#include "scripting/scriptingapi.h"
 
 namespace campvis {
 
@@ -11,7 +12,7 @@ namespace campvis {
      * Any Lua field may contain a metatable. They serve multiple purposes, including emulation 
      * of classes and objects.
      */
-    class MetatableLuaTable : public LuaTable {
+    class CAMPVIS_SCRIPTING_API MetatableLuaTable : public LuaTable {
     public:
         /**
          * Creates a new MetatableLuaTable.

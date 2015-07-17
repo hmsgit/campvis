@@ -25,6 +25,8 @@
 #ifndef LUATABLE_H__
 #define LUATABLE_H__
 
+#include "scripting/scriptingapi.h"
+
 #include <map>
 #include <memory>
 #include <set>
@@ -55,7 +57,7 @@ namespace campvis {
      * such calls to be propagated through their enclosing tables all the way up to the global
      * table.
      */
-    class LuaTable : public std::enable_shared_from_this<LuaTable>
+    class CAMPVIS_SCRIPTING_API LuaTable : public std::enable_shared_from_this<LuaTable>
     {
         friend GlobalLuaTable;
         friend MetatableLuaTable;

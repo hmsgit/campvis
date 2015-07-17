@@ -39,7 +39,7 @@ namespace campvis {
      * Main lua generator for the CAMPVis application.
      * Calls individual properties for their own scripts and assembles all responses.
      */
-    class PropertyCollectionLuaScriptGenerator : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API PropertyCollectionLuaScriptGenerator : public AbstractPropertyLua {
     public:
         /**
          * Creates a new PropertyCollectionLua.

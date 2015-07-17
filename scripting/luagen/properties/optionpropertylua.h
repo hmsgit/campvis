@@ -27,7 +27,9 @@
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
+
 #include "core/properties/optionproperty.h"
+#include "scripting/scriptingapi.h"
 
 namespace campvis {
     class AbstractOptionProperty;
@@ -35,7 +37,7 @@ namespace campvis {
     /**
      * Lua generator for a OptionProperty
      */
-    class OptionPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API OptionPropertyLua : public AbstractPropertyLua {
 
     public:
         /**

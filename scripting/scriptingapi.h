@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -22,36 +22,28 @@
 // 
 // ================================================================================================
 
-#ifndef STRINGPROPERTYLUA_H__
-#define STRINGPROPERTYLUA_H__
+#ifndef SCRIPTINGAPI_H__
+#define SCRIPTINGAPI_H__
 
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
+#ifdef CAMPVIS_DYNAMIC_LIBS
+    #ifdef CAMPVIS_SCRIPTING_BUILD_DLL
+        // building library -> export symbols
+        #ifdef WIN32
+            #define CAMPVIS_SCRIPTING_API __declspec(dllexport)
+        #else
+            #define CAMPVIS_SCRIPTING_API
+        #endif
+    #else
+        // including library -> import symbols
+        #ifdef WIN32
+            #define CAMPVIS_SCRIPTING_API __declspec(dllimport)
+        #else
+            #define CAMPVIS_SCRIPTING_API
+        #endif
+    #endif
+#else
+    // building/including static library -> do nothing
+    #define CAMPVIS_SCRIPTING_API
+#endif
 
-#include "core/properties/stringproperty.h"
-#include "scripting/scriptingapi.h"
-
-namespace campvis {
-    /**
-     * Lua generator for a StringProperty
-     */
-    class CAMPVIS_SCRIPTING_API StringPropertyLua : public AbstractPropertyLua {
-    public:
-        /**
-         * Creates a new PropertyLua for the property \a property.
-         * \param   property        The property the lua shall handle
-         */
-        StringPropertyLua(StringProperty* property);
-
-        /**
-         * Destructor
-         */
-        virtual ~StringPropertyLua();
-
-        virtual std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc);
-    };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<StringPropertyLua, StringProperty>;
-}
-#endif // STRINGPROPERTYLUA_H__
+#endif // SCRIPTINGAPI_H__

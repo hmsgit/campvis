@@ -25,6 +25,7 @@
 #ifndef BOOLPROPERTYLUA_H__
 #define BOOLPROPERTYLUA_H__
 
+#include "scripting/scriptingapi.h"
 #include "scripting/luagen/properties/abstractpropertylua.h"
 #include "scripting/luagen/properties/propertyluafactory.h"
 #include "core/properties/genericproperty.h"
@@ -33,7 +34,7 @@ namespace campvis {
     /**
      * Lua generator for a BoolProperty
      */
-    class BoolPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API BoolPropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new BoolPropertyLua for the property \a property.

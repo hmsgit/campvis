@@ -25,10 +25,8 @@
 #ifndef ABSTRACTPROPERTYLUA_H__
 #define ABSTRACTPROPERTYLUA_H__
 
-#include "sigslot/sigslot.h"
-#include "tbb/atomic.h"
-#include <QBoxLayout>
-#include <QLabel>
+#include "scripting/scriptingapi.h"
+#include <string>
 
 namespace campvis {
     class AbstractProperty;
@@ -37,7 +35,7 @@ namespace campvis {
     /**
      * Abstract base class for property luas.
      */
-    class AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API AbstractPropertyLua {
     public:
         /**
          * Creates a new Lua Property for the property \a property.

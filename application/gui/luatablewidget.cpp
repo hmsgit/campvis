@@ -229,6 +229,8 @@ namespace campvis {
                     return QVariant("[Metatable]");
                 case COMPLETER_MODEL:
                     return QVariant("[Methods]");
+                default:
+                    return QVariant("");
             }
         }
         else {

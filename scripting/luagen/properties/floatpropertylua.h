@@ -34,7 +34,7 @@ namespace campvis {
     /**
      * Lua generator for a FloatProperty
      */
-    class FloatPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API FloatPropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new FloatPropertyLua for the property \a property.

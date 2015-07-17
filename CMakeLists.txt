@@ -1,6 +1,6 @@
 # = CAMPVis - Yet another medical visualization framework =====================
 PROJECT(CAMPVis)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0 FATAL_ERROR)
 
 SET(CAMPVIS_VERSION 1.0.0)
 

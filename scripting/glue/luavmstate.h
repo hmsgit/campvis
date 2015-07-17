@@ -28,7 +28,14 @@
 #include <iostream>
 #include <memory>
 #include <string>
+
+#pragma warning(push)
+#pragma warning (disable: 4244 4267)
 #include "scripting/swigluarun.h"
+#pragma warning(pop)
+
+
+#include "scripting/scriptingapi.h"
 #include "scripting/glue/globalluatable.h"
 #include "tbb/recursive_mutex.h"
 
@@ -60,7 +67,7 @@ namespace campvis {
      * common operations (e.g. script execution) while still giving access to the underlying raw
      * Lua state.
      */
-    class LuaVmState
+    class CAMPVIS_SCRIPTING_API LuaVmState
     {
     public:
         /**

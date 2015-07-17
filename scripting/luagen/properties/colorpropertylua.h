@@ -29,13 +29,14 @@
 #include "propertyluafactory.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/colorproperty.h"
+#include "scripting/scriptingapi.h"
 
 
 namespace campvis {
     /**
      * Lua generator for a ColorProperty
      */
-    class ColorPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API ColorPropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new FloatPropertyLua for the property \a property.
