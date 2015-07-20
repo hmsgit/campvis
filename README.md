@@ -26,12 +26,13 @@ CAMPVis a software platform for medical imaging and visualization. It is targete
 * [Intel TBB](https://www.threadingbuildingblocks.org/)
 * OpenGL 3.3+ Capable Video Hardware (and Drivers!)
 * Qt 4.8 for Application Package (Qt 5 Support in Progress)
-* CMake Build System
+* CMake 3.0+
 
 ### Tested Environments
 
 * Windows: MSVC 2010+, Linux: gcc 4.8+
-* nVidia GPUs
+* various nVidia GPUs
+* AMD R290X
 * Intel HD4000+ GPUs (Basically Ivy Bridge and Later)
 
 ### Getting in Touch
