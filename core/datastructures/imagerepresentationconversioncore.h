@@ -86,7 +86,7 @@ namespace campvis {
             if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
                 // converting from disk representation
                 if (tester->getBaseType() == TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType && tester->getParent()->getNumChannels() == NUMCHANNELS) {
-                    WeaklyTypedPointer wtp = tester->getImageData();
+                    WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
                     return GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
                 }
                 else {

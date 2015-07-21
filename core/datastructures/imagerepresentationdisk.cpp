@@ -50,7 +50,7 @@ namespace campvis {
     ImageRepresentationDisk::~ImageRepresentationDisk() {
     }
 
-    campvis::WeaklyTypedPointer ImageRepresentationDisk::getImageData() const {
+    campvis::WeaklyTypedPointer ImageRepresentationDisk::getWeaklyTypedPointer() const {
         const cgt::svec3& size = getSize();
         size_t numElements = cgt::hmul(size);
         size_t numBytesPerElement = WeaklyTypedPointer::numBytes(_type, _parent->getNumChannels());
