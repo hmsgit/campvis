@@ -102,11 +102,8 @@ namespace sigslot {
         // nothing to wait for if current thread is signal_manager's thread.
         if (isCurrentThreadSignalManagerThread())
             return;
-
-        // nothing to wait for if the signal queue is already empty.
-        if (_signalQueue.empty())
-            return;
-
+        
+        // signal used to detect that the signal queue has been flushed
         class SIGSLOT_API flushed_signal : public _signal_handle_base {
         public:
             flushed_signal(bool* ptr)
@@ -125,8 +122,13 @@ namespace sigslot {
 
         bool signalVariable = false;
         this->queueSignalImpl(new flushed_signal(&signalVariable));
-        while (! signalVariable)
-            std::this_thread::yield(); // so we do some busy waiting here - hopefully not too long...
+
+        while (! signalVariable) {
+            // so we do some busy waiting here - hopefully not too long...
+            std::this_thread::yield();
+            // make sure that the signal_manager thread is actually running, otherwise we wait forever.
+            _evaluationCondition.notify_all();
+        }
     }
 
     const std::string signal_manager::loggerCat_;

@@ -48,15 +48,17 @@ public:
 
     ~DummyTestProcessor () {}
 
-    virtual const std::string getName() const { return "DummyTestProcessor"; };
-    virtual const std::string getDescription() const { return "A dummy processor for the testing purposes only."; };
-    virtual const std::string getAuthor() const { return "Hossain Mahmud <mahmud@in.tum.de>"; };
-    virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
+    virtual const std::string getName() const override { return "DummyTestProcessor"; };
+    virtual const std::string getDescription() const override { return "A dummy processor for the testing purposes only."; };
+    virtual const std::string getAuthor() const override { return "Hossain Mahmud <mahmud@in.tum.de>"; };
+    virtual ProcessorState getProcessorState() const override { return AbstractProcessor::TESTING; };
     
-    virtual void updateResult(DataContainer& dataContainer) {
+    virtual void updateResult(DataContainer& dataContainer) override {
         if (_togglePropertyDuringProcess) {
             bool currentValue = _boolProperty.getValue();
             _boolProperty.setValue(! currentValue);
+
+            std::cout << "set to: " << !currentValue << "\n";
         }
     }
 
@@ -98,25 +100,29 @@ TEST_F(AbstractProcessorTest, invalidationTest) {
     this->_processor1.invalidate(AbstractProcessor::INVALID_RESULT);
     this->_processor1._togglePropertyDuringProcess = false;
     this->_processor1.process(this->_dataContainer);
-    EXPECT_EQ(AbstractProcessor::VALID, this->_processor1.getInvalidationLevel());
-}
 
-/** 
- * Tests processor's locking mechanism 
- */ 
-TEST_F(AbstractProcessorTest, lockingTest) {
+    sigslot::signal_manager::getRef().waitForSignalQueueFlushed();
+    EXPECT_EQ(AbstractProcessor::VALID, this->_processor1.getInvalidationLevel());
+
+    /* --- */
+
     this->_processor1.invalidate(AbstractProcessor::INVALID_RESULT);
     this->_processor1._togglePropertyDuringProcess = true;
     this->_processor1.process(this->_dataContainer);
 
     sigslot::signal_manager::getRef().waitForSignalQueueFlushed();
     EXPECT_NE(AbstractProcessor::VALID, this->_processor1.getInvalidationLevel());
+}
 
+/** 
+ * Tests processor's locking mechanism 
+ */ 
+TEST_F(AbstractProcessorTest, lockingTest) {
+    bool currentValue = this->_processor1._boolProperty.getValue();
     {
-        AbstractProcessor::ScopedLock lock(&this->_processor1);
-        bool currentValue = this->_processor1._boolProperty.getValue();
+        AbstractProcessor::ScopedLock lock(&this->_processor1);        
         this->_processor1._boolProperty.setValue(! currentValue);
-
         EXPECT_EQ(currentValue, this->_processor1._boolProperty.getValue());
     }
+    EXPECT_EQ(!currentValue, this->_processor1._boolProperty.getValue());
 }

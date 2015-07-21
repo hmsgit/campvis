@@ -34,6 +34,8 @@
 #include "cgt/qt/qtthreadedcanvas.h"
 
 #include "core/datastructures/imagerepresentationconverter.h"
+#include "core/pipeline/pipelinefactory.h"
+#include "core/pipeline/processorfactory.h"
 #include "core/tools/quadrenderer.h"
 #include "core/tools/simplejobprocessor.h"
 
@@ -85,7 +87,8 @@ namespace campvis {
 
         SimpleJobProcessor::deinit();
         ImageRepresentationConverter::deinit();
-        //PipelineFactory::deinit();
+        PipelineFactory::deinit();
+        ProcessorFactory::deinit();
     }
 
     CAMPVIS_CORE_API std::string completePath(const std::string& filename) {

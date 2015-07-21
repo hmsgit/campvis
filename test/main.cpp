@@ -90,11 +90,10 @@ GTEST_API_ int main(int argc, char **argv) {
     std::thread testThread([&] () {
         cgt::GLContextScopedLock lock(_localContext);
         ret= RUN_ALL_TESTS();
-
+        app->exit();
     });
 
-    testThread.join();
-    app->exit();
+    app->exec();
     deinit();
 
     delete app;

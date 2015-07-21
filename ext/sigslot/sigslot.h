@@ -361,15 +361,15 @@ namespace sigslot {
 
         /// Typedef for the signal queue
         typedef tbb::concurrent_queue<_signal_handle_base*> SignalQueue;
+        /// Typedef for signal pool's allocator
+        typedef std::allocator<_signal_handle_base> pool_allocator_t;
 
         SignalHandlingMode _handlingMode;               ///< Mode for handling signals
         SignalQueue _signalQueue;                       ///< Queue for signals to be dispatched
+        tbb::memory_pool<pool_allocator_t> _signalPool; ///< Memory pool for the signals
 
         std::mutex _ecMutex;                            ///< Mutex for protecting _evaluationCondition
-        std::thread::id _this_thread_id;
-
-        typedef std::allocator<_signal_handle_base> pool_allocator_t;
-        tbb::memory_pool<pool_allocator_t> _signalPool; ///< Memory pool for the signals
+        std::thread::id _this_thread_id;                ///< Thread ID of signal_manager thread
 
         static const std::string loggerCat_;
     };
