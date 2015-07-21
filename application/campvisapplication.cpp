@@ -222,6 +222,7 @@ namespace campvis {
         return toReturn;
     }
 
+
     void CampVisApplication::addPipeline(const std::string& name, AbstractPipeline* pipeline) {
         cgtAssert(pipeline != 0, "Pipeline must not be 0.");
 
@@ -244,8 +245,6 @@ namespace campvis {
 
         if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", pipeline->getName()))
             LERROR("Could not inject the pipeline into the Lua VM.");
-
-        _luaVmState->execString("inspect(pipelines)");
 #endif
 
         GLCtxtMgr.releaseContext(canvas, false);
