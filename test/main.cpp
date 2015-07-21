@@ -88,15 +88,19 @@ GTEST_API_ int main(int argc, char **argv) {
     int ret;
     
     std::thread testThread([&] () {
-        cgt::GLContextScopedLock lock(_localContext);
-        ret= RUN_ALL_TESTS();
+        {
+            cgt::GLContextScopedLock lock(_localContext);
+            ret= RUN_ALL_TESTS();
+        }
+
+        deinit();
         app->exit();
     });
 
     app->exec();
-    deinit();
-
+    testThread.join();
     delete app;
+
     printf("main() returned with %d\n", ret);
-    return 0;
+    return ret;
 }
