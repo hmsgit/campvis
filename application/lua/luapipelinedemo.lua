@@ -70,4 +70,4 @@ pipeline.s_init:connect(initCallback)
 
 
 -- so, we now finished creating our LuaDemo. All that's missing is registering it with the CAMPVis application
-application:addPipeline(pipeline:getName(), pipeline)
+application:addPipeline(pipeline)

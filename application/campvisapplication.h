@@ -97,10 +97,9 @@ namespace campvis {
          * Each pipeline will automatically get its own OpenGL context, the corresponding CampvisPainter
          * and all necessary connections will be created.
          * 
-         * \param   name    Name of the OpenGL context to create for the pipeline.
          * \param   vp      AbstractPipeline to add.
          */
-        void addPipeline(const std::string& name, AbstractPipeline* pipeline);
+        void addPipeline(AbstractPipeline* pipeline);
 
         /**
          * Adds a dock widget to the main window.

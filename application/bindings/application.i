@@ -27,7 +27,7 @@ namespace campvis {
         int run();
         
         %apply SWIGTYPE *DISOWN {AbstractPipeline* pipeline};
-        void addPipeline(const std::string& name, AbstractPipeline* pipeline);
+        void addPipeline(AbstractPipeline* pipeline);
         DataContainer* createAndAddDataContainer(const std::string& name);
         %clear AbstractPipeline* pipeline;
 

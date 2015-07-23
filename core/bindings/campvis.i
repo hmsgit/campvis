@@ -16,6 +16,8 @@
 #include "core/pipeline/abstractprocessor.h"
 #include "core/pipeline/abstractworkflow.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/pipelinefactory.h"
+#include "core/pipeline/processorfactory.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/tfgeometry2d.h"
@@ -50,7 +52,7 @@ namespace sigslot {
 
 %template(PairStringDataHandle) std::pair<std::string, campvis::DataHandle>;
 %template(VectorOfPairStringDataHandle) std::vector< std::pair< std::string, campvis::DataHandle> >;
-
+%template(VectorOfString) std::vector< std::string >;
 
 namespace campvis {
 
@@ -524,6 +526,28 @@ namespace campvis {
     public:
         explicit VisualizationProcessor(IVec2Property* viewportSizeProp);
         ~VisualizationProcessor();
+    };
+
+
+
+    /* PipelineFactory and ProcessorFactory */
+
+    class PipelineFactory {
+    public:
+        static PipelineFactory& getRef();
+
+        std::vector<std::string> getRegisteredPipelines() const;
+        AbstractPipeline* createPipeline(const std::string& id, DataContainer& dc) const;
+        AbstractWorkflow* createWorkflow(const std::string& id) const;
+    };
+
+    class ProcessorFactory {
+    public:
+        static ProcessorFactory& getRef();
+    
+        std::vector<std::string> getRegisteredProcessors() const;
+        std::vector<std::string> getRegisteredRaycastingProcessors() const;
+        AbstractProcessor* createProcessor(const std::string& id, IVec2Property* viewPortSizeProp = nullptr) const;
     };
 }
 

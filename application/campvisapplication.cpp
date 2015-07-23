@@ -143,7 +143,7 @@ namespace campvis {
 
                     std::vector<AbstractPipeline*> pipelines = w->getPipelines();
                     for (auto it = pipelines.begin(); it != pipelines.end(); ++it) {
-                        addPipeline((*it)->getName(), *it);
+                        addPipeline(*it);
                     }
 
                     _workflows.push_back(w);
@@ -161,7 +161,7 @@ namespace campvis {
                 DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
                 AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), *dc);
                 if (p != nullptr)
-                    addPipeline(pipelinesToAdd[i].toStdString(), p);
+                    addPipeline(p);
             }
         }
 
@@ -223,18 +223,18 @@ namespace campvis {
     }
 
 
-    void CampVisApplication::addPipeline(const std::string& name, AbstractPipeline* pipeline) {
+    void CampVisApplication::addPipeline(AbstractPipeline* pipeline) {
         cgtAssert(pipeline != 0, "Pipeline must not be 0.");
 
         // create canvas and painter for the pipeline and connect all together
-        cgt::QtThreadedCanvas* canvas = new cgt::QtThreadedCanvas("CAMPVis", cgt::ivec2(512, 512));
+        cgt::QtThreadedCanvas* canvas = new cgt::QtThreadedCanvas(pipeline->getName(), cgt::ivec2(512, 512));
         canvas->init();
 
         pipeline->setCanvas(canvas);
         pipeline->getPipelinePainter()->setErrorTexture(_errorTexture);
 
         _pipelines.push_back(pipeline);
-        _pipelineWindows[pipeline] = _mainWindow->addVisualizationPipelineWidget(name, canvas);
+        _pipelineWindows[pipeline] = _mainWindow->addVisualizationPipelineWidget(pipeline->getName(), canvas);
 
         // initialize context (GLEW) and pipeline in OpenGL thread)
         initGlContextAndPipeline(canvas, pipeline);
