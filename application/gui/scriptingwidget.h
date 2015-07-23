@@ -99,7 +99,7 @@ namespace campvis {
          *
          * \param message message to append to the log viewer
          */
-        void appendMessage(const QString& message);
+        void appendMessage(QString message);
 
     private slots:
         /**
@@ -110,7 +110,8 @@ namespace campvis {
         void execute();
 
     signals:
-        void s_commandExecuted(const QString& cmd);
+        void s_commandExecuted(QString cmd);
+        void s_messageAppended(QString message);
 
     private:
         QTextEdit* _consoleDisplay;         ///< Text edit to hold the console output

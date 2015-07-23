@@ -1,9 +1,12 @@
 %module cvio
 %include std_string.i
-%include "core/bindings/campvis.i"
+%import "core/bindings/campvis.i"
+
 %{
-#include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/allproperties.h"
+#include "core/pipeline/abstractworkflow.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/visualizationprocessor.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/mhdimagewriter.h"
 %}

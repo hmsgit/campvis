@@ -5,14 +5,14 @@
 %include std_string.i
 %include std_vector.i
 
-%include "core/bindings/campvis.i"
+%import "core/bindings/campvis.i"
 
 %{
 #include "application/campvisapplication.h"
-//#include "core/properties/allproperties.h"
-//#include "core/pipeline/abstractprocessor.h"
-//#include "core/pipeline/abstractworkflow.h"
-//#include "core/pipeline/autoevaluationpipeline.h"
+#include "core/properties/allproperties.h"
+#include "core/pipeline/abstractprocessor.h"
+#include "core/pipeline/abstractworkflow.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 %}
 
 namespace campvis {
@@ -26,8 +26,10 @@ namespace campvis {
         void deinit();
         int run();
         
+        %apply SWIGTYPE *DISOWN {AbstractPipeline* pipeline};
         void addPipeline(const std::string& name, AbstractPipeline* pipeline);
         DataContainer* createAndAddDataContainer(const std::string& name);
+        %clear AbstractPipeline* pipeline;
 
         void rebuildAllShadersFromFiles();
         void setPipelineVisibility(AbstractPipeline* pipeline, bool visibility);

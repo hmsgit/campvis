@@ -12,6 +12,7 @@
 %{
 #include <cstdio>
 #include <iostream>
+#include <type_traits>
 #include "tbb/recursive_mutex.h"
 #include "ext/cgt/logmanager.h"
 #include "ext/sigslot/sigslot.h"
@@ -42,7 +43,35 @@ namespace sigslot {
      * Type bundling all information necessary to inject a signal argument into a Lua state:
      * a pointer to the argument and its corresponding SWIG type information.
      */
-    typedef std::pair<void*, swig_type_info*> ArgWithTypeInfoType;
+    struct ArgWithTypeInfoType {
+        void* ptr;
+        swig_type_info* type_info;
+        void (*deleter)(void*);
+    };
+    
+    template<typename T, bool makeCopy>
+    struct CreateAwtitHelper {};
+    
+    template<typename T>
+    struct CreateAwtitHelper<T, true> {
+        static void deletePtr(void* ptr) {
+            delete static_cast<T*>(ptr);
+        }
+
+        static ArgWithTypeInfoType createAwtit(T arg, swig_type_info* typeInfo) {
+            ArgWithTypeInfoType toReturn = { new T(arg), typeInfo, &deletePtr };
+            return toReturn;
+        }
+    };
+
+    template<typename T>
+    struct CreateAwtitHelper<T, false> {
+        static ArgWithTypeInfoType createAwtit(T arg, swig_type_info* typeInfo) {
+            ArgWithTypeInfoType toReturn = { arg, typeInfo, nullptr };
+            return toReturn;
+        }
+    };
+
 
     /*
      * Return an object bundling the provided argument with its SWIG type information.
@@ -56,7 +85,8 @@ namespace sigslot {
             LogMgr.log("Lua", cgt::LuaError, "SWIG wrapper for " + std::string(typeName) + " not found");
         }
 
-        return std::make_pair(arg, typeInfo);
+        ArgWithTypeInfoType toReturn = CreateAwtitHelper<T, !std::is_pointer<T>::value && !std::is_reference<T>::value>::createAwtit(arg, typeInfo);
+        return toReturn;
     }
 
     /*
@@ -66,7 +96,7 @@ namespace sigslot {
     inline std::list<ArgWithTypeInfoType>* argWithTypeInfoListCons(ArgWithTypeInfoType head,
                                                                    std::list<ArgWithTypeInfoType>* tail)
     {
-        if (head.second == nullptr) {
+        if (head.type_info == nullptr) {
             delete tail;
         } else if (tail != nullptr) {
             tail->push_front(head);
@@ -227,7 +257,7 @@ namespace sigslot {
                 swiglua_ref_get(&_slot_fn);
 
                 for (auto it = argWithTypeInfoList->begin(); it != argWithTypeInfoList->end(); ++it)
-                    SWIG_NewPointerObj(_slot_fn.L, it->first, it->second, 0);
+                    SWIG_NewPointerObj(_slot_fn.L, it->ptr, it->type_info, 0);
 
                 if (lua_pcall(_slot_fn.L, argWithTypeInfoList->size(), 0, 0) != LUA_OK) {
                     const char* errorMsg = lua_tostring(_slot_fn.L, -1);
@@ -240,6 +270,10 @@ namespace sigslot {
                     lua_pop(_slot_fn.L, 1);
                 }
 
+                for (auto it = argWithTypeInfoList->begin(); it != argWithTypeInfoList->end(); ++it) {
+                    if (it->deleter != nullptr)
+                        (it->deleter)(it->ptr);
+                }
                 delete argWithTypeInfoList;
             }
         }
@@ -622,6 +656,24 @@ namespace sigslot {
                         delete lua_connection;
                         $self->m_connected_slots.erase(it);
                         return;
+                    }
+
+                    ++it;
+                }
+            }
+
+            void disconnectAllLuaSlots() {
+                typedef sigslot::_signal_base2<arg1_type, arg2_type>::connections_list connections_list;
+                connections_list::iterator it = $self->m_connected_slots.begin();
+                connections_list::iterator itEnd = $self->m_connected_slots.end();
+
+                while (it != itEnd) {
+                    sigslot::_lua_connection2<arg1_type, arg2_type>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection2<arg1_type, arg2_type>*>(*it);
+
+                    if (lua_connection != nullptr) {
+                        delete lua_connection;
+                        $self->m_connected_slots.erase(it);
                     }
 
                     ++it;

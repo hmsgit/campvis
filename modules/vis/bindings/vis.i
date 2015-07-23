@@ -1,8 +1,13 @@
 %module vis
+
 %include std_string.i
-%include "core/bindings/campvis.i"
+%import "core/bindings/campvis.i"
+
 %{
+#include "core/properties/allproperties.h"
+#include "core/pipeline/abstractworkflow.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/visualizationprocessor.h"
 #include "modules/vis/processors/volumeexplorer.h"
 #include "modules/vis/processors/volumerenderer.h"
 

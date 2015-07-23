@@ -89,9 +89,11 @@ namespace campvis {
         connect(_btnClear, SIGNAL(clicked()), this, SLOT(clearLog()));
         connect(_btnExecute, SIGNAL(clicked()), this, SLOT(execute()));
         connect(_editCommand, SIGNAL(returnPressed()), this, SLOT(execute()));
+
+        connect(this, SIGNAL(s_messageAppended(QString)), this, SLOT(appendMessage(QString)));
     }
 
-    void ScriptingWidget::appendMessage(const QString& message) {
+    void ScriptingWidget::appendMessage(QString message) {
         _consoleDisplay->append(message);
     }
 
@@ -134,7 +136,7 @@ namespace campvis {
 
     void ScriptingWidget::logFiltered(const std::string &cat, cgt::LogLevel level, const std::string& msg, const std::string& extendedInfo/*=""*/) {
         if (level == cgt::LuaInfo || level == cgt::LuaError) {
-            appendMessage(QString::fromStdString(msg));
+            emit s_messageAppended(QString::fromStdString(msg));
         }
     }
 

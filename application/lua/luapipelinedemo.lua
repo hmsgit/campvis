@@ -58,17 +58,10 @@ local initCallback = function()
     LuaDemo.image_reader.s_validated:connect(callback)
 
     -- let us create a fancy transfer function
-    local geometry1 = campvis.TFGeometry1D_createQuad(cgt.vec2(0.12, 0.15), cgt.col4(85, 0, 0, 128),
-                                                      cgt.col4(255, 0, 0, 128))
-    local geometry2 = campvis.TFGeometry1D_createQuad(cgt.vec2(.19, .28), cgt.col4(89, 89, 89, 155),
-                                                      cgt.col4(89, 89, 89, 155))
-    local geometry3 = campvis.TFGeometry1D_createQuad(cgt.vec2(.41, .51), cgt.col4(170, 170, 128, 64),
-                                                      cgt.col4(192, 192, 128, 64))
-
     local dvrTF = campvis.Geometry1DTransferFunction(128, cgt.vec2(0, 0.05))
-    dvrTF:addGeometry(geometry1)
-    dvrTF:addGeometry(geometry2)
-    dvrTF:addGeometry(geometry3)
+    dvrTF:addGeometry(campvis.TFGeometry1D_createQuad(cgt.vec2(0.12, 0.15), cgt.col4(85, 0, 0, 128), cgt.col4(255, 0, 0, 128)))
+    dvrTF:addGeometry(campvis.TFGeometry1D_createQuad(cgt.vec2(.19, .28), cgt.col4(89, 89, 89, 155), cgt.col4(89, 89, 89, 155)))
+    dvrTF:addGeometry(campvis.TFGeometry1D_createQuad(cgt.vec2(.41, .51), cgt.col4(170, 170, 128, 64), cgt.col4(192, 192, 128, 64)))
 
     LuaDemo.vr:getNestedProperty("RaycasterProps::TransferFunction"):replaceTF(dvrTF)
 end
