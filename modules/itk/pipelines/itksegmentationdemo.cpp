@@ -32,8 +32,8 @@
 
 namespace campvis {
 
-    ItkSegmentationDemo::ItkSegmentationDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    ItkSegmentationDemo::ItkSegmentationDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _imageReader()
         , _itkFilter()

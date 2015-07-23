@@ -210,14 +210,6 @@ namespace campvis {
         void selectById(const std::string& id);
     };
 
-    /* Downcast the return value of selectById to appropriate subclass */
-    %factory(void campvis::AbstractOptionProperty::selectById,
-             campvis::GenericOptionProperty);
-
-    /* Downcast the return value of getOptionId to appropriate subclass */
-    %factory(void campvis::AbstractOptionProperty::getOptionId,
-             campvis::GenericOptionProperty);
-
     /* TFGeometry1D */
 
     %nodefaultctor TFGeometry1D;
@@ -332,6 +324,9 @@ namespace campvis {
     
     /* DataHandle */
 
+    /* Downcast the return value of DataHandle::getData to appropriate subclass */
+    %factory(const AbstractData* campvis::DataHandle::getData, const campvis::ImageData);
+
     class DataHandle {
     public:
         explicit DataHandle(AbstractData* data = 0);
@@ -370,9 +365,6 @@ namespace campvis {
         virtual ImageData* clone() const;
         virtual cgt::Bounds getWorldBounds() const;
     };
-
-    /* Downcast the return value of DataHandle::getData to appropriate subclass */
-    %factory(AbstractData* campvis::DataHandle::getData, campvis::ImageData);
 
     /* DataContainer */
 
@@ -454,10 +446,10 @@ namespace campvis {
 
     class AbstractPipeline : public HasPropertyCollection {
     public:
-        AbstractPipeline(DataContainer* dc);
+        AbstractPipeline(DataContainer& dc);
         virtual ~AbstractPipeline();
 
-        virtual const std::string getName() const = 0;
+        virtual std::string getName() const = 0;
 
         const DataContainer& getDataContainer() const;
         DataContainer& getDataContainer();
@@ -475,6 +467,10 @@ namespace campvis {
 
     class AutoEvaluationPipeline : public AbstractPipeline {
     public:
+        AutoEvaluationPipeline(DataContainer& dataContainer, const std::string& pipelineName);
+        virtual ~AutoEvaluationPipeline();
+        
+        std::string getName() const;
         virtual void addProcessor(AbstractProcessor* processor);
 
         void addEventListenerToBack(cgt::EventListener* e);
@@ -512,23 +508,6 @@ namespace campvis {
     };
 }
 
-%inline{
-namespace campvis {
-    class LuaPipeline : public campvis::AutoEvaluationPipeline {
-    public:
-        const std::string _name;
-
-        LuaPipeline(const std::string& name, campvis::DataContainer* dc)
-            : campvis::AutoEvaluationPipeline(dc)
-            , _name(name)
-        {
-        };
-
-        virtual const std::string getName() const { return _name; };
-    };
-}
-}
-
 %luacode {
   function campvis.newPipeline (name, o)
     if not name then
@@ -542,3 +521,4 @@ namespace campvis {
 
   print("Module campvis-core loaded")
 }
+

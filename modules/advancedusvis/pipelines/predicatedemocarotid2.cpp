@@ -35,8 +35,8 @@
 
 namespace campvis {
 
-    PredicateDemoCarotid2::PredicateDemoCarotid2(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    PredicateDemoCarotid2::PredicateDemoCarotid2(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _imageReader()
         , _labelReader()

@@ -43,9 +43,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API ViscontestDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a ViscontestDemo pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        explicit ViscontestDemo(DataContainer* dc);
+        explicit ViscontestDemo(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -56,9 +58,6 @@ namespace campvis {
         virtual void init();
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        /// \see AbstractPipeline::getId()
         static const std::string getId() { return "ViscontestDemo"; };
 
         /// \see AbstractPipeline::executePipeline()

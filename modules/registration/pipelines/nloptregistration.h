@@ -47,9 +47,11 @@ namespace registration {
     class CAMPVIS_MODULES_API NloptRegistration : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a NloptRegistration pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        explicit NloptRegistration(DataContainer* dc);
+        explicit NloptRegistration(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -61,8 +63,6 @@ namespace registration {
         /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "registration::NloptRegistration"; };
 
         GenericOptionProperty<nlopt::algorithm> p_optimizer;    ///< Optimizer Algorithm

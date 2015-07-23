@@ -83,7 +83,7 @@ protected:
 
     void init() {
         // create pipeline
-        _pipeline = PipelineFactory::getRef().createPipeline(_pipelineName, &_dataContainer);
+        _pipeline = PipelineFactory::getRef().createPipeline(_pipelineName, _dataContainer);
 
         if (_pipeline != nullptr) {
             // setup pipeline

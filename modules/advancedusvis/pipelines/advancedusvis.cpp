@@ -32,8 +32,8 @@
 
 namespace campvis {
 
-    AdvancedUsVis::AdvancedUsVis(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    AdvancedUsVis::AdvancedUsVis(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _usReader()
         , _confidenceReader()
         , _usFusion1(&_canvasSize)

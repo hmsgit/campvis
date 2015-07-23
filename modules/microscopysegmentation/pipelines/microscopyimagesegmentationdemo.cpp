@@ -34,10 +34,9 @@
 
 namespace campvis {
 
-    MicroscopyImageSegmentationDemo::MicroscopyImageSegmentationDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    MicroscopyImageSegmentationDemo::MicroscopyImageSegmentationDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
-        //, _imageReader(new IVec2Property("CanvasSize", "Canvas Size", cgt::ivec2(128, 128), cgt::ivec2(1, 1), cgt::ivec2(4096, 4096)))
         , _ve(&_canvasSize)
     {
         addProcessor(&_lsp);

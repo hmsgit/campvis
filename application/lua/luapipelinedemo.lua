@@ -13,7 +13,7 @@ LuaDemo = {}
 
 -- create DataContainer and Pipeline
 LuaDemo.dc = application:createAndAddDataContainer("This DataContainer was created by Lua.")
-LuaDemo.pipeline = campvis.LuaPipeline("A pipeline created by Lua", LuaDemo.dc)
+LuaDemo.pipeline = campvis.AutoEvaluationPipeline(LuaDemo.dc, "A pipeline created by Lua")
 local pipeline = LuaDemo.pipeline;
 
 -- create the processors we need
@@ -51,7 +51,7 @@ local initCallback = function()
 
     -- alternative 2 to automatically adjust the camera to the data
     local callback = function(arg)
-        local data_container = LuaDemo.getDataContainer(instance)
+        local data_container = pipeline:getDataContainer()
         local img_data = data_container:getData(LuaDemo.image_reader.p_targetImageID:getValue()):getData()
         LuaDemo.tcp:reinitializeCamera(img_data:getWorldBounds())
     end

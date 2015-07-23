@@ -159,7 +159,7 @@ namespace campvis {
             }
             else {
                 DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
-                AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), dc);
+                AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), *dc);
                 if (p != nullptr)
                     addPipeline(pipelinesToAdd[i].toStdString(), p);
             }

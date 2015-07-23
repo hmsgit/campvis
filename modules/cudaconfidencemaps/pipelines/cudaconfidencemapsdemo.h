@@ -48,9 +48,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API CudaConfidenceMapsDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a CudaConfidenceMapsDemo pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        explicit CudaConfidenceMapsDemo(DataContainer *dc);
+        explicit CudaConfidenceMapsDemo(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -59,7 +61,6 @@ namespace campvis {
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
-
         /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
@@ -69,8 +70,6 @@ namespace campvis {
         /// \see AbstractPipeline::onEvent()
         virtual void onEvent(cgt::Event* e);
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "CudaConfidenceMapsDemo"; };
 
     protected:

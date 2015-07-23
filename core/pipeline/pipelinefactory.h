@@ -62,7 +62,7 @@ namespace campvis {
 
         std::vector<std::string> getRegisteredPipelines() const;
 
-        AbstractPipeline* createPipeline(const std::string& id, DataContainer* dc) const;
+        AbstractPipeline* createPipeline(const std::string& id, DataContainer& dc) const;
 
         AbstractWorkflow* createWorkflow(const std::string& id) const;
 
@@ -73,7 +73,7 @@ namespace campvis {
          * \return  The registration index.
          */
         template<typename T>
-        size_t registerPipeline(std::function<AbstractPipeline*(DataContainer*)> callee) {
+        size_t registerPipeline(std::function<AbstractPipeline*(DataContainer&)> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
             auto it = _pipelineMap.lower_bound(T::getId());
@@ -112,7 +112,7 @@ namespace campvis {
         mutable tbb::spin_mutex _mutex;
         static tbb::atomic<PipelineFactory*> _singleton;    ///< the singleton object
 
-        std::map< std::string, std::function<AbstractPipeline*(DataContainer*)> > _pipelineMap;
+        std::map< std::string, std::function<AbstractPipeline*(DataContainer&)> > _pipelineMap;
 
         std::map< std::string, std::function<AbstractWorkflow*()> > _workflowMap;
     };
@@ -128,7 +128,7 @@ namespace campvis {
          * \param   dc  DataContainer for the created pipeline to work on.
          * \return  A newly created pipeline of type T. Caller has to take ownership of the pointer.
          */
-        static AbstractPipeline* create(DataContainer* dc) {
+        static AbstractPipeline* create(DataContainer& dc) {
             return new T(dc);
         }
 

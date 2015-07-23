@@ -37,8 +37,8 @@
 
 namespace campvis {
 
-    ViscontestDemo::ViscontestDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    ViscontestDemo::ViscontestDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _tcp(&_canvasSize)
         , _fiberReader()

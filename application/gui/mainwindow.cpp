@@ -425,7 +425,7 @@ namespace campvis {
         if (dc == 0) {
             dc = _application->createAndAddDataContainer("DataContainer #" + StringUtils::toString(_application->_dataContainers.size() + 1));
         }
-        AbstractPipeline* p = PipelineFactory::getRef().createPipeline(name, dc);
+        AbstractPipeline* p = PipelineFactory::getRef().createPipeline(name, *dc);
         _application->addPipeline(name, p);
     }
 

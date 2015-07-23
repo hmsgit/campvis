@@ -35,8 +35,8 @@
 
 namespace campvis {
 
-    PredicateDemoSmallHeart::PredicateDemoSmallHeart(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    PredicateDemoSmallHeart::PredicateDemoSmallHeart(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _imageReader()
         , _labelReader()

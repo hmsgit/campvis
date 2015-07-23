@@ -60,7 +60,7 @@ namespace campvis {
         return toReturn;
     }
 
-    AbstractPipeline* PipelineFactory::createPipeline(const std::string& id, DataContainer* dc) const {
+    AbstractPipeline* PipelineFactory::createPipeline(const std::string& id, DataContainer& dc) const {
         tbb::spin_mutex::scoped_lock lock(_mutex);
 
         auto it = _pipelineMap.find(id);

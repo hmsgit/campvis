@@ -36,7 +36,7 @@ namespace campvis {
     // explicitly instantiate templates to register the pipelines
     template class PipelineRegistrar<CudaConfidenceMapsDemo>;
 
-    template class WorkflowRegistrar<CudaConfidenceMapsWorkflow>
+    template class WorkflowRegistrar<CudaConfidenceMapsWorkflow>;
     
     template class SmartProcessorRegistrar<CudaConfidenceMapsSolver>;
     template class SmartProcessorRegistrar<UsFanRenderer>;

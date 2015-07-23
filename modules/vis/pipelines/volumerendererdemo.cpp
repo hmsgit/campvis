@@ -32,8 +32,8 @@
 
 namespace campvis {
 
-    VolumeRendererDemo::VolumeRendererDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    VolumeRendererDemo::VolumeRendererDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()

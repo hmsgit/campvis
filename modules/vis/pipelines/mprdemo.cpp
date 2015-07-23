@@ -32,8 +32,8 @@
 
 namespace campvis {
 
-    MprDemo::MprDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    MprDemo::MprDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()

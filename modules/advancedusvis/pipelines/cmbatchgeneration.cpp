@@ -43,8 +43,8 @@
 
 namespace campvis {
 
-    CmBatchGeneration::CmBatchGeneration(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    CmBatchGeneration::CmBatchGeneration(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _usReader()
         , _confidenceGenerator()
         , _usBlurFilter(&_canvasSize)
@@ -160,7 +160,7 @@ namespace campvis {
 
         forceExecuteProcessor(&_usReader);
 
-        DataHandle dh = _data->getData(_usReader.p_targetImageID.getValue());
+        DataHandle dh = _dataContainer->getData(_usReader.p_targetImageID.getValue());
         if (dh.getData() != 0) {
             if (const ImageData* tester = dynamic_cast<const ImageData*>(dh.getData())) {
             	_canvasSize.setValue(tester->getSize().xy());
@@ -218,7 +218,7 @@ namespace campvis {
 
     void CmBatchGeneration::save(int path, const std::string& basePath) {
         // get result
-        ScopedTypedData<RenderData> rd(*_data, _usFusion.p_targetImageID.getValue());
+        ScopedTypedData<RenderData> rd(*_dataContainer, _usFusion.p_targetImageID.getValue());
         const ImageRepresentationGL* rep = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>(false);
         if (rep != 0) {
 #ifdef CAMPVIS_HAS_MODULE_DEVIL

@@ -35,8 +35,8 @@
 
 namespace campvis {
 
-    PredicateDemoShoulder::PredicateDemoShoulder(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    PredicateDemoShoulder::PredicateDemoShoulder(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _imageReader()
         , _labelReader()

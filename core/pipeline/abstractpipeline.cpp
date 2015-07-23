@@ -40,17 +40,17 @@
 namespace campvis {
     const std::string AbstractPipeline::loggerCat_ = "CAMPVis.core.datastructures.AbstractPipeline";
 
-    AbstractPipeline::AbstractPipeline(DataContainer* dc) 
+    AbstractPipeline::AbstractPipeline(DataContainer& dc) 
         : HasPropertyCollection()
         , cgt::EventHandler()
         , cgt::EventListener()
-        , _data(dc)
+        , _dataContainer(&dc)
         , _canvas(0)
         , _canvasSize("CanvasSize", "Canvas Size", cgt::ivec2(128, 128), cgt::ivec2(1, 1), cgt::ivec2(4096, 4096))
         , _ignoreCanvasSizeUpdate(false)
         , _renderTargetID("renderTargetID", "Render Target ID", "AbstractPipeline.renderTarget", DataNameProperty::READ)
     {
-        cgtAssert(_data != 0, "Pointer to the DataContainer for this pipeline must not be 0!");
+        cgtAssert(_dataContainer != nullptr, "Pointer to the DataContainer for this pipeline must not be 0!");
 
         _painter.reset(new PipelinePainter(nullptr, this));
 
@@ -65,7 +65,7 @@ namespace campvis {
     }
 
     void AbstractPipeline::init() {
-        _data->s_dataAdded.connect(this, &AbstractPipeline::onDataContainerDataAdded);
+        _dataContainer->s_dataAdded.connect(this, &AbstractPipeline::onDataContainerDataAdded);
 
         _painter->init();
         initAllProperties();
@@ -85,7 +85,7 @@ namespace campvis {
     }
 
     void AbstractPipeline::deinit() {
-        _data->s_dataAdded.disconnect(this);
+        _dataContainer->s_dataAdded.disconnect(this);
 
         // use trigger signal to enforce blocking call
         s_deinit.triggerSignal();
@@ -106,7 +106,7 @@ namespace campvis {
 
 
         // clear DataContainer
-        _data->clear();
+        _dataContainer->clear();
     }
 
     void AbstractPipeline::run() {
@@ -153,11 +153,11 @@ namespace campvis {
     }
 
     const DataContainer& AbstractPipeline::getDataContainer() const {
-        return *_data;
+        return *_dataContainer;
     }
 
     DataContainer& AbstractPipeline::getDataContainer() {
-        return *_data;
+        return *_dataContainer;
     }
 
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
@@ -171,7 +171,7 @@ namespace campvis {
                     startTime = tbb::tick_count::now();
 
                 try {
-                    processor->process(*_data);
+                    processor->process(*_dataContainer);
                 }
                 catch (std::exception& e) {
                     LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": " << e.what());

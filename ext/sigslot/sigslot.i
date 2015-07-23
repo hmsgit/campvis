@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <iostream>
 #include "tbb/recursive_mutex.h"
+#include "ext/cgt/logmanager.h"
 #include "ext/sigslot/sigslot.h"
 %}
 
@@ -52,7 +53,7 @@ namespace sigslot {
         swig_type_info* typeInfo = SWIG_TypeQuery(typeName);
 
         if (typeInfo == nullptr) {
-            std::cerr << "SWIG wrapper for " << typeName << " not found" << std::endl;
+            LogMgr.log("Lua", cgt::LuaError, "SWIG wrapper for " + std::string(typeName) + " not found");
         }
 
         return std::make_pair(arg, typeInfo);
@@ -232,9 +233,9 @@ namespace sigslot {
                     const char* errorMsg = lua_tostring(_slot_fn.L, -1);
 
                     if (errorMsg == nullptr)
-                        std::cerr << "(error object is not a string)" << std::endl;
+                        LogMgr.log("Lua", cgt::LuaError, "(error object is not a string)");
                     else
-                        std::cerr << "An error occured while calling a Lua slot function: " << errorMsg << std::endl;
+                        LogMgr.log("Lua", cgt::LuaError, "An error occured while calling a Lua slot function: " + std::string(errorMsg));
 
                     lua_pop(_slot_fn.L, 1);
                 }
