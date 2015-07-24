@@ -150,14 +150,14 @@ namespace campvis {
             return;
 
         QString textUnderCursor = text().left(cursorPosition());
-        int pos = int(textUnderCursor.toStdString().find_last_of(" .:()[]{}"));
+        size_t pos = textUnderCursor.toStdString().find_last_of(" .:()[]{}");
         if (pos == std::string::npos)
             pos = 0;
         else
             pos += 1;
 
         QString fullText = text();
-        fullText.replace(pos, textUnderCursor.length() - pos, completitionString);
+        fullText.replace(int(pos), textUnderCursor.length() - int(pos), completitionString);
         setText(fullText);
     }
 

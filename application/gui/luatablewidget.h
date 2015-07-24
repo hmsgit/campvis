@@ -68,7 +68,7 @@ namespace campvis {
     /// The Root Item
     class CAMPVIS_APPLICATION_API LuaTreeRootItem : public TreeItem {
     public:
-        LuaTreeRootItem(TreeItem* parent = 0);
+        explicit LuaTreeRootItem(TreeItem* parent = 0);
         virtual ~LuaTreeRootItem();
 
         /// \see TreeItem::getData()

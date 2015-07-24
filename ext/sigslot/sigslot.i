@@ -19,6 +19,10 @@
 %}
 
 
+%ignore ArgWithTypeInfoType;
+%ignore argWithTypeInfoListCons;
+
+
 %inline {
 namespace sigslot {
 
@@ -570,6 +574,24 @@ namespace sigslot {
                     ++it;
                 }
             }
+
+            void disconnectAllLuaSlots() {
+                typedef sigslot::_signal_base0::connections_list connections_list;
+                connections_list::iterator it = $self->m_connected_slots.begin();
+                connections_list::iterator itEnd = $self->m_connected_slots.end();
+
+                while (it != itEnd) {
+                    sigslot::_lua_connection0<>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection0<>*>(*it);
+
+                    if (lua_connection != nullptr) {
+                        delete lua_connection;
+                        $self->m_connected_slots.erase(it);
+                    }
+
+                    ++it;
+                }
+            }
         }
     };
 
@@ -599,7 +621,6 @@ namespace sigslot {
              */
             void disconnect(SWIGLUA_REF slot_fn) {
                 typedef sigslot::_signal_base1<arg1_type>::connections_list connections_list;
-
                 connections_list::iterator it = $self->m_connected_slots.begin();
                 connections_list::iterator itEnd = $self->m_connected_slots.end();
 
@@ -611,6 +632,24 @@ namespace sigslot {
                         delete lua_connection;
                         $self->m_connected_slots.erase(it);
                         return;
+                    }
+
+                    ++it;
+                }
+            }
+
+            void disconnectAllLuaSlots() {
+                typedef sigslot::_signal_base1<arg1_type>::connections_list connections_list;
+                connections_list::iterator it = $self->m_connected_slots.begin();
+                connections_list::iterator itEnd = $self->m_connected_slots.end();
+
+                while (it != itEnd) {
+                    sigslot::_lua_connection1<arg1_type>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection1<arg1_type>*>(*it);
+
+                    if (lua_connection != nullptr) {
+                        delete lua_connection;
+                        $self->m_connected_slots.erase(it);
                     }
 
                     ++it;
@@ -724,6 +763,24 @@ namespace sigslot {
                     ++it;
                 }
             }
+
+            void disconnectAllLuaSlots() {
+                typedef sigslot::_signal_base3<arg1_type, arg2_type, arg3_type>::connections_list connections_list;
+                connections_list::iterator it = $self->m_connected_slots.begin();
+                connections_list::iterator itEnd = $self->m_connected_slots.end();
+
+                while (it != itEnd) {
+                    sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type>*>(*it);
+
+                    if (lua_connection != nullptr) {
+                        delete lua_connection;
+                        $self->m_connected_slots.erase(it);
+                    }
+
+                    ++it;
+                }
+            }
         }
     };
 
@@ -764,6 +821,24 @@ namespace sigslot {
                         delete lua_connection;
                         $self->m_connected_slots.erase(it);
                         return;
+                    }
+
+                    ++it;
+                }
+            }
+
+            void disconnectAllLuaSlots() {
+                typedef sigslot::_signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>::connections_list connections_list;
+                connections_list::iterator it = $self->m_connected_slots.begin();
+                connections_list::iterator itEnd = $self->m_connected_slots.end();
+
+                while (it != itEnd) {
+                    sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type>*>(*it);
+
+                    if (lua_connection != nullptr) {
+                        delete lua_connection;
+                        $self->m_connected_slots.erase(it);
                     }
 
                     ++it;
@@ -810,6 +885,25 @@ namespace sigslot {
                         delete lua_connection;
                         $self->m_connected_slots.erase(it);
                         return;
+                    }
+
+                    ++it;
+                }
+            }
+
+            void disconnectAllLuaSlots() {
+                typedef sigslot::_signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>::connections_list connections_list;
+                connections_list::iterator it = $self->m_connected_slots.begin();
+                connections_list::iterator itEnd = $self->m_connected_slots.end();
+
+                while (it != itEnd) {
+                    sigslot::_lua_connection5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection5<arg1_type, arg2_type, arg3_type, arg4_type,
+                                                                   arg5_type>*>(*it);
+
+                    if (lua_connection != nullptr) {
+                        delete lua_connection;
+                        $self->m_connected_slots.erase(it);
                     }
 
                     ++it;

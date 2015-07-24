@@ -178,11 +178,10 @@ namespace campvis {
                 if (itemName == "_G")
                     continue;
 
-                LuaTreeItem* lti = nullptr;
                 if (luaType == LUA_TTABLE) 
-                    lti = new LuaTreeItemTable(_modelStyle, false, thisTable->getTable(itemName), itemName, luaType, this);
+                    new LuaTreeItemTable(_modelStyle, false, thisTable->getTable(itemName), itemName, luaType, this);
                 else 
-                    lti = new LuaTreeItemLeaf(_modelStyle, thisTable, itemName, luaType, this);
+                    new LuaTreeItemLeaf(_modelStyle, thisTable, itemName, luaType, this);
             }
         }
         else if (_modelStyle == COMPLETER_MODEL) {
@@ -196,11 +195,10 @@ namespace campvis {
                     if (itemName == "_G")
                         continue;
 
-                    LuaTreeItem* lti = nullptr;
                     if (luaType == LUA_TTABLE) 
-                        lti = new LuaTreeItemTable(_modelStyle, false, thisTable->getTable(itemName), itemName, luaType, this);
+                        new LuaTreeItemTable(_modelStyle, false, thisTable->getTable(itemName), itemName, luaType, this);
                     else 
-                        lti = new LuaTreeItemLeaf(_modelStyle, thisTable, itemName, luaType, this);
+                        new LuaTreeItemLeaf(_modelStyle, thisTable, itemName, luaType, this);
                 }
             }
             else {

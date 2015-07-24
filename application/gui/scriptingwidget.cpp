@@ -32,8 +32,8 @@ namespace campvis {
 
     ScriptingWidget::ScriptingWidget(QWidget* parent)
         : QWidget(parent)
-        , _consoleDisplay(nullptr)
         , _editCommand(nullptr)
+        , _consoleDisplay(nullptr)
         , _btnExecute(nullptr)
         , _btnClear(nullptr)
         , _currentPosition(-1)
