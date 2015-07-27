@@ -43,8 +43,10 @@ namespace campvis {
     public:
         /**
          * Small demo pipeline for tensor data visualization.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        explicit TensorDemo(DataContainer* dc);
+        explicit TensorDemo(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -54,9 +56,6 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        /// \see AbstractPipeline::getId()
         static const std::string getId() { return "TensorDemo"; };
 
     protected:

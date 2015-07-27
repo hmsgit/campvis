@@ -59,8 +59,10 @@ namespace campvis {
         /**
          * Adds the given property \a prop to the set of shared properties.
          * All shared properties will be changed when this property changes.
+         * 
          * \note        Make sure not to build circular sharing or you will encounter endless loops!
          * \param prop  Property to add, must be of the same type as this property.
+         * \return  true if \a prop was added successfully, false otherwise (e.g. if types do not match).
          */
         virtual void addSharedProperty(AbstractProperty* prop);
 
@@ -78,6 +80,17 @@ namespace campvis {
          */
         virtual void setValue(const T& value);
 
+
+        /**
+         * Returns the default value of this property as it was set during construction.
+         * \return  _defaultValue
+         */
+        const T& getDefaultValue() const;
+
+        /**
+         * Resets this property to the default value of this property as it was set during construction.
+         */
+        void resetToDefaultValue();
 
         /**
          * Unlocks the property. If the back buffer has changed, the changes will be written to the front
@@ -110,7 +123,8 @@ namespace campvis {
          */
         void setBackValue(const T& value);
 
-        
+
+        const T _defaultValue;                  ///< default value of the property as set during construction
         T _value;                               ///< value of the property
         T _backBuffer;                          ///< back buffer for values when property is in use
 
@@ -126,6 +140,7 @@ namespace campvis {
     template<typename T>
     campvis::GenericProperty<T>::GenericProperty(const std::string& name, const std::string& title, const T& value) 
         : AbstractProperty(name, title)
+        , _defaultValue(value)
         , _value(value)
         , _backBuffer(value)
     {
@@ -138,8 +153,9 @@ namespace campvis {
 
     template<typename T>
     void campvis::GenericProperty<T>::addSharedProperty(AbstractProperty* prop) {
-        // make type check first, then call base method.
         cgtAssert(prop != 0, "Shared property must not be 0!");
+
+        // make type check first, then call base method.
         if (GenericProperty<T>* tmp = dynamic_cast< GenericProperty<T>* >(prop)) {
             AbstractProperty::addSharedProperty(prop);
             tmp->setValue(getValue());
@@ -164,6 +180,16 @@ namespace campvis {
             setFrontValue(vv);
             setBackValue(vv);
         }
+    }
+
+    template<typename T>
+    const T& campvis::GenericProperty<T>::getDefaultValue() const {
+        return  _defaultValue;
+    }
+
+    template<typename T>
+    void campvis::GenericProperty<T>::resetToDefaultValue() {
+        setValue(_defaultValue);
     }
 
     template<typename T>

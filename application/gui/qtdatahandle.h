@@ -26,6 +26,8 @@
 #define QTQtDataHandle_H__
 
 #include "core/datastructures/datahandle.h"
+#include "application/applicationapi.h"
+
 #include <QMetaType>
 
 namespace campvis {
@@ -33,7 +35,7 @@ namespace campvis {
     /**
      * Wraps around a DataHandle to make it suitable for QVariant and queued connections.
      */
-    class QtDataHandle : public DataHandle {
+    class CAMPVIS_APPLICATION_API QtDataHandle : public DataHandle {
     public:
         /**
          * Creates a new QtDataHandle for the given data.

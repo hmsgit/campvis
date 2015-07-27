@@ -27,8 +27,10 @@
 
 #include "sigslot/sigslot.h"
 
-#include "application/gui/properties/propertycollectionwidget.h"
 #include "modules/io/processors/genericimagereader.h"
+
+#include "application/applicationapi.h"
+#include "application/gui/properties/propertycollectionwidget.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 
 #include <QScrollArea>

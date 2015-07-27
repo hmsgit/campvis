@@ -36,9 +36,11 @@ namespace campvis {
 
     std::string IntPropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
         std::string ret = "";
-        ret += luaProc;
-        ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(" 
-            + StringUtils::toString( static_cast<IntProperty*>(_property)->getValue() ) + ")";
+        if (static_cast<IntProperty*>(_property)->getValue() != static_cast<IntProperty*>(_property)->getDefaultValue()) {
+            ret += luaProc;
+            ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(" 
+                + StringUtils::toString( static_cast<IntProperty*>(_property)->getValue() ) + ")";
+        }
         return ret;
     }
 

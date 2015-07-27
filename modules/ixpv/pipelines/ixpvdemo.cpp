@@ -32,8 +32,8 @@
 
 namespace campvis {
 
-    IxpvDemo::IxpvDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    IxpvDemo::IxpvDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _tcp(&_canvasSize)
         , _xrayReader()
         , _ctReader()
@@ -130,7 +130,7 @@ namespace campvis {
 
     void IxpvDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_ctReader) {
-            ImageRepresentationLocal::ScopedRepresentation local(*_data, _ctReader.p_targetImageID.getValue());
+            ImageRepresentationLocal::ScopedRepresentation local(*_dataContainer, _ctReader.p_targetImageID.getValue());
             if (local != 0) {
                 // update camera
                 cgt::Bounds volumeExtent = local->getParent()->getWorldBounds();
@@ -144,7 +144,7 @@ namespace campvis {
         }
         else if (processor == &_usReader) {
             // set TF handles
-            ImageRepresentationLocal::ScopedRepresentation local(*_data, _usReader.p_targetImageID.getValue());
+            ImageRepresentationLocal::ScopedRepresentation local(*_dataContainer, _usReader.p_targetImageID.getValue());
             if (local != 0) {
                 Interval<float> ii = local->getNormalizedIntensityRange();
                 _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(cgt::vec2(ii.getLeft(), ii.getRight()));

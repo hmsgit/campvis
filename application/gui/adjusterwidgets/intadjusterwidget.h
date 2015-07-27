@@ -26,6 +26,7 @@
 #define INTADJUSTERWIDGET_H__
 
 #include "abstractadjusterwidget.h"
+#include "application/applicationapi.h"
 
 namespace campvis {
     /**
@@ -34,7 +35,7 @@ namespace campvis {
      * IntAdjusterWidget consists of a slider, which can be used to quickly change integer values, and a spin box,
      * which is better suited for precise adjustments.
      */
-    class IntAdjusterWidget : public AbstractAdjusterWidget<int> {
+    class CAMPVIS_APPLICATION_API IntAdjusterWidget : public AbstractAdjusterWidget<int> {
         Q_OBJECT
 
     public:

@@ -7,7 +7,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 MESSAGE(STATUS "Configuring sigslot Library")
 
 # headers
-SET(SIGSLOT_HEADERS sigslot.h)
+SET(SIGSLOT_HEADERS sigslot.h sigslot.i)
 
 # sources
 SET(SIGSLOT_SOURCES sigslot.cpp)

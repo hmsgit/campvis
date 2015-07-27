@@ -31,8 +31,8 @@
 
 namespace campvis {
 
-    TensorDemo::TensorDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    TensorDemo::TensorDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()

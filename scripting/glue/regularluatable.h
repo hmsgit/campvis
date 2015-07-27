@@ -26,19 +26,17 @@
 #define REGULARLUATABLE_H__
 
 #include "luatable.h"
-
+#include "scripting/scriptingapi.h"
 
 namespace campvis {
 
     /**
      * Class representing regular Lua tables.
      *
-     * Regular tables can be defined by exclusion: any Lua table that is not a global table is
-     * a regular one. Tables are Lua's only built-in composite data type. Consequently, they serve
-     * multiple purposes, including emulation of classes and objects.
+     * Regular tables can be defined by exclusion: any Lua table that is not a global table or a
+     * metatable is a regular one. 
      */
-    class RegularLuaTable : public LuaTable
-    {
+    class CAMPVIS_SCRIPTING_API RegularLuaTable : public LuaTable {
     public:
         /**
          * Creates a new RegularLuaTable.
@@ -53,22 +51,19 @@ namespace campvis {
          */
         virtual ~RegularLuaTable();
 
-        /// \see LuaTable::isValid()
-        virtual bool isValid();
-
-        /// \see LuaTable::getTable(const std::string&)
-        virtual std::shared_ptr<LuaTable> getTable(const std::string& name);
-
-        /// \see LuaTable::callInstanceMethod(const std::string&)
-        virtual void callInstanceMethod(const std::string& name);
+        virtual bool isValid() override;
+        virtual void callInstanceMethod(const std::string& name) override;
+        
+        virtual void pushField(const std::string& name) override;
+        virtual void popRecursive() override;
 
     protected:
-        /// \see LuaTable::pushField(const std::string&)
-        virtual void pushField(const std::string& name);
+        virtual void populateValueMap() override;
+        virtual LuaTable* getParentTable() override;
 
     private:
-        std::shared_ptr<LuaTable> _parent;  ///< Lua table in which this table is stored
-        std::string _name;                  ///< Name of this table
+        std::shared_ptr<LuaTable> _parent;  ///< Lua table in which this table is stored.
+        std::string _name;                  ///< Name of this table in _parent.
     };
 }
 

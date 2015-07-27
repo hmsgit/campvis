@@ -22,8 +22,10 @@
 // 
 // ================================================================================================
 
-#include "cgt/assert.h"
+
 #include "treeitem.h"
+#include "cgt/assert.h"
+#include <iostream>
 
 namespace campvis {
 

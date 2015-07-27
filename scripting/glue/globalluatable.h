@@ -26,8 +26,7 @@
 #define GLOBALLUATABLE_H__
 
 #include "luatable.h"
-#include "luavmstate.h"
-
+#include "scripting/scriptingapi.h"
 
 namespace campvis {
 
@@ -38,8 +37,7 @@ namespace campvis {
      * a result, they must be used in order to interact with Lua states and access user-defined
      * values.
      */
-    class GlobalLuaTable : public LuaTable
-    {
+    class CAMPVIS_SCRIPTING_API GlobalLuaTable : public LuaTable {
     public:
         /**
          * Creates a new GlobalLuaTable.
@@ -53,19 +51,17 @@ namespace campvis {
          */
         virtual ~GlobalLuaTable();
 
-        /// \see LuaTable::isValid()
-        virtual bool isValid();
+        virtual bool isValid() override;
+        virtual void callInstanceMethod(const std::string& name) override;
 
-        /// \see LuaTable::getTable(const std::string&)
-        virtual std::shared_ptr<LuaTable> getTable(const std::string& name);
-
-        /// \see LuaTable::callInstanceMethod(const std::string&)
-        virtual void callInstanceMethod(const std::string& name);
-
+        virtual void pushField(const std::string& name) override;
+        virtual void popRecursive() override;
+        
     protected:
-        /// \see LuaTable::pushField(const std::string&)
-        virtual void pushField(const std::string& name);
+        virtual void populateValueMap() override;
+        virtual LuaTable* getParentTable() override;
     };
+
 }
 
 #endif // GLOBALLUATABLE_H__

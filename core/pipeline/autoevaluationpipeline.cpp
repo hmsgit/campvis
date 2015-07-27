@@ -34,12 +34,17 @@
 namespace campvis {
     const std::string AutoEvaluationPipeline::loggerCat_ = "CAMPVis.core.datastructures.AutoEvaluationPipeline";
 
-    AutoEvaluationPipeline::AutoEvaluationPipeline(DataContainer* dc)
-        : AbstractPipeline(dc)
+    AutoEvaluationPipeline::AutoEvaluationPipeline(DataContainer& dataContainer, const std::string& pipelineName)
+        : AbstractPipeline(dataContainer)
+        , _pipelineName(pipelineName)
     {
     }
 
     AutoEvaluationPipeline::~AutoEvaluationPipeline() {
+    }
+
+    std::string AutoEvaluationPipeline::getName() const  {
+        return _pipelineName;
     }
 
     void AutoEvaluationPipeline::init() {

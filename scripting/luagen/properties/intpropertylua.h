@@ -27,6 +27,8 @@
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
+
+#include "scripting/scriptingapi.h"
 #include "core/properties/numericproperty.h"
 #include "core/tools/stringutils.h"
 
@@ -34,7 +36,7 @@ namespace campvis {
     /**
      * Lua generator for a IntProperty
      */
-    class IntPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API IntPropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new IntPropertyLua for the property \a property.

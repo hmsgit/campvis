@@ -34,8 +34,8 @@
 
 namespace campvis {
 
-    AdvDVRVis::AdvDVRVis(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    AdvDVRVis::AdvDVRVis(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _imageReader()
         , _resampler(&_canvasSize)

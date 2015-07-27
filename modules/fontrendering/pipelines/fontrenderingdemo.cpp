@@ -29,8 +29,8 @@ namespace campvis {
 
     namespace fontrendering {
 
-        FontRenderingDemo::FontRenderingDemo(DataContainer* dc)
-            : AutoEvaluationPipeline(dc)
+        FontRenderingDemo::FontRenderingDemo(DataContainer& dc)
+            : AutoEvaluationPipeline(dc, getId())
             , _tr(&_canvasSize)
         {
             addProcessor(&_tr);

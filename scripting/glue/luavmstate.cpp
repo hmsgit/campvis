@@ -135,7 +135,10 @@ namespace campvis {
     }
 
     std::shared_ptr<GlobalLuaTable> LuaVmState::getGlobalTable() {
-        return std::shared_ptr<GlobalLuaTable>(new GlobalLuaTable(*this));
+        if (! _globalLuaTable)
+            _globalLuaTable = std::make_shared<GlobalLuaTable>(*this);
+
+        return _globalLuaTable;
     }
 
     lua_State* LuaVmState::rawState() const {

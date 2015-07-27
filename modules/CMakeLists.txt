@@ -3,11 +3,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 #INCLUDE(../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring CAMPVis-Modules")
-WRITE_PIPELINE_REGISTRATION("gen_pipelineregistration.h")
 
 LIST(APPEND CampvisModulesHeaders
     modulesapi.h
-    gen_pipelineregistration.h
 )
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})

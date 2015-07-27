@@ -35,8 +35,8 @@
 
 namespace campvis {
 
-    PredicateDemoAchilles::PredicateDemoAchilles(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    PredicateDemoAchilles::PredicateDemoAchilles(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _imageReader()
         , _labelReader()

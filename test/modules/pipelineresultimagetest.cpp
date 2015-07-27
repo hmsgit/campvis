@@ -83,7 +83,7 @@ protected:
 
     void init() {
         // create pipeline
-        _pipeline = PipelineFactory::getRef().createPipeline(_pipelineName, &_dataContainer);
+        _pipeline = PipelineFactory::getRef().createPipeline(_pipelineName, _dataContainer);
 
         if (_pipeline != nullptr) {
             // setup pipeline
@@ -105,6 +105,8 @@ protected:
 
     void execute() {
         if (_pipeline != nullptr) {
+            sigslot::signal_manager::getRef().waitForSignalQueueFlushed();
+
             for (size_t i = 0; i < _pipeline->getProcessors().size(); ++i)
                 _pipeline->executePipeline();
 
@@ -115,6 +117,8 @@ protected:
             _imageWriter.process(_dataContainer);
 
             _wroteFile = cgt::FileSystem::fileExists(_fileName);
+
+            sigslot::signal_manager::getRef().waitForSignalQueueFlushed();
         }
     }
 

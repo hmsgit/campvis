@@ -25,6 +25,7 @@
 #ifndef BOOLPROPERTYWIDGET_H__
 #define BOOLPROPERTYWIDGET_H__
 
+#include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/genericproperty.h"
@@ -35,7 +36,7 @@ namespace campvis {
     /**
      * Widget for a IntProperty
      */
-    class BoolPropertyWidget : public AbstractPropertyWidget {
+    class CAMPVIS_APPLICATION_API BoolPropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT;
 
     public:

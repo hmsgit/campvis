@@ -25,8 +25,10 @@
 #ifndef STRINGPROPERTYWIDGET_H__
 #define STRINGPROPERTYWIDGET_H__
 
+#include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertywidgetfactory.h"
+
 #include "core/properties/stringproperty.h"
 
 class QLineEdit;
@@ -36,7 +38,7 @@ namespace campvis {
     /**
      * Widget for a StringProperty
      */
-    class StringPropertyWidget : public AbstractPropertyWidget {
+    class CAMPVIS_APPLICATION_API StringPropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT;
 
     public:

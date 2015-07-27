@@ -25,6 +25,7 @@
 #ifndef MDIDOCKEDWINDOW_H__
 #define MDIDOCKEDWINDOW_H__
 
+#include "application/gui/qtcolortools.h"
 #include <QMdiSubWindow>
 
 namespace campvis {
@@ -38,7 +39,7 @@ namespace campvis {
      * MdiDockedWindow implements additional methods (stopWindowDrag) that should be used to
      * coordinate its detaching with respect to grabbing/releasing the mouse input.
      */
-    class MdiDockedWindow : public QMdiSubWindow {
+    class CAMPVIS_APPLICATION_API MdiDockedWindow : public QMdiSubWindow {
 
         Q_OBJECT
 

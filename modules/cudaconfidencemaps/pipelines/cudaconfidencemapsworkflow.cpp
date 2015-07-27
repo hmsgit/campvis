@@ -32,7 +32,7 @@ namespace campvis {
         , p_pipelineProperties("PipelineProperties", "Main Settings")
         , _demoPipeline(nullptr)
     {
-        _demoPipeline = new CudaConfidenceMapsDemo(_dataContainer);
+        _demoPipeline = new CudaConfidenceMapsDemo(*_dataContainer);
         p_pipelineProperties.addPropertyCollection(*_demoPipeline);
 
 

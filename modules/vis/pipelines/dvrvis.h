@@ -46,9 +46,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API DVRVis : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a DVRVis pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        explicit DVRVis(DataContainer* dc);
+        explicit DVRVis(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -58,8 +60,6 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "DVRVis"; };
 
     protected:

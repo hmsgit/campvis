@@ -35,8 +35,8 @@
 
 namespace campvis {
 
-    IvusTcDemo::IvusTcDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    IvusTcDemo::IvusTcDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , p_sourceDirectory("SoruceDirectory", "Source Directory", "D:/Medical Data/IVUS/H52 LAD1", StringProperty::DIRECTORY)
         , p_readImagesButton("ReadImagesButton", "Read Images")
         , p_predicateHistogram("PredicateHistogram", "Voxel Predicate Selection")

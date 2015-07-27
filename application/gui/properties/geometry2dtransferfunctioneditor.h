@@ -49,7 +49,7 @@ namespace campvis {
     /**
      * Editor widget for a Geometry2DTransferFunction.
      */
-    class Geometry2DTransferFunctionEditor : public AbstractTransferFunctionEditor, public cgt::EventListener, public cgt::Painter {
+    class CAMPVIS_APPLICATION_API Geometry2DTransferFunctionEditor : public AbstractTransferFunctionEditor, public cgt::EventListener, public cgt::Painter {
         Q_OBJECT;
 
     public:

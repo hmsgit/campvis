@@ -64,10 +64,10 @@ namespace campvis {
          * If you derive from AbstractPipeline, you will have to implement the pipeline evaluation
          * logic yourself. You might want to have a look at AutoEvaluationPipeline.
          * 
-         * \param   dc  Pointer to the DataContainer containing local working set of data for this 
-         *              pipeline, must not be 0, must be valid the whole lifetime of this pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        explicit AbstractPipeline(DataContainer* dc);
+        explicit AbstractPipeline(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -78,7 +78,7 @@ namespace campvis {
          * Gets the name of this very pipeline. To be defined by every subclass.
          * \return  The name of this pipeline.
          */
-        virtual const std::string getName() const = 0;
+        virtual std::string getName() const = 0;
 
 
         /**
@@ -143,13 +143,13 @@ namespace campvis {
 
         /**
          * Returns the DataContainer of this pipeline, const version.
-         * \return _data
+         * \return _dataContainer
          */
         const DataContainer& getDataContainer() const;
 
         /**
          * Returns the DataContainer of this pipeline, non-const version.
-         * \return _data
+         * \return _dataContainer
          */
         DataContainer& getDataContainer();
 
@@ -171,7 +171,7 @@ namespace campvis {
          * \param   index    The index of the processor to get
          * \return  The first processor whose name matches \a name, 0 if no such processor exists.
          */
-        AbstractProcessor* getProcessor(int index) const;
+        AbstractProcessor* getProcessor(size_t index) const;
 
         /**
          * Gets the flag whether this pipeline is currently enabled.
@@ -213,7 +213,7 @@ namespace campvis {
          * Returns the canvas size 
          * \return  The IVec2Property with current canvas size on it
          */
-        IVec2Property& getCanvasSize() {return _canvasSize;}
+        IVec2Property& getCanvasSize() { return _canvasSize; }
 
         /**
          * Returns this pipelines PipelinePainter.
@@ -263,7 +263,7 @@ namespace campvis {
 
 
         /// Pointer to the DataContainer containing local working set of data for this Pipeline, must not be 0.
-        DataContainer* _data;
+        DataContainer* _dataContainer;
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
 

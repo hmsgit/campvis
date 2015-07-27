@@ -30,8 +30,8 @@
 namespace campvis {
 namespace workflowdemo {
 
-    ImageLoading::ImageLoading(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    ImageLoading::ImageLoading(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _imageReader()
     {
         addProcessor(&_imageReader);

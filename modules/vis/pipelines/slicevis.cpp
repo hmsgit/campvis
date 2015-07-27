@@ -31,8 +31,8 @@
 
 namespace campvis {
 
-    SliceVis::SliceVis(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    SliceVis::SliceVis(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _imageReader()
         , _sliceExtractor(&_canvasSize)
         , _wheelHandler(&_sliceExtractor.p_zSliceNumber)
@@ -82,7 +82,7 @@ namespace campvis {
 
     void SliceVis::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
-            ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
+            ScopedTypedData<ImageData> img(*_dataContainer, _imageReader.p_targetImageID.getValue());
             if (img != 0) {
                 _sliceExtractor.p_transferFunction.setImageHandle(img.getDataHandle());
             }

@@ -31,8 +31,8 @@
 
 namespace campvis {
 
-    DVRVis::DVRVis(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    DVRVis::DVRVis(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()

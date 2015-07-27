@@ -36,8 +36,8 @@
 
 namespace campvis {
 
-    GeometryRendererDemo::GeometryRendererDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    GeometryRendererDemo::GeometryRendererDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _tcp(&_canvasSize)
         , _lsp()
         , _geometryReader()
@@ -129,9 +129,9 @@ namespace campvis {
     void GeometryRendererDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_geometryReader) {
             // update camera
-            ScopedTypedData<IHasWorldBounds> lv(*_data, _geometryReader.p_targetImageID.getValue());
-            ScopedTypedData<IHasWorldBounds> teapot(*_data, "teapot");
-            ScopedTypedData<IHasWorldBounds> cube(*_data, "cube");
+            ScopedTypedData<IHasWorldBounds> lv(*_dataContainer, _geometryReader.p_targetImageID.getValue());
+            ScopedTypedData<IHasWorldBounds> teapot(*_dataContainer, "teapot");
+            ScopedTypedData<IHasWorldBounds> cube(*_dataContainer, "cube");
             if (lv != 0 && teapot != 0) {
                 cgt::Bounds unionBounds;
                 unionBounds.addVolume(lv->getWorldBounds());

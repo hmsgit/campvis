@@ -37,8 +37,8 @@ namespace campvis {
         GenericOption<std::string>("particles", "Particle Simulation"),
     };
 
-    VectorFieldDemo::VectorFieldDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    VectorFieldDemo::VectorFieldDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()
@@ -132,7 +132,7 @@ namespace campvis {
     void VectorFieldDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             // update camera
-            ScopedTypedData<ImageData> img(*_data, _sliceRenderer.p_sourceImageID.getValue());
+            ScopedTypedData<ImageData> img(*_dataContainer, _sliceRenderer.p_sourceImageID.getValue());
             if (img) {
                 p_sliceNumber.setMaxValue(static_cast<int>(img->getSize().z));
             }

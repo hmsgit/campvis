@@ -29,8 +29,8 @@
 
 namespace campvis {
 
-    ItkFilterDemo::ItkFilterDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    ItkFilterDemo::ItkFilterDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _imageReader()
         , _itkFilter()

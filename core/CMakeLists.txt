@@ -2,7 +2,7 @@ PROJECT(campvis-core)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 #INCLUDE(../cmake/commonconf.cmake)
 
-MESSAGE(STATUS "Configuring CAMPVis Core")
+MESSAGE(STATUS "Configuring CAMPVis-Core")
 
 # glob sources from core directories
 FILE(GLOB CampvisCoreSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -54,7 +54,6 @@ TARGET_LINK_LIBRARIES(campvis-core cgt sigslot ${CampvisGlobalExternalLibs})
 # if campvis-core is built as a shared library, CMake will define the following flag to instruct
 # the code to export DLL symbols
 SET_TARGET_PROPERTIES(campvis-core PROPERTIES DEFINE_SYMBOL "CAMPVIS_CORE_BUILD_DLL")
-
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisCoreSources ${CampvisHome} "")

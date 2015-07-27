@@ -59,8 +59,8 @@ namespace registration {
         GenericOption<nlopt::algorithm>("neldermead", "Nelder-Mead Simplex", nlopt::LN_NELDERMEAD)
     };
 
-    NloptRegistration::NloptRegistration(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    NloptRegistration::NloptRegistration(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , p_optimizer("Optimizer", "Optimizer", optimizers, 3)
         , p_liveUpdate("LiveUpdate", "Live Update of Difference Image", false)
         , p_performOptimization("PerformOptimization", "Perform Optimization")
@@ -202,7 +202,7 @@ namespace registration {
             _sm.p_rotation.setValue(r);
 
             // compute difference image and render difference volume
-            _sm.generateDifferenceImage(_data, referenceImage, movingImage, t, r);
+            _sm.generateDifferenceImage(_dataContainer, referenceImage, movingImage, t, r);
             _ve.process(getDataContainer());
         }
 

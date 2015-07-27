@@ -28,8 +28,8 @@
 
 namespace campvis {
 
-    StreamingOIGTLDemo::StreamingOIGTLDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    StreamingOIGTLDemo::StreamingOIGTLDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
     {
         addProcessor(&_igtlClient);
         addProcessor(&_matrixProcessor);

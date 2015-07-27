@@ -1,11 +1,13 @@
 %module devil
 
 %include std_string.i
-%include "core/bindings/campvis.i"
+%import "core/bindings/campvis.i"
 
 %{
-#include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/allproperties.h"
+#include "core/pipeline/abstractworkflow.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/visualizationprocessor.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/devil/processors/devilimagewriter.h"
 %}

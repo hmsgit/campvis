@@ -25,7 +25,7 @@
 #ifndef TREEITEM_H__
 #define TREEITEM_H__
 
-#include <iostream>
+#include "application/applicationapi.h"
 
 #include <QList>
 #include <QVariant>
@@ -35,7 +35,7 @@ namespace campvis {
     /**
      * Abstract base class for TreeView items of the PipelineTreeWidget.
      */
-    class TreeItem {
+    class CAMPVIS_APPLICATION_API TreeItem {
     public:
         /**
          * Creates a new TreeItem

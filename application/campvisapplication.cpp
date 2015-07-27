@@ -49,12 +49,12 @@
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/pipeline/visualizationprocessor.h"
 
-#include "application/tools/qtjobprocessor.h"
+#include "tools/qtjobprocessor.h"
 
 #include <QApplication>
 
 #ifdef CAMPVIS_HAS_SCRIPTING
-#include "scripting/gen_pipelineregistration.h"
+#include "scripting/glue/luavmstate.h"
 #endif
 
 namespace campvis {
@@ -115,9 +115,11 @@ namespace campvis {
                 LERROR("Error setting up Lua VM.");
 
             // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
+            if (! _luaVmState->execString("require(\"cgt\")"))
+                LERROR("Error setting up Lua VM.");
             if (! _luaVmState->execString("require(\"campvis\")"))
                 LERROR("Error setting up Lua VM.");
-            if (! _luaVmState->execString("require(\"cgt\")"))
+            if (! _luaVmState->execString("require(\"application\")"))
                 LERROR("Error setting up Lua VM.");
 
             if (! _luaVmState->execString("pipelines = {}"))
@@ -125,6 +127,9 @@ namespace campvis {
 
             if (! _luaVmState->execString("inspect = require 'inspect'"))
                 LERROR("Error setting up Lua VM.");
+
+            if (! _luaVmState->injectGlobalObjectPointer(this, "campvis::CampVisApplication *", "application"))
+                LERROR("Could not inject the pipeline into the Lua VM.");
 #endif
         }
 
@@ -142,7 +147,7 @@ namespace campvis {
 
                     std::vector<AbstractPipeline*> pipelines = w->getPipelines();
                     for (auto it = pipelines.begin(); it != pipelines.end(); ++it) {
-                        addPipeline((*it)->getName(), *it);
+                        addPipeline(*it);
                     }
 
                     _workflows.push_back(w);
@@ -158,12 +163,12 @@ namespace campvis {
             }
             else {
                 DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
-                AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), dc);
+                AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), *dc);
                 if (p != nullptr)
-                    addPipeline(pipelinesToAdd[i].toStdString(), p);
+                    addPipeline(p);
             }
         }
-        
+
         _initialized = true;
     }
 
@@ -221,31 +226,29 @@ namespace campvis {
         return toReturn;
     }
 
-    void CampVisApplication::addPipeline(const std::string& name, AbstractPipeline* pipeline) {
+
+    void CampVisApplication::addPipeline(AbstractPipeline* pipeline) {
         cgtAssert(pipeline != 0, "Pipeline must not be 0.");
 
         // create canvas and painter for the pipeline and connect all together
-        cgt::QtThreadedCanvas* canvas = new cgt::QtThreadedCanvas("CAMPVis", cgt::ivec2(512, 512));
+        cgt::QtThreadedCanvas* canvas = new cgt::QtThreadedCanvas(pipeline->getName(), cgt::ivec2(512, 512));
         canvas->init();
 
         pipeline->setCanvas(canvas);
         pipeline->getPipelinePainter()->setErrorTexture(_errorTexture);
 
         _pipelines.push_back(pipeline);
-        _pipelineWindows[pipeline] = _mainWindow->addVisualizationPipelineWidget(name, canvas);
+        _pipelineWindows[pipeline] = _mainWindow->addVisualizationPipelineWidget(pipeline->getName(), canvas);
 
         // initialize context (GLEW) and pipeline in OpenGL thread)
         initGlContextAndPipeline(canvas, pipeline);
 
 #ifdef CAMPVIS_HAS_SCRIPTING
         if (! _luaVmState->injectObjectPointerToTable(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", static_cast<int>(_pipelines.size())))
-        //if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", name))
             LERROR("Could not inject the pipeline into the Lua VM.");
 
         if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", pipeline->getName()))
             LERROR("Could not inject the pipeline into the Lua VM.");
-
-        _luaVmState->execString("inspect(pipelines)");
 #endif
 
         GLCtxtMgr.releaseContext(canvas, false);
@@ -296,7 +299,7 @@ namespace campvis {
         for (auto it = _pipelines.begin(); it != _pipelines.end(); ++it) {
             for (auto pit = (*it)->getProcessors().cbegin(); pit != (*it)->getProcessors().cend(); ++pit) {
                 if (VisualizationProcessor* tester = dynamic_cast<VisualizationProcessor*>(*pit)) {
-                	tester->invalidate(AbstractProcessor::INVALID_RESULT);
+                    tester->invalidate(AbstractProcessor::INVALID_RESULT);
                 }
             }
         }
@@ -316,3 +319,4 @@ namespace campvis {
     }
 
 }
+

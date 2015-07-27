@@ -25,12 +25,13 @@
 #ifndef LOGHIGHLIGHTER_H__
 #define LOGHIGHLIGHTER_H__
 
+#include "application/applicationapi.h"
 #include <QTextEdit>
 #include <QSyntaxHighlighter>
 
 namespace campvis {
 
-    class LogHighlighter : public QSyntaxHighlighter {
+    class CAMPVIS_APPLICATION_API LogHighlighter : public QSyntaxHighlighter {
 
         Q_OBJECT
 

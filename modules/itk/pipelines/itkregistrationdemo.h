@@ -39,9 +39,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API ItkRegistrationDemo : public AutoEvaluationPipeline {
     public:
         /**
-        * Creates a AutoEvaluationPipeline.
-        */
-        explicit ItkRegistrationDemo(DataContainer* dc);
+         * Creates a ItkRegistrationDemo pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
+         */
+        explicit ItkRegistrationDemo(DataContainer& dataContainer);
 
         /**
         * Virtual Destructor
@@ -50,13 +52,9 @@ namespace campvis {
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
-
         /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        /// \see AbstractPipeline::getId()
         static const std::string getId() { return "ItkRegistrationDemo"; };
 
     protected:

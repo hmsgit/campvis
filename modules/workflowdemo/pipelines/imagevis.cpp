@@ -31,8 +31,8 @@
 namespace campvis {
     namespace workflowdemo {
 
-        ImageVis::ImageVis(DataContainer* dc)
-            : AutoEvaluationPipeline(dc)
+        ImageVis::ImageVis(DataContainer& dc)
+            : AutoEvaluationPipeline(dc, getId())
             , _ve(&_canvasSize, new SliceExtractor(nullptr), new ContextPreservingRaycaster(nullptr))
         {
             addProcessor(&_ve);

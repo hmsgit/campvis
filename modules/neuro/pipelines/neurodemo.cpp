@@ -37,8 +37,8 @@
 
 namespace campvis {
 
-    NeuroDemo::NeuroDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    NeuroDemo::NeuroDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _tcp(&_canvasSize)
         , _ctReader()

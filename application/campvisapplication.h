@@ -34,11 +34,7 @@
 #include <vector>
 
 #include "core/datastructures/datacontainer.h"
-
-
-#ifdef CAMPVIS_HAS_SCRIPTING
-#include "scripting/glue/luavmstate.h"
-#endif
+#include "application/applicationapi.h"
 
 namespace cgt {
     class GLCanvas;
@@ -65,7 +61,7 @@ namespace campvis {
      *  5. call deinit()
      *  6. You can now safely destroy your CampVisApplication
      */
-    class CampVisApplication : public QApplication {
+    class CAMPVIS_APPLICATION_API CampVisApplication : public QApplication {
     friend class MainWindow;
 
     public:
@@ -97,10 +93,9 @@ namespace campvis {
          * Each pipeline will automatically get its own OpenGL context, the corresponding CampvisPainter
          * and all necessary connections will be created.
          * 
-         * \param   name    Name of the OpenGL context to create for the pipeline.
          * \param   vp      AbstractPipeline to add.
          */
-        void addPipeline(const std::string& name, AbstractPipeline* pipeline);
+        void addPipeline(AbstractPipeline* pipeline);
 
         /**
          * Adds a dock widget to the main window.

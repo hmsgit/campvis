@@ -28,8 +28,8 @@
 namespace campvis {
     namespace workflowdemo {
 
-        ImageFiltering::ImageFiltering(DataContainer* dc)
-            : AutoEvaluationPipeline(dc)
+        ImageFiltering::ImageFiltering(DataContainer& dc)
+            : AutoEvaluationPipeline(dc, getId())
             , _lsp()
             , _glCrop(&_canvasSize)
             , _ve(&_canvasSize)

@@ -38,9 +38,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API GeometryRendererDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a GeometryRendererDemo pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        explicit GeometryRendererDemo(DataContainer* dc);
+        explicit GeometryRendererDemo(DataContainer& dc);
 
         /**
          * Virtual Destructor
@@ -54,7 +56,7 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
+        virtual std::string getName() const { return getId(); };
         static const std::string getId() { return "GeometryRendererDemo"; };
 
 

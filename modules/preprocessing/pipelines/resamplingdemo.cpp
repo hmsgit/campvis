@@ -35,8 +35,8 @@
 
 namespace campvis {
 
-    ResamplingDemo::ResamplingDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    ResamplingDemo::ResamplingDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _imageReader()
         , _resampler(&_canvasSize)

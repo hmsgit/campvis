@@ -31,6 +31,8 @@
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
 
+#include "scripting/scriptingapi.h"
+
 #include <map>
 #include <string>
 #include <typeindex>
@@ -40,7 +42,6 @@
 namespace campvis {
     class AbstractProperty;
     class AbstractPropertyLua;
-    class DataContainer;
 
     /**
      * Factory for creating Lua Property depending on the Property type.
@@ -49,7 +50,7 @@ namespace campvis {
      * 
      * \note    PropertyLuaFactory is a thread-safe lazy-instantiated singleton.
      */
-    class PropertyLuaFactory {
+    class CAMPVIS_SCRIPTING_API PropertyLuaFactory {
     public:
         /// Typedef for a function pointer to create a PropertyLua if you know exactly its type.
         typedef AbstractPropertyLua* (*PropertyLuaCreateFunctionPointer) (AbstractProperty*);
@@ -83,7 +84,6 @@ namespace campvis {
          * Create a PropertyLua for the given property.
          * Checkes all registered luas, wether they match the type of \a property.
          * \param   property        The property the lua shall handle.
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
          * \return  The created property lua for the property - nullptr, if there was no matching lua found.
          */
         AbstractPropertyLua* createPropertyLua(AbstractProperty* property);
@@ -117,7 +117,6 @@ namespace campvis {
         /**
          * Static factory method for creating the lua if we know the property type exactly.
          * \param   property        The property the lua shall handle.
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
          * \return  The newly created property lua.
          */
         static AbstractPropertyLua* create(AbstractProperty* property) {
@@ -129,7 +128,6 @@ namespace campvis {
          * Static factory method for creating the lua if we don't know the property type.
          * Performs a dynamic type check to see whether the property type matches.
          * \param   property        The property the lua shall handle.
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
          * \return  The newly created property lua, may be nullptr in case the types do not match.
          */
         static AbstractPropertyLua* tryCreate(AbstractProperty* property) {

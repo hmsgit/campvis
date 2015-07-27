@@ -27,13 +27,15 @@
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
+
 #include "core/properties/stringproperty.h"
+#include "scripting/scriptingapi.h"
 
 namespace campvis {
     /**
      * Lua generator for a StringProperty
      */
-    class StringPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API StringPropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new PropertyLua for the property \a property.

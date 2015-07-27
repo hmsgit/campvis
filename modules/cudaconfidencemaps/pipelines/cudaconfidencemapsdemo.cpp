@@ -44,8 +44,8 @@
 
 namespace campvis {
 
-    CudaConfidenceMapsDemo::CudaConfidenceMapsDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    CudaConfidenceMapsDemo::CudaConfidenceMapsDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _usIgtlReader()
         , _usCropFilter(&_canvasSize)
         , _usPreBlur(&_canvasSize)
@@ -219,8 +219,8 @@ namespace campvis {
 
             // Read fan geomtry from encoded image...
             if (p_useSpacingEncodedFanGeometry.getValue()) {
-                ImageRepresentationGL::ScopedRepresentation img(*_data, _usCropFilter.p_inputImage.getValue());
-                auto image = reinterpret_cast<const ImageData*>(_data->getData(_usCropFilter.p_inputImage.getValue()).getData());
+                ImageRepresentationGL::ScopedRepresentation img(*_dataContainer, _usCropFilter.p_inputImage.getValue());
+                auto image = reinterpret_cast<const ImageData*>(_dataContainer->getData(_usCropFilter.p_inputImage.getValue()).getData());
                 if (image != nullptr) {
                     cgt::vec3 encodedData = image->getMappingInformation().getVoxelSize();
                     p_fanHalfAngle.setValue(encodedData.x / 2.0f);
@@ -254,7 +254,7 @@ namespace campvis {
                 filename << _filePrefix << std::setw(4) << std::setfill('0') << _recordedFrames << ".png";
                 auto url = dir.absoluteFilePath(QString::fromStdString(filename.str())).toStdString();
 
-                ScopedTypedData<ImageData> rd(*_data, "us");
+                ScopedTypedData<ImageData> rd(*_dataContainer, "us");
                 const ImageRepresentationGL *rep = rd->getRepresentation<ImageRepresentationGL>();
                 if (rep != 0) {
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
@@ -291,8 +291,8 @@ namespace campvis {
                 StatisticsEntry entry;
                 entry.time = (startTime - _objectCreationTime).seconds() * 1000.0f;
 
-                ImageRepresentationGL::ScopedRepresentation originalImage(*_data, _usCropFilter.p_outputImage.getValue());
-                ImageRepresentationGL::ScopedRepresentation downsampledImage(*_data, _usResampler.p_outputImage.getValue());
+                ImageRepresentationGL::ScopedRepresentation originalImage(*_dataContainer, _usCropFilter.p_outputImage.getValue());
+                ImageRepresentationGL::ScopedRepresentation downsampledImage(*_dataContainer, _usResampler.p_outputImage.getValue());
 
                 if (originalImage && downsampledImage) {
                     entry.originalWidth = originalImage->getSize().x;

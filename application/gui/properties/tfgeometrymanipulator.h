@@ -28,8 +28,11 @@
 #include "cgt/vector.h"
 #include "cgt/matrix.h"
 #include "cgt/event/eventlistener.h"
+
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/tfgeometry2d.h"
+
+#include "application/applicationapi.h"
 
 namespace campvis {
     class Geometry1DTransferFunction;
@@ -40,7 +43,7 @@ namespace campvis {
      * for manipulating the TFGeometry1D (which is handy e.g. for TF editors...). Therefore, it
      * extends the cgt::EventListener class and should implement its methods as necessary.
      */
-    class AbstractTFGeometryManipulator : public cgt::EventListener {
+    class CAMPVIS_APPLICATION_API AbstractTFGeometryManipulator : public cgt::EventListener {
     public:
         /**
          * Creates a new AbstractTFGeometryManipulator for the given Geometry1DTransferFunction.

@@ -26,6 +26,7 @@
 #define CAMPVISMAINWINDOW_H__
 
 #include "sigslot/sigslot.h"
+#include "application/applicationapi.h"
 #include "application/campvisapplication.h"
 #include "application/gui/mdi/mdidockarea.h"
 #include "application/gui/pipelinetreewidget.h"
@@ -48,12 +49,13 @@ namespace campvis {
     class DataContainerInspectorWidget;
     class DataContainerInspectorCanvas;
     class MdiDockableWindow;
+    class LuaTableTreeWidget;
 
     /**
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the CampVisApplication instance given during creation.
      */
-    class MainWindow : public QMainWindow, public sigslot::has_slots {
+    class CAMPVIS_APPLICATION_API MainWindow : public QMainWindow, public sigslot::has_slots {
         Q_OBJECT
 
     public:
@@ -217,6 +219,7 @@ namespace campvis {
 
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         ScriptingWidget* _scriptingConsoleWidget;           ///< Widget showing the scripting console (if available)
+        LuaTableTreeWidget* _luaTreeWidget;                 ///< Tree widget showing the global Lua variables
         WorkflowControllerWidget* _workflowWidget;          ///< Widget showing the workflow controller
         
         QComboBox* _cbProcessorFactory;                      ///< Combobox for selecting the Processor from the ProcessorFactory

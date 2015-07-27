@@ -33,7 +33,10 @@
 #include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
+
+#include "application/applicationapi.h"
 #include "application/tools/treeitem.h"
+
 #include <vector>
 
 namespace campvis {
@@ -43,7 +46,7 @@ namespace campvis {
     /**
      * Specialization for root TreeItems.
      */
-    class PipelineTreeRootItem : public TreeItem {
+    class CAMPVIS_APPLICATION_API PipelineTreeRootItem : public TreeItem {
     public:
         explicit PipelineTreeRootItem(TreeItem* parent = 0);
         virtual ~PipelineTreeRootItem();
@@ -55,7 +58,7 @@ namespace campvis {
     /**
      * Specialization for TreeItems hosting an AbstracPipeline.
      */
-    class DataContainerTreeItem : public TreeItem {
+    class CAMPVIS_APPLICATION_API DataContainerTreeItem : public TreeItem {
     public:
         DataContainerTreeItem(DataContainer* dc, TreeItem* parent);
         virtual ~DataContainerTreeItem();
@@ -73,7 +76,7 @@ namespace campvis {
     /**
      * Specialization for TreeItems hosting an AbstracPipeline.
      */
-    class PipelineTreeItem : public TreeItem {
+    class CAMPVIS_APPLICATION_API PipelineTreeItem : public TreeItem {
     public:
         PipelineTreeItem(AbstractPipeline* pipeline, TreeItem* parent);
         virtual ~PipelineTreeItem();
@@ -91,7 +94,7 @@ namespace campvis {
     /**
      * Specialization for TreeItems hosting an AbstractProcessor.
      */
-    class ProcessorTreeItem : public TreeItem {
+    class CAMPVIS_APPLICATION_API ProcessorTreeItem : public TreeItem {
     public:
         ProcessorTreeItem(AbstractProcessor* processor, TreeItem* parent);
         virtual ~ProcessorTreeItem();
@@ -111,7 +114,7 @@ namespace campvis {
     /**
      * QItemModel for displaying a list of pipelines and their processors in the PipelineTreeWidget.
      */
-    class PipelineTreeModel : public QAbstractItemModel {
+    class CAMPVIS_APPLICATION_API PipelineTreeModel : public QAbstractItemModel {
         Q_OBJECT
 
     public:
@@ -147,7 +150,7 @@ namespace campvis {
     /**
      * Qt widget for showing a list of pipelines and their processors in a QTreeView.
      */
-    class PipelineTreeWidget : public QTreeView {
+    class CAMPVIS_APPLICATION_API PipelineTreeWidget : public QTreeView {
         Q_OBJECT;
 
     public:

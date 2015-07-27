@@ -25,6 +25,7 @@
 #ifndef TRANSFERFUNCTIONPROPERTYWIDGET_H__
 #define TRANSFERFUNCTIONPROPERTYWIDGET_H__
 
+#include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/transferfunctionproperty.h"
@@ -42,7 +43,7 @@ namespace campvis {
     /**
      * Widget for a TransferFunctionProperty
      */
-    class TransferFunctionPropertyWidget : public AbstractPropertyWidget {
+    class CAMPVIS_APPLICATION_API TransferFunctionPropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT;
 
     public:

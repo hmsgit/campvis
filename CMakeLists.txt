@@ -1,6 +1,6 @@
 # = CAMPVis - Yet another medical visualization framework =====================
 PROJECT(CAMPVis)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0 FATAL_ERROR)
 
 SET(CAMPVIS_VERSION 1.0.0)
 
@@ -51,30 +51,15 @@ ENDIF()
 # build scripting targets when enabled
 IF(CAMPVIS_ENABLE_SCRIPTING)
     # build Lua from source
-    IF(WIN32)
-        # Keep LUA_BUILD_AS_DLL in sync with BUILD_SHARED_LIBS
-        SET(LUA_BUILD_AS_DLL ${BUILD_SHARED_LIBS} CACHE BOOL "Build Lua library as DLL" FORCE)
-    ENDIF(WIN32)
-
-    ADD_SUBDIRECTORY(ext/lua EXCLUDE_FROM_ALL)
-    # If the above command failed, provide a hint how to fix the problem
-    IF(NOT TARGET liblua)
-        MESSAGE(SEND_ERROR "Did you forget to run `git submodule update --init`?")
-    ENDIF(NOT TARGET liblua)
+    ADD_SUBDIRECTORY(ext/lua)
+    SET(LUA_DIR "${CampvisHome}/ext/lua")
 
     # First, find Lua to setup paths for all projects correctly
-    FIND_PACKAGE(Lua REQUIRED)
-    IF(LUA_FOUND)
-        MESSAGE(STATUS "* Found Lua")
-        LIST(APPEND CampvisGlobalDefinitions ${LUA_DEFINITIONS})
-        LIST(APPEND CampvisGlobalIncludeDirs ${LUA_INCLUDE_DIR})
-        LIST(APPEND CampvisGlobalExternalLibs ${LUA_LIBRARY})
-    ELSE(LUA_FOUND)
-        MESSAGE(FATAL_ERROR "Lua not found!")
-    ENDIF(LUA_FOUND)
+    LIST(APPEND CampvisGlobalIncludeDirs "${LUA_DIR}/src" "${CMAKE_BINARY_DIR}/ext/lua")
+    LIST(APPEND CampvisGlobalExternalLibs "liblua")
+    LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_HAS_SCRIPTING")
     
     ADD_SUBDIRECTORY(scripting)
-    LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_HAS_SCRIPTING")
 ENDIF()
 
 IF(CAMPVIS_BUILD_APPLICATION)
