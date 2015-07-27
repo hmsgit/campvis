@@ -106,27 +106,28 @@ IF(CAMPVIS_ENABLE_SCRIPTING)
     LIST(APPEND CampvisMainLibs campvis-scripting)
 ENDIF(CAMPVIS_ENABLE_SCRIPTING)
 
-ADD_LIBRARY(campvis-application
+ADD_LIBRARY(campvis-application-lib
     ${CampvisApplicationSources} ${CampvisApplicationHeaders}
     ${CampvisApplicationMoc}
 )
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-application ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
 
 # if campvis-core is built as a shared library, CMake will define the following flag to instruct
 # the code to export DLL symbols
-SET_TARGET_PROPERTIES(campvis-application PROPERTIES DEFINE_SYMBOL "CAMPVIS_APPLICATION_BUILD_DLL")
+SET_TARGET_PROPERTIES(campvis-application-lib PROPERTIES DEFINE_SYMBOL "CAMPVIS_APPLICATION_BUILD_DLL")
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationSources ${CampvisHome} "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationHeaders ${CampvisHome} "")
 ENDIF()
 
+INSTALL(TARGETS campvis-application-lib DESTINATION exports EXPORT campvis-targets)
 
 
-ADD_EXECUTABLE(campvis-gui "campvis.cpp")
-TARGET_LINK_LIBRARIES(campvis-gui campvis-application ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+ADD_EXECUTABLE(campvis-application "campvis.cpp")
+TARGET_LINK_LIBRARIES(campvis-application campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
 
 
 

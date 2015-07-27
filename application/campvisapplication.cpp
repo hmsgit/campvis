@@ -53,6 +53,10 @@
 
 #include <QApplication>
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+#include "scripting/glue/luavmstate.h"
+#endif
+
 namespace campvis {
 
     const std::string CampVisApplication::loggerCat_ = "CAMPVis.application.CampVisApplication";

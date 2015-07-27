@@ -36,10 +36,6 @@
 #include "core/datastructures/datacontainer.h"
 #include "application/applicationapi.h"
 
-#ifdef CAMPVIS_HAS_SCRIPTING
-#include "scripting/glue/luavmstate.h"
-#endif
-
 namespace cgt {
     class GLCanvas;
     class QtThreadedCanvas;

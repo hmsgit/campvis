@@ -1,7 +1,7 @@
 PROJECT(campvis-scripting)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
-MESSAGE(STATUS "Configuring CAMPVis Scripting")
+MESSAGE(STATUS "Configuring CAMPVis-Scripting")
 
 # SWIG
 FIND_PACKAGE(SWIG REQUIRED)
@@ -53,7 +53,7 @@ ENDFOREACH(ModName ${CampvisModules})
 MACRO(DECLARE_LUA_MODULE InterfaceFile)
     STRING(REGEX REPLACE ".*/([A-Za-z0-9_]+)\\.i" "\\1" LuaModShortName ${InterfaceFile})
     SET(LuaModName "${LuaModShortName}-lua-mod")
-    MESSAGE(STATUS "* ${LuaModShortName}")
+    MESSAGE(STATUS " - ${LuaModShortName}")
 
     IF(WIN32)
         ADD_DEFINITIONS("/wd4244 /wd4267")
@@ -63,7 +63,7 @@ MACRO(DECLARE_LUA_MODULE InterfaceFile)
     SET_SOURCE_FILES_PROPERTIES(${InterfaceFile} PROPERTIES SWIG_FLAGS "-I${CampvisHome}")
     LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
     SWIG_ADD_MODULE(${LuaModName} lua ${InterfaceFile})
-    SWIG_LINK_LIBRARIES(${LuaModName} cgt campvis-core campvis-modules campvis-application ${CampvisGlobalExternalLibs})
+    SWIG_LINK_LIBRARIES(${LuaModName} cgt campvis-core campvis-modules campvis-application-lib ${CampvisGlobalExternalLibs})
 
     SET(LuaModFullPath "${CampvisLuaModulesDirectory}${LuaModShortName}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
@@ -81,7 +81,7 @@ MACRO(DECLARE_LUA_MODULE InterfaceFile)
     LIST(APPEND CampvisLuaModules ${LuaModName})
 ENDMACRO(DECLARE_LUA_MODULE)
 
-MESSAGE(STATUS "Setting up Lua modules:")
+MESSAGE(STATUS "* Setting up Lua modules:")
 
 # Generate a Lua module for every interface file found
 FOREACH(BindingDir ${CampvisBindingDirs})
@@ -117,3 +117,5 @@ IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisScriptingSources ${CampvisHome} "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisScriptingHeaders ${CampvisHome} "")
 ENDIF()
+
+INSTALL(TARGETS campvis-scripting DESTINATION exports EXPORT campvis-targets)
