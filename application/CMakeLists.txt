@@ -29,7 +29,6 @@ FILE(GLOB CampvisApplicationForms
 )
 
 SET(CampvisApplicationToBeMocced
-    gui/completinglualineedit.h
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
     gui/datacontainerinspectorwidget.h
@@ -40,8 +39,6 @@ SET(CampvisApplicationToBeMocced
     gui/qtdatahandle.h
     gui/logviewerwidget.h
     gui/loghighlighter.h
-    gui/luatablewidget.h
-    gui/scriptingwidget.h
     gui/workflowcontrollerwidget.h
     gui/mdi/mdidockarea.h
     gui/mdi/mdidockablewindow.h
@@ -70,6 +67,26 @@ SET(CampvisApplicationToBeMocced
     tools/qtexteditlog.h
     tools/qtjobprocessor.h
 )
+
+
+IF(CAMPVIS_ENABLE_SCRIPTING)
+    LIST(APPEND CampvisApplicationToBeMocced
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/completinglualineedit.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/luatablewidget.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/scriptingwidget.h
+    )
+ELSE(CAMPVIS_ENABLE_SCRIPTING)
+    LIST(REMOVE_ITEM CampvisApplicationSources
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/completinglualineedit.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/luatablewidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/scriptingwidget.cpp
+    )
+    LIST(REMOVE_ITEM CampvisApplicationHeaders
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/completinglualineedit.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/luatablewidget.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/scriptingwidget.h
+    )
+ENDIF(CAMPVIS_ENABLE_SCRIPTING)
 
 
 # add additional sources from the activated modules

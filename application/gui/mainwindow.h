@@ -32,7 +32,6 @@
 #include "application/gui/pipelinetreewidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
 #include "application/gui/logviewerwidget.h"
-#include "application/gui/scriptingwidget.h"
 #include "application/gui/workflowcontrollerwidget.h"
 #include "application/tools/qtexteditlog.h"
 #include "application/ui_mainwindow.h"
@@ -50,6 +49,7 @@ namespace campvis {
     class DataContainerInspectorCanvas;
     class MdiDockableWindow;
     class LuaTableTreeWidget;
+    class ScriptingWidget;
 
     /**
      * Main Window for the CAMPVis application.

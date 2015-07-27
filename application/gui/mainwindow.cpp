@@ -49,6 +49,7 @@
 #include "scripting/luagen/properties/propertycollectionluascriptgenerator.h"
 #include "scripting/luagen/properties/abstractpropertylua.h"
 #include "application/gui/luatablewidget.h"
+#include "application/gui/scriptingwidget.h"
 #endif
 
 namespace campvis {
@@ -379,8 +380,10 @@ namespace campvis {
 
         _logViewer->init();
 
+#ifdef CAMPVIS_HAS_SCRIPTING
         if (_scriptingConsoleWidget)
             _scriptingConsoleWidget->init();
+#endif
     }
 
     void MainWindow::deinit() {
@@ -389,8 +392,10 @@ namespace campvis {
 
         _logViewer->deinit();
 
+#ifdef CAMPVIS_HAS_SCRIPTING
         if (_scriptingConsoleWidget)
             _scriptingConsoleWidget->deinit();
+#endif
     }
 
     MdiDockableWindow * MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {
