@@ -80,6 +80,8 @@ namespace campvis {
     void CampVisApplication::init() {
         cgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
 
+        QtJobProcessor::init();
+
         std::vector<std::string> searchPaths;
         if (_argc > 0) {
             // ugly hack
@@ -207,7 +209,7 @@ namespace campvis {
 
         campvis::deinit();
         PropertyWidgetFactory::deinit();
-        PipelineFactory::deinit();
+        QtJobProcessor::deinit();
 
         _initialized = false;
     }

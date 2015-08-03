@@ -24,23 +24,20 @@
 
 #include "core/pipeline/pipelinefactory.h"
 
-#include "modules/vis/pipelines/advdvrvis.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/geometryrendererdemo.h"
-#include "modules/vis/pipelines/mprdemo.h"
-#include "modules/vis/pipelines/slicevis.h"
-#include "modules/vis/pipelines/volumeexplorerdemo.h"
-#include "modules/vis/pipelines/volumerendererdemo.h"
+#include "modules/workflowdemo/pipelines/imagefiltering.h"
+#include "modules/workflowdemo/pipelines/imageloading.h"
+#include "modules/workflowdemo/pipelines/imagevis.h"
+
+#include "modules/workflowdemo/workflows/demoworkflow.h"
 
 namespace campvis {
 
     // explicitly instantiate templates to register the pipelines
-    template class PipelineRegistrar<AdvDVRVis>;
-    template class PipelineRegistrar<DVRVis>;
-    template class PipelineRegistrar<GeometryRendererDemo>;
-    template class PipelineRegistrar<MprDemo>;
-    template class PipelineRegistrar<SliceVis>;
-    template class PipelineRegistrar<VolumeRendererDemo>;
-    template class PipelineRegistrar<VolumeExplorerDemo>;
+    template class PipelineRegistrar<workflowdemo::ImageFiltering>;
+    template class PipelineRegistrar<workflowdemo::ImageLoading>;
+    template class PipelineRegistrar<workflowdemo::ImageVis>;
+    
+
+    template class WorkflowRegistrar<workflowdemo::DemoWorkflow>;
 
 }
