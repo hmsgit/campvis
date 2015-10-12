@@ -27,6 +27,7 @@
 
 #include "modules/preprocessing/pipelines/morphologyfilterdemo.h"
 #include "modules/preprocessing/pipelines/resamplingdemo.h"
+#include "modules/preprocessing/pipelines/ssimdemo.h"
 
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/preprocessing/processors/glgradientvolumegenerator.h"
@@ -35,6 +36,7 @@
 #include "modules/preprocessing/processors/glintensityquantizer.h"
 #include "modules/preprocessing/processors/glmorphologyfilter.h"
 #include "modules/preprocessing/processors/glsignaltonoiseratiofilter.h"
+#include "modules/preprocessing/processors/glstructuralsimilarity.h"
 #include "modules/preprocessing/processors/glvesselnessfilter.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
 
@@ -43,6 +45,7 @@ namespace campvis {
     // explicitly instantiate templates to register the pipelines
     template class PipelineRegistrar<MorphologyDemo>;
     template class PipelineRegistrar<ResamplingDemo>;
+    template class PipelineRegistrar<SsimDemo>;
 
     template class SmartProcessorRegistrar<GlGaussianFilter>;
     template class SmartProcessorRegistrar<GlGradientVolumeGenerator>;
@@ -51,6 +54,7 @@ namespace campvis {
     template class SmartProcessorRegistrar<GlIntensityQuantizer>;
     template class SmartProcessorRegistrar<GlMorphologyFilter>;
     template class SmartProcessorRegistrar<GlSignalToNoiseRatioFilter>;
+    template class SmartProcessorRegistrar<GlStructuralSimilarity>;
     template class SmartProcessorRegistrar<GlVesselnessFilter>;
     template class SmartProcessorRegistrar<GradientVolumeGenerator>;
 
