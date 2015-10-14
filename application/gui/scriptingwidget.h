@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,6 +30,8 @@
 #include "cgt/painter.h"
 #include "tbb/mutex.h"
 
+#include "application/applicationapi.h"
+#include "application/gui/completinglualineedit.h"
 #include "application/tools/bufferinglog.h"
 #include "application/gui/loghighlighter.h"
 
@@ -49,7 +51,7 @@ namespace campvis {
     /**
      * Qt widget providing a console-like interface to the Lua VM of CampvisApplication.
      */
-    class ScriptingWidget : public QWidget, cgt::Log {
+    class CAMPVIS_APPLICATION_API ScriptingWidget : public QWidget, cgt::Log {
         Q_OBJECT;
 
     public:
@@ -76,6 +78,8 @@ namespace campvis {
          */
         void deinit();
 
+        CompletingLuaLineEdit* _editCommand;            ///< Text field to enter Lua commands
+
     protected:
         /**
          * Setup the the log viewer's GUI
@@ -95,7 +99,7 @@ namespace campvis {
          *
          * \param message message to append to the log viewer
          */
-        void appendMessage(const QString& message);
+        void appendMessage(QString message);
 
     private slots:
         /**
@@ -106,11 +110,11 @@ namespace campvis {
         void execute();
 
     signals:
-        void s_commandExecuted(const QString& cmd);
+        void s_commandExecuted(QString cmd);
+        void s_messageAppended(QString message);
 
     private:
         QTextEdit* _consoleDisplay;         ///< Text edit to hold the console output
-        QLineEdit* _editCommand;            ///< Text field to enter Lua commands
         QPushButton* _btnExecute;           ///< Button to execute command
         QPushButton* _btnClear;             ///< Button to clear the console output
 

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -28,7 +28,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/vis/processors/volumeexplorer.h"
@@ -40,9 +39,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API ItkRegistrationDemo : public AutoEvaluationPipeline {
     public:
         /**
-        * Creates a AutoEvaluationPipeline.
-        */
-        ItkRegistrationDemo(DataContainer* dc);
+         * Creates a ItkRegistrationDemo pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
+         */
+        explicit ItkRegistrationDemo(DataContainer& dataContainer);
 
         /**
         * Virtual Destructor
@@ -51,13 +52,9 @@ namespace campvis {
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
-
         /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        /// \see AbstractPipeline::getId()
         static const std::string getId() { return "ItkRegistrationDemo"; };
 
     protected:
@@ -66,10 +63,6 @@ namespace campvis {
         VolumeExplorer _ve;
         ItkRegistration _itkRegistration;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<ItkRegistrationDemo>;
-
 }
 
 #endif // ITKREGISTRATIONDEMO_H__

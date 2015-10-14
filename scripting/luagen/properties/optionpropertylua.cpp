@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -37,9 +37,11 @@ namespace campvis {
 
     std::string OptionPropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
         std::string ret = "";
-        ret += luaProc;
-        ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):selectById(\"" 
-            + StringUtils::toString(static_cast<AbstractOptionProperty*>(_property)->getOptionId() ) + "\")";
+        if (static_cast<AbstractOptionProperty*>(_property)->getValue() != static_cast<AbstractOptionProperty*>(_property)->getDefaultValue()) {
+            ret += luaProc;
+            ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):selectById(\"" 
+                + StringUtils::toString(static_cast<AbstractOptionProperty*>(_property)->getOptionId() ) + "\")";
+        }
         return ret;
     }
 

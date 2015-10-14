@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -25,14 +25,23 @@
 in vec3 ex_TexCoord;
 out vec4 out_Color;
 
-#include "tools/gradient.frag"
-#include "tools/texture3d.frag"
-
+#ifdef GLRESAMPLER_3D
 uniform sampler3D _texture;
-uniform TextureParameters3D _textureParams;
-
 uniform float _zTexCoord;
+#endif
+
+#ifdef GLRESAMPLER_2D
+uniform sampler2D _texture;
+#endif
 
 void main() {
-    out_Color = texture(_texture, vec3(ex_TexCoord.xy, _zTexCoord));
+    #ifdef GLRESAMPLER_3D
+    vec4 sample = texture(_texture, vec3(ex_TexCoord.xy, _zTexCoord));
+    #endif
+
+    #ifdef GLRESAMPLER_2D
+    vec4 sample = texture(_texture, ex_TexCoord.xy);
+    #endif
+
+    out_Color = sample;
 }

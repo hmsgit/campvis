@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -28,6 +28,7 @@
 #include "mdidockedwindow.h"
 #include "mdifloatingwindow.h"
 
+#include "application/gui/qtcolortools.h"
 #include <QWidget>
 
 namespace campvis {
@@ -41,7 +42,7 @@ namespace campvis {
      * window) of the widget it's passed and seamlessly switching between them in response to the
      * user's actions (window dragging, key presses, etc).
      */
-    class MdiDockableWindow : public QWidget {
+    class CAMPVIS_APPLICATION_API MdiDockableWindow : public QWidget {
 
         Q_OBJECT
 

@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -54,12 +54,12 @@ namespace campvis {
     ContourObject::~ContourObject() {
     }
 
-    ContourObject* ContourObject::operator=(const ContourObject& rhs) {
+    ContourObject& ContourObject::operator=(const ContourObject& rhs) {
         this->_objectName.setValue(rhs._objectName.getValue());
         this->_color.setValue(rhs._color.getValue());
         this->_points = rhs._points;
         this->_objectsCoordinates = rhs._objectsCoordinates;
-        return this;
+        return *this;
     }
 
     void ContourObject::addObject() {
@@ -198,9 +198,7 @@ namespace campvis {
         _vr.init();
         _sliceExtractor.init();
 
-        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/microscopyimagesegmentation.frag", "");
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/microscopysegmentation/glsl/microscopyimagesegmentation.frag", "");
 
         _sliceExtractor.s_invalidated.connect(this, &MicroscopyImageSegmentation::onProcessorInvalidated);
         _vr.s_invalidated.connect(this, &MicroscopyImageSegmentation::onProcessorInvalidated);
@@ -216,7 +214,7 @@ namespace campvis {
         _sliceExtractor.deinit();
         VisualizationProcessor::deinit();
         ShdrMgr.dispose(_shader);
-        delete _quad;
+        _quad = nullptr; // Object is automatically deleted
     }
 
     void MicroscopyImageSegmentation::updateResult(DataContainer& data) {

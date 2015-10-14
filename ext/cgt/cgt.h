@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -49,7 +49,6 @@
 
 //Interaction
 //#include "glcanvas.h"
-// FIXME: include glcanvas and guiapplication, include glut/qt/sdl-canvas/application/libs depending on macros
 #include "cgt/mouse.h"
 #include "cgt/camera.h"
 #include "cgt/navigation/navigation.h"

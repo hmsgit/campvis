@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -91,7 +91,7 @@ namespace campvis {
          * \note    The caller has to take ownership of the returned pointer.
          * \return  Pointer to the image data in the local memory, to be owned by caller.
          */
-        WeaklyTypedPointer getImageData() const;
+        WeaklyTypedPointer getWeaklyTypedPointer() const;
 
 
         /**

@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -28,7 +28,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/vtkimagereader.h"
@@ -39,9 +38,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API GeometryRendererDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a GeometryRendererDemo pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        GeometryRendererDemo(DataContainer* dc);
+        explicit GeometryRendererDemo(DataContainer& dc);
 
         /**
          * Virtual Destructor
@@ -55,7 +56,7 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
+        virtual std::string getName() const { return getId(); };
         static const std::string getId() { return "GeometryRendererDemo"; };
 
 
@@ -76,10 +77,6 @@ namespace campvis {
         RenderTargetCompositor _compositor1;
         RenderTargetCompositor _compositor2;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<GeometryRendererDemo>;
-
 }
 
 #endif // GEOMETRYRENDERERDEMO_H__

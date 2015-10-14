@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -49,7 +49,7 @@ namespace campvis {
         /**
          * Constructs a new GlGaussianFilter Processor
          **/
-        GlGaussianFilter(IVec2Property* viewportSizeProp);
+        explicit GlGaussianFilter(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -60,9 +60,13 @@ namespace campvis {
         virtual void init();
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "GlGaussianFilter"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "GlGaussianFilter"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a gaussian filtering on the input image using OpenGL."; };
         /// \see AbstractProcessor::getAuthor()
@@ -78,6 +82,8 @@ namespace campvis {
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
 
         /**
          * Applys the morphology filter \a filter to \a inputImage.
@@ -95,7 +101,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // GLGAUSSIANFILTER_H__

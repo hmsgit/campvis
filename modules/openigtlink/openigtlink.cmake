@@ -2,8 +2,8 @@
 # CMake file for the openigtlink module
 
 # Set module status (valid values are STABLE, TESTING and EXPERIMENTAL)
-SET(ThisModStatus EXPERIMENTAL)
-# Set whether this module has external dependencies that are not shipped this CAMPVis.
+SET(ThisModStatus TESTING)
+# Set whether this module has external dependencies that are not shipped with CAMPVis.
 SET(ThisModExternalDependencies TRUE)
 
 # The files and assignments need only to be parsed if the module is enabled
@@ -16,6 +16,7 @@ IF(ModuleEnabled)
             modules/openigtlink/pipelines/*.cpp
             modules/openigtlink/processors/*.cpp
             modules/openigtlink/datastructures/*.cpp
+            modules/openigtlink/*.cpp
         )
 
         # Header files (including GLSL files so that they'll appear in VS projects)
@@ -37,6 +38,9 @@ IF(ModuleEnabled)
         LIST(APPEND ThisModIncludeDirs ${OpenIGTLink_INCLUDE_DIRS})
         LIST(APPEND ThisModExternalLibs ${OpenIGTLink_LIBRARIES})
         LIST(APPEND ThisModLinkDirectories ${OpenIGTLink_LIBRARY_DIRS})
+        
+        LIST(APPEND ThisModExternalDllsDebug "${OpenIGTLink_LIBRARY_DIRS}/Debug/igtlutil.dll" "${OpenIGTLink_LIBRARY_DIRS}/Debug/OpenIGTLink.dll")
+        LIST(APPEND ThisModExternalDllsRelease "${OpenIGTLink_LIBRARY_DIRS}/Release/igtlutil.dll" "${OpenIGTLink_LIBRARY_DIRS}/Release/OpenIGTLink.dll")
         
     ELSE()
         MESSAGE(FATAL_ERROR "Could not find OpenIGTLink. Please specify OpenIGTLink_DIR.")

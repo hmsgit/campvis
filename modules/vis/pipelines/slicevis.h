@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -31,8 +31,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
 
@@ -40,9 +38,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API SliceVis : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a SliceVis pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        SliceVis(DataContainer* dc);
+        explicit SliceVis(DataContainer& dc);
 
         /**
          * Virtual Destructor
@@ -52,8 +52,6 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "SliceVis"; };
 
 
@@ -74,10 +72,6 @@ namespace campvis {
         TransFuncWindowingEventListener _tfWindowingHandler;
 
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<SliceVis>;
-
 }
 
 #endif // SLICEVIS_H__

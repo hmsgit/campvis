@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -29,6 +29,8 @@
 #include "cgt/cgt_gl.h"
 
 #include "core/coreapi.h"
+
+#include <memory>
 
 namespace campvis {
     class FaceGeometry;
@@ -71,8 +73,8 @@ namespace campvis {
         /// Private Constructor, must be called from valid OpenGL context.
         QuadRenderer();
 
-        FaceGeometry* _quad11;  ///< The FaceGeometry that renders the [-1, 1] quad.
-        FaceGeometry* _quad01;  ///< The FaceGeometry that renders the [0, 1] quad.
+        std::unique_ptr<FaceGeometry> _quad11;  ///< The FaceGeometry that renders the [-1, 1] quad.
+        std::unique_ptr<FaceGeometry> _quad01;  ///< The FaceGeometry that renders the [0, 1] quad.
     };
 
 #define QuadRdr cgt::Singleton<campvis::QuadRenderer>::getRef()

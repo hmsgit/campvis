@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -27,6 +27,8 @@
 
 #include "cgt/logmanager.h"
 
+#include "application/applicationapi.h"
+
 #include <QObject>
 #include <QTextEdit>
 #include <QTextDocument>
@@ -38,7 +40,7 @@ namespace campvis {
     /**
      * QTextEditLog implements logging to a QTextEdit instance.
      */
-    class QTextEditLog : private QObject, public Log {
+    class CAMPVIS_APPLICATION_API QTextEditLog : private QObject, public Log {
 
         Q_OBJECT
 
@@ -60,7 +62,7 @@ namespace campvis {
         virtual ~QTextEditLog() {}
         bool isOpen() { return true; }
 
-	signals:
+    signals:
         /** Internal signal used to pass messages to _logDisplay in a thread-safe way.
          *
          * This class' \c log method is called from several non-GUI

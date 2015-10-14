@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -27,7 +27,6 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
@@ -36,9 +35,11 @@ namespace workflowdemo {
     class CAMPVIS_MODULES_API ImageVis : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+        * Creates a ImageVis pipeline.
+        * \param   dataContainer   Reference to the DataContainer containing local working set of data
+        *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        ImageVis(DataContainer* dc);
+        explicit ImageVis(DataContainer& dc);
 
         /**
          * Virtual Destructor
@@ -48,18 +49,12 @@ namespace workflowdemo {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "WorkflowDemo::ImageVis"; };
 
 
         VolumeExplorer _ve;
     };
 }
-
-// Instantiate template to register the pipelines.
-template class PipelineRegistrar<workflowdemo::ImageVis>;
-
 }
 
 #endif // IMAGEVIS_H__

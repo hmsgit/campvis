@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -31,6 +31,7 @@
 #include <QVariant>
 #include <map>
 
+#include "application/applicationapi.h"
 #include "application/tools/treeitem.h"
 #include "application/gui/qtdatahandle.h"
 
@@ -42,7 +43,7 @@ namespace campvis {
     /**
      * Specialization for root TreeItems.
      */
-    class DataContainerTreeRootItem : public TreeItem {
+    class CAMPVIS_APPLICATION_API DataContainerTreeRootItem : public TreeItem {
     public:
         explicit DataContainerTreeRootItem(TreeItem* parent = 0);
         virtual ~DataContainerTreeRootItem();
@@ -54,7 +55,7 @@ namespace campvis {
     /**
      * Specialization for TreeItems hosting an AbstractProcessor.
      */
-    class DataHandleTreeItem : public TreeItem {
+    class CAMPVIS_APPLICATION_API DataHandleTreeItem : public TreeItem {
     public:
         /**
          * Creates a new TreeItem for a QtDataHandle
@@ -96,7 +97,7 @@ namespace campvis {
     /**
      * QItemModel for displaying a list of pipelines and their processors in the DataContainerTreeWidget.
      */
-    class DataContainerTreeModel : public QAbstractItemModel {
+    class CAMPVIS_APPLICATION_API DataContainerTreeModel : public QAbstractItemModel {
         Q_OBJECT
 
     public:
@@ -141,7 +142,7 @@ namespace campvis {
     /**
      * Qt widget for showing a list of pipelines and their processors in a QTreeView.
      */
-    class DataContainerTreeWidget : public QTreeView {
+    class CAMPVIS_APPLICATION_API DataContainerTreeWidget : public QTreeView {
         Q_OBJECT;
 
     public:

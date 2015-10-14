@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -25,20 +25,22 @@
 #ifndef COLORPROPERTYWIDGET_H__
 #define COLORPROPERTYWIDGET_H__
 
+#include "application/applicationapi.h"
 #include "application/gui/adjusterwidgets/doubleadjusterwidget.h"
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertywidgetfactory.h"
+#include "application/gui/qtcolortools.h"
+
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/colorproperty.h"
 
-#include "application/gui/qtcolortools.h"
 
 
 namespace campvis {
     /**
      * Widget for a ColorProperty
      */
-    class ColorPropertyWidget : public AbstractPropertyWidget {
+    class CAMPVIS_APPLICATION_API ColorPropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT
 
     public:

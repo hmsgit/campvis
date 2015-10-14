@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -24,14 +24,16 @@
 
 #include "scriptingwidget.h"
 
+#include <QCompleter>
+#include <QDirModel>
 #include <QKeyEvent>
 
 namespace campvis {
 
     ScriptingWidget::ScriptingWidget(QWidget* parent)
         : QWidget(parent)
-        , _consoleDisplay(nullptr)
         , _editCommand(nullptr)
+        , _consoleDisplay(nullptr)
         , _btnExecute(nullptr)
         , _btnClear(nullptr)
         , _currentPosition(-1)
@@ -54,14 +56,17 @@ namespace campvis {
     void ScriptingWidget::setupGUI() {
         setWindowTitle(tr("Scripting Console"));
 
-        QVBoxLayout* mainLayout = new QVBoxLayout(this);
+        QHBoxLayout* mainLayout = new QHBoxLayout(this);
+
+        QVBoxLayout* leftColumnLayout = new QVBoxLayout();
+        mainLayout->addLayout(leftColumnLayout);
 
         QHBoxLayout* controlsLayout = new QHBoxLayout();
-        mainLayout->addLayout(controlsLayout);
+        leftColumnLayout->addLayout(controlsLayout);
 
         _consoleDisplay = new QTextEdit(this);
         _consoleDisplay->setReadOnly(true);
-        mainLayout->addWidget(_consoleDisplay);
+        leftColumnLayout->addWidget(_consoleDisplay);
 
         // Use the system's default monospace font at the default size in the log viewer
         QFont monoFont = QFont("Monospace");
@@ -69,7 +74,7 @@ namespace campvis {
         monoFont.setPointSize(QFont().pointSize() + 1);
 
         _consoleDisplay->document()->setDefaultFont(monoFont);
-        _editCommand = new QLineEdit(this);
+        _editCommand = new CompletingLuaLineEdit(nullptr, this);
         _editCommand->setPlaceholderText(tr("Enter Lua commands here..."));
         _editCommand->installEventFilter(this);
         controlsLayout->addWidget(_editCommand);
@@ -84,9 +89,11 @@ namespace campvis {
         connect(_btnClear, SIGNAL(clicked()), this, SLOT(clearLog()));
         connect(_btnExecute, SIGNAL(clicked()), this, SLOT(execute()));
         connect(_editCommand, SIGNAL(returnPressed()), this, SLOT(execute()));
+
+        connect(this, SIGNAL(s_messageAppended(QString)), this, SLOT(appendMessage(QString)));
     }
 
-    void ScriptingWidget::appendMessage(const QString& message) {
+    void ScriptingWidget::appendMessage(QString message) {
         _consoleDisplay->append(message);
     }
 
@@ -129,7 +136,7 @@ namespace campvis {
 
     void ScriptingWidget::logFiltered(const std::string &cat, cgt::LogLevel level, const std::string& msg, const std::string& extendedInfo/*=""*/) {
         if (level == cgt::LuaInfo || level == cgt::LuaError) {
-            appendMessage(QString::fromStdString(msg));
+            emit s_messageAppended(QString::fromStdString(msg));
         }
     }
 

@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -28,6 +28,8 @@
 #include "tbb/mutex.h"
 #include "cgt/logmanager.h"
 
+#include "application/applicationapi.h"
+
 #include <deque>
 #include <QObject>
 
@@ -36,7 +38,7 @@ namespace campvis {
     /**
      * BufferingLog stores up to the specified number of messages in memory.
      */
-    class BufferingLog : public QObject, public cgt::Log {
+    class CAMPVIS_APPLICATION_API BufferingLog : public QObject, public cgt::Log {
 
         Q_OBJECT
 

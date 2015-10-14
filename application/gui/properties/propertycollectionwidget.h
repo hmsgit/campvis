@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -26,6 +26,8 @@
 #define PROPERTYCOLLECTIONWIDGET_H__
 
 #include "sigslot/sigslot.h"
+#include "application/applicationapi.h"
+
 #include <QList>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -40,7 +42,7 @@ namespace campvis {
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
      */
-    class PropertyCollectionWidget : public QWidget, public sigslot::has_slots {
+    class CAMPVIS_APPLICATION_API PropertyCollectionWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:
@@ -48,7 +50,7 @@ namespace campvis {
          * Creates a new PropertyCollectionWidget.
          * \param   parent  Parent widget, may be 0.
          */
-        PropertyCollectionWidget(QWidget* parent = 0);
+        explicit PropertyCollectionWidget(QWidget* parent = 0);
 
         /**
          * Destructor.
@@ -117,6 +119,7 @@ namespace campvis {
         DataContainer* _dataContainer;          ///< The DataContainer the properties shall work on
 
         QVBoxLayout* _layout;
+        QWidget* _strechWidget;
         std::map<AbstractProperty*, QWidget*> _widgetMap;
     };
 }

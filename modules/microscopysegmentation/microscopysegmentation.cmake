@@ -21,6 +21,7 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/microscopysegmentation/processors/*.cpp
 		modules/microscopysegmentation/pipelines/*.cpp
+		modules/microscopysegmentation/*.cpp
 	)
 
 	# Header files
@@ -30,5 +31,5 @@ IF(${ModuleEnabled})
 	)
 ENDIF(${ModuleEnabled})
 
-SET(ThisModStatus STABLE)
+SET(ThisModStatus TESTING)
 SET(ThisModExternalDependencies FALSE)

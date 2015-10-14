@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -182,7 +182,7 @@ template class CGT_API Singleton<LogManager>;
  */
 class CGT_API LogManager : public Singleton<LogManager> {
 public:
-    LogManager(const std::string& logDir = "");
+    explicit LogManager(const std::string& logDir = "");
     ~LogManager();
 
     /// Initialize logmanager, put all logfiles in logDir

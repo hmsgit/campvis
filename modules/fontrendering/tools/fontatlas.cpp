@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -44,6 +44,7 @@ namespace campvis {
             , _ftFace(nullptr)
             , _texture(nullptr)
             , _shader(nullptr)
+            , _height(height)
         {
             // Initialize the FreeType2 library 
             if (FT_Init_FreeType(&_ftLibrary)) {
@@ -116,8 +117,6 @@ namespace campvis {
             LDEBUG("Generated a " << w << " x "<< h << " texture atlas");
         
             _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/fontrendering/glsl/fontatlas.frag", "");
-            _shader->setAttributeLocation(0, "in_Position");
-            _shader->setAttributeLocation(1, "in_TexCoord");
             LGL_ERROR;
         }
 
@@ -154,6 +153,12 @@ namespace campvis {
             // Loop through all characters
             for (size_t i = 0; i < text.length(); ++i) {
                 unsigned char p = text[i];
+
+                // Hanlde "\n"
+                if (p == 10) {
+                    pos = cgt::vec2(position.x, pos.y - _height * 1.2f);
+                }
+
                 if (p >= 32 && p < 256) {
                     cgt::vec2 pos2(pos.x + _glyphs[p].bitmapOffset.x, -pos.y - _glyphs[p].bitmapOffset.y);
                     cgt::vec2 size = _glyphs[p].bitmapSize;

@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -28,6 +28,8 @@
 #include "cgt/logmanager.h"
 #include "cgt/singleton.h"
 
+#include "application/applicationapi.h"
+
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
 
@@ -51,7 +53,7 @@ namespace campvis {
      * 
      * \note    PropertyWidgetFactory is a thread-safe lazy-instantiated singleton.
      */
-    class PropertyWidgetFactory {
+    class CAMPVIS_APPLICATION_API PropertyWidgetFactory {
     public:
         /// Typedef for a function pointer to create a PropertyWidget if you know exactly its type.
         typedef AbstractPropertyWidget* (*PropertyWidgetCreateFunctionPointer) (AbstractProperty*, DataContainer*, QWidget*);

@@ -2,28 +2,23 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
+// 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
-// The licensing of this softare is not yet resolved. Until then, redistribution in source or
-// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
-// However, the names of the original authors and the above copyright notice must retain in its
-// original state in any case.
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
 // 
-// Legal disclaimer provided by the BSD license:
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
 // 
 // ================================================================================================
 
@@ -53,16 +48,17 @@ namespace campvis {
         , p_automationMode("AutomationMode", "Automation Mode", automationOptions, 3)
         , p_image("ReferenceImage", "Reference Image", "", DataNameProperty::READ)
         , p_llf("LLF", "Bounding Box LLF", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
-        , p_urb("URB", "Bounding Box URB", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
+        , p_urb("URB", "Bounding Box URB", cgt::vec3(1.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
         , _canvasSize(canvasSize)
         , _trackball(nullptr)
     {
         _dirty = false;
+        p_automationMode.selectByOption(FullAutomatic);
 
-        addProperty(p_automationMode);
+        addProperty(p_automationMode, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_image, INVALID_RESULT | INVALID_PROPERTIES);
-        addProperty(p_llf);
-        addProperty(p_urb);
+        addProperty(p_llf, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_urb, INVALID_RESULT | INVALID_PROPERTIES);
 
         if (_canvasSize != nullptr) {
             _canvasSize->s_changed.connect(this, &TrackballCameraProvider::onRenderTargetSizeChanged);
@@ -165,10 +161,53 @@ namespace campvis {
     }
 
     void TrackballCameraProvider::updateProperties(DataContainer& data) {
-        // convert data
-        ScopedTypedData<IHasWorldBounds> img(data, p_image.getValue());
-        if (img != 0) {
-            reinitializeCamera(img->getWorldBounds());
+        if (p_automationMode.getOptionValue() == FullAutomatic) {
+            // convert data
+            ScopedTypedData<IHasWorldBounds> img(data, p_image.getValue());
+            if (img != 0) {
+                cgt::Bounds b = img->getWorldBounds();
+                p_llf.setValue(b.getLLF());
+                p_urb.setValue(b.getURB());
+
+                reinitializeCamera(b);
+            }
+
+            p_position.setVisible(false);
+            p_focus.setVisible(false);
+            p_upVector.setVisible(false);
+            p_fov.setVisible(false);
+            p_aspectRatio.setVisible(false);
+            p_clippingPlanes.setVisible(false);
+
+            p_image.setVisible(true);
+            p_llf.setVisible(false);
+            p_urb.setVisible(false);
+        }
+        else if (p_automationMode.getOptionValue() == SemiAutomatic) {
+            reinitializeCamera(cgt::Bounds(p_llf.getValue(), p_urb.getValue()));
+
+            p_position.setVisible(false);
+            p_focus.setVisible(false);
+            p_upVector.setVisible(false);
+            p_fov.setVisible(false);
+            p_aspectRatio.setVisible(false);
+            p_clippingPlanes.setVisible(false);
+
+            p_image.setVisible(false);
+            p_llf.setVisible(true);
+            p_urb.setVisible(true);
+        }
+        else if (p_automationMode.getOptionValue() == FullManual) {
+            p_position.setVisible(true);
+            p_focus.setVisible(true);
+            p_upVector.setVisible(true);
+            p_fov.setVisible(true);
+            p_aspectRatio.setVisible(true);
+            p_clippingPlanes.setVisible(true);
+
+            p_image.setVisible(false);
+            p_llf.setVisible(false);
+            p_urb.setVisible(false);
         }
     }
 
@@ -202,9 +241,9 @@ namespace campvis {
     }
 
     void TrackballCameraProvider::reinitializeCamera(const cgt::Bounds& worldBounds) {
-        cgt::vec3 pos = worldBounds.center() - cgt::vec3(0, 0, cgt::length(worldBounds.diagonal()));
-
         if (_trackball->getSceneBounds() != worldBounds) {
+            cgt::vec3 pos = worldBounds.center() - cgt::vec3(0, 0, cgt::length(worldBounds.diagonal()));
+
             _trackball->setSceneBounds(worldBounds);
             _trackball->setCenter(worldBounds.center());
             _trackball->reinitializeCamera(pos, worldBounds.center(), p_upVector.getValue());

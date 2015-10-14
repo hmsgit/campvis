@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -45,8 +45,7 @@ const std::string DRIVER_DLL_ATI = "atioglxx.dll";
 namespace cgt {
 
 GpuCapabilitiesWindows::GpuCapabilitiesWindows()
-    : loggerCat_("cgt.GpuCapabilitiesWindows")
-    , GpuCapabilities()
+    : GpuCapabilities()
     , videoRamSize_(-1)
 #ifdef CGT_WITH_WMI
     , pIWbemLocator_(0)

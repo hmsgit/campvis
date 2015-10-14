@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -36,17 +36,22 @@
 #include "modules/vis/processors/volumeexplorer.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
 #include "modules/preprocessing/processors/lhhistogram.h"
+#include "modules/registration/processors/registrationsliceview.h"
 #include "modules/registration/processors/similaritymeasure.h"
 
 #include <nlopt.hpp>
 
 namespace campvis {
+namespace registration {
+
     class CAMPVIS_MODULES_API NloptRegistration : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a NloptRegistration pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        NloptRegistration(DataContainer* dc);
+        explicit NloptRegistration(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -58,9 +63,7 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "NloptRegistration"; };
+        static const std::string getId() { return "registration::NloptRegistration"; };
 
         GenericOptionProperty<nlopt::algorithm> p_optimizer;    ///< Optimizer Algorithm
         BoolProperty p_liveUpdate;                              ///< Live Update of the difference image
@@ -78,13 +81,6 @@ namespace campvis {
             const ImageRepresentationGL* _moving;
             size_t _count;
         };
-
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
 
         /**
          * Callback method called from p_performOptimization.
@@ -117,11 +113,14 @@ namespace campvis {
         LightSourceProvider _lsp;
         MhdImageReader _referenceReader;
         MhdImageReader _movingReader;
+        RegistrationSliceView _rsw;
         SimilarityMeasure _sm;
         VolumeExplorer _ve;
         
         nlopt::opt* _opt;                               ///< Pointer to nlopt Optimizer object
     };
+
+}
 
 }
 

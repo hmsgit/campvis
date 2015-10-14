@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Constructs a new GlVesselnessFilter Processor
          **/
-        GlVesselnessFilter(IVec2Property* viewportSizeProp);
+        explicit GlVesselnessFilter(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -57,9 +57,13 @@ namespace campvis {
         virtual void init();
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "GlVesselnessFilter"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "GlVesselnessFilter"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Computes a Vesselness Measure very similar to the one proposed by Frangi."; };
         /// \see AbstractProcessor::getAuthor()
@@ -86,7 +90,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // GLVESSELNESSFILTER_H__

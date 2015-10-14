@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -35,8 +35,8 @@
 
 namespace campvis {
 
-    IvusTcDemo::IvusTcDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    IvusTcDemo::IvusTcDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , p_sourceDirectory("SoruceDirectory", "Source Directory", "D:/Medical Data/IVUS/H52 LAD1", StringProperty::DIRECTORY)
         , p_readImagesButton("ReadImagesButton", "Read Images")
         , p_predicateHistogram("PredicateHistogram", "Voxel Predicate Selection")

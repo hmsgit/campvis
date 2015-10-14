@@ -1,6 +1,6 @@
 ﻿/**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -31,7 +31,6 @@
 
 #include "cgt/gpucapabilities.h"
 #include "cgt/filesystem.h"
-#include "cgt/openglgarbagecollector.h"
 
 namespace cgt {
 
@@ -64,7 +63,7 @@ Texture::Texture(GLenum type, const cgt::ivec3& dimensions, GLint internalFormat
 
 Texture::~Texture() {
     if (id_)
-        GLGC.addGarbageTexture(id_);
+        glDeleteTextures(1, &id_);
 }
 
 
@@ -368,7 +367,7 @@ void Texture::applyWrapping() {
         glTexParameteri(type_, GL_TEXTURE_WRAP_R, wrap);
 }
 
-void Texture::uploadTexture(GLubyte* data, GLint format, GLenum dataType) {
+void Texture::uploadTexture(const GLubyte* data, GLint format, GLenum dataType) {
     bind();
 
     switch (type_) {

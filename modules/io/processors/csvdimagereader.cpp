@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -127,9 +127,11 @@ namespace campvis {
             std::string concatenated = ss.str(); \
              \
             std::ifstream file(concatenated.c_str(), std::ifstream::in); \
-            if (!file.is_open() || file.bad()) \
+            if (!file.is_open() || file.bad()) { \
+                delete [] dataArray; \
                 throw cgt::FileException("Could not open file " + ss.str() + " for reading.", p_url.getValue()); \
-                 \
+            } \
+            \
             TMP_TYPE tmp; \
             for (size_t column = 0; column < size.y && file.good(); ++column) { \
                 for (size_t row = 0; row < size.x && file.good(); ++row) { \

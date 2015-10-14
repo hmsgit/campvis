@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -27,11 +27,14 @@
 
 #include <string>
 
+#include "cgt/assert.h"
 #include "cgt/framebufferobject.h"
 #include "cgt/shadermanager.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "modules/modulesapi.h"
+
+#include <memory>
 
 namespace cgt {
     class FramebufferObject;
@@ -72,6 +75,9 @@ namespace campvis {
         GLuint getMaxMipmapLevel() { return _maxMipmapLevel; }
 
     private:
+        // disable copying and assignment
+        explicit VoxelHierarchyMapper(const VoxelHierarchyMapper& rhs);
+        VoxelHierarchyMapper& operator=(VoxelHierarchyMapper rhs);
 
         void createXorBitmaskTexture();
 
@@ -104,8 +110,7 @@ namespace campvis {
         cgt::Texture* _xorBitmaskTexture;           ///< Texture holding the 128x128 possible combinations of uvec4 bitmasks
         cgt::Texture* _hierarchyTexture;            ///< The OpenGL texture storing the voxel hierarchy
 
-        FaceGeometry* _quad;
-
+        std::unique_ptr<FaceGeometry> _quad;
 
         static std::string loggerCat_;
     };

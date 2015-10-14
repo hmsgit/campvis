@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -34,32 +34,28 @@
 namespace campvis {
     const std::string AutoEvaluationPipeline::loggerCat_ = "CAMPVis.core.datastructures.AutoEvaluationPipeline";
 
-    AutoEvaluationPipeline::AutoEvaluationPipeline(DataContainer* dc) 
-        : AbstractPipeline(dc)
+    AutoEvaluationPipeline::AutoEvaluationPipeline(DataContainer& dataContainer, const std::string& pipelineName)
+        : AbstractPipeline(dataContainer)
+        , _pipelineName(pipelineName)
     {
     }
 
     AutoEvaluationPipeline::~AutoEvaluationPipeline() {
     }
 
+    std::string AutoEvaluationPipeline::getName() const  {
+        return _pipelineName;
+    }
+
     void AutoEvaluationPipeline::init() {
         AbstractPipeline::init();
-
-        // connect invalidation of each processor
-        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
-            (*it)->s_invalidated.connect(this, &AutoEvaluationPipeline::onProcessorInvalidated);
-        }
-
-        _data->s_dataAdded.connect(this, &AutoEvaluationPipeline::onDataContainerDataAdded);
     }
 
     void AutoEvaluationPipeline::deinit() {
-        _data->s_dataAdded.disconnect(this);
-
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             (*it)->s_invalidated.disconnect(this);
         }
-    
+
         AbstractPipeline::deinit();
     }
 
@@ -75,10 +71,11 @@ namespace campvis {
         findDataNamePropertiesAndAddToPortMap(processor);
 
         AbstractPipeline::addProcessor(processor);
+        processor->s_invalidated.connect(this, &AutoEvaluationPipeline::onProcessorInvalidated);
     }
 
     void AutoEvaluationPipeline::executePipeline() {
-        // execute each processor once 
+        // execute each processor once
         // (AbstractProcessor::process() takes care of executing only invalid processors)
         for (size_t i = 0; i < _processors.size(); ++i) {
             executeProcessorAndCheckOpenGLState(_processors[i]);
@@ -134,6 +131,8 @@ namespace campvis {
 
     void AutoEvaluationPipeline::onDataContainerDataAdded(std::string name, DataHandle dh) {
         {
+            AbstractPipeline::onDataContainerDataAdded(name, dh);
+
             // acquire read lock
             tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
 
@@ -149,6 +148,10 @@ namespace campvis {
 
     void AutoEvaluationPipeline::findDataNamePropertiesAndAddToPortMap(const HasPropertyCollection* hpc) {
         const PropertyCollection& pc = hpc->getProperties();
+
+        // const_cast okay, since we're just connecting to signals
+        const_cast<HasPropertyCollection*>(hpc)->s_propertyAdded.connect(this, &AutoEvaluationPipeline::onPropertyCollectionPropertyAdded);
+        const_cast<HasPropertyCollection*>(hpc)->s_propertyRemoved.connect(this, &AutoEvaluationPipeline::onPropertyCollectionPropertyRemoved);
 
         // traverse property collection
         for (size_t i = 0; i < pc.size(); ++i) {
@@ -167,6 +170,55 @@ namespace campvis {
             else if (MetaProperty* mp = dynamic_cast<MetaProperty*>(pc[i])) {
                 // if MetaProperty, recursively check its PropertyCollection
                 findDataNamePropertiesAndAddToPortMap(mp);
+            }
+        }
+    }
+
+    void AutoEvaluationPipeline::onPropertyCollectionPropertyAdded(AbstractProperty* property) {
+        // check whether the incoming property is of the correct type (we only care about DataNameProperties)
+        if (DataNameProperty* dnp = dynamic_cast<DataNameProperty*>(property)) {
+            if (dnp->getAccessInfo() == DataNameProperty::READ) {
+                // check whether this property is already present in the port map
+                IteratorMapType::iterator it = _iteratorMap.find(dnp);
+                if (it == _iteratorMap.end()) {
+                    // add to port map and register to changed signal
+                    tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
+                    std::pair<PortMapType::iterator, bool> result = _portMap.insert(std::make_pair(dnp->getValue(), dnp));
+                    cgtAssert(result.second, "Could not insert Property into port map!");
+                    if (result.second) {
+                        _iteratorMap[dnp] = result.first;
+                        dnp->s_changed.connect(this, &AutoEvaluationPipeline::onDataNamePropertyChanged);
+                    }
+                }
+                else {
+                    // this should not happen, otherwise we did something wrong before.
+                    cgtAssert(false, "This property is already in iterator map!");
+                }
+            }
+        }
+    }
+
+    void AutoEvaluationPipeline::onPropertyCollectionPropertyRemoved(AbstractProperty* property) {
+        // check whether the incoming property is of the correct type (we only care about DataNameProperties)
+        if (DataNameProperty* dnp = dynamic_cast<DataNameProperty*>(property)) {
+            if (dnp->getAccessInfo() == DataNameProperty::READ) {
+                // find string-iterator pair for the given property
+                IteratorMapType::iterator it = _iteratorMap.find(dnp);
+                if (it != _iteratorMap.end()) {
+                    // remove from port map and deregister from changed signal
+                    dnp->s_changed.disconnect(this);
+
+                    // acquire a write-lock since we erase the old value from our port map
+                    tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, true);
+
+                    // remove the property from the port map
+                    _portMap.unsafe_erase(it->second);
+                    _iteratorMap.unsafe_erase(it);
+                }
+                else {
+                    // this should not happen, otherwise we did something wrong before.
+                    cgtAssert(false, "Could not find Property in iterator map!");
+                }
             }
         }
     }

@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,8 +30,6 @@
 #include "modules/workflowdemo/pipelines/imageloading.h"
 #include "modules/workflowdemo/pipelines/imagefiltering.h"
 #include "modules/workflowdemo/pipelines/imagevis.h"
-
-#include "modules/pipelinefactory.h"
 
 namespace campvis {
 namespace workflowdemo {
@@ -79,7 +77,6 @@ namespace workflowdemo {
     };
 
 }
-template class WorkflowRegistrar<workflowdemo::DemoWorkflow>;
 }
 
 #endif // DEMOWORKFLOW_H__

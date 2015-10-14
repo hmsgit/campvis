@@ -14,7 +14,10 @@
 #include "core/datastructures/imagedata.h"
 #include "core/properties/allproperties.h"
 #include "core/pipeline/abstractprocessor.h"
+#include "core/pipeline/abstractworkflow.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/pipelinefactory.h"
+#include "core/pipeline/processorfactory.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/tfgeometry2d.h"
@@ -30,20 +33,26 @@ static const char* const SOURCE_DIR = CAMPVIS_SOURCE_DIR;
 // Template specialisations and instantiations required to get signals to work in Lua
 namespace sigslot {
     template<>
-    struct LuaConnectionArgTraits<campvis::AbstractProcessor*> {
-        static const char* const typeName;
-    };
-
+    struct LuaConnectionArgTraits<campvis::AbstractProcessor*> { static const char* const typeName; };
     const char* const LuaConnectionArgTraits<campvis::AbstractProcessor*>::typeName = "campvis::AbstractProcessor *";
+
+    template<>
+    struct LuaConnectionArgTraits<campvis::DataHandle> { static const char* const typeName; };
+    const char* const LuaConnectionArgTraits<campvis::DataHandle>::typeName = "campvis::DataHandle *";
+
+    template<>
+    struct LuaConnectionArgTraits<std::string> { static const char* const typeName; };
+    const char* const LuaConnectionArgTraits<std::string>::typeName = "std::string *";
 }
 }
 
 
 %template(sigslot_signal1_AbstractProcessor) sigslot::signal1<campvis::AbstractProcessor*>;
+%template(sigslot_signal2_string_DataHandle) sigslot::signal2<std::string, campvis::DataHandle>;
 
 %template(PairStringDataHandle) std::pair<std::string, campvis::DataHandle>;
 %template(VectorOfPairStringDataHandle) std::vector< std::pair< std::string, campvis::DataHandle> >;
-
+%template(VectorOfString) std::vector< std::string >;
 
 namespace campvis {
 
@@ -209,14 +218,6 @@ namespace campvis {
         void selectById(const std::string& id);
     };
 
-    /* Downcast the return value of selectById to appropriate subclass */
-    %factory(void campvis::AbstractOptionProperty::selectById,
-             campvis::GenericOptionProperty);
-
-    /* Downcast the return value of getOptionId to appropriate subclass */
-    %factory(void campvis::AbstractOptionProperty::getOptionId,
-             campvis::GenericOptionProperty);
-
     /* TFGeometry1D */
 
     %nodefaultctor TFGeometry1D;
@@ -269,7 +270,9 @@ namespace campvis {
         GenericGeometryTransferFunction(const cgt::vec3& size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
         virtual ~GenericGeometryTransferFunction();
 
+        %apply SWIGTYPE *DISOWN {T* geometry};
         void addGeometry(T* geometry);
+        %clear T* geometry;
     };
     
     /* Geometry1DTransferFunction */
@@ -300,11 +303,13 @@ namespace campvis {
 
     class TransferFunctionProperty : public AbstractProperty {
     public:
+        %apply SWIGTYPE *DISOWN {AbstractTransferFunction* tf};
         TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf);
         virtual ~TransferFunctionProperty();
 
         AbstractTransferFunction* getTF();
         void replaceTF(AbstractTransferFunction* tf);
+        %clear AbstractTransferFunction* tf;
     };
 
     /* IHasWorldBounds */
@@ -328,9 +333,13 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const = 0;
         virtual AbstractData* clone() const = 0;
     };
-	
+    
     /* DataHandle */
 
+    /* Downcast the return value of DataHandle::getData to appropriate subclass */
+    %factory(const AbstractData* campvis::DataHandle::getData, const campvis::ImageData);
+
+    %apply SWIGTYPE *DISOWN {AbstractData* data};
     class DataHandle {
     public:
         explicit DataHandle(AbstractData* data = 0);
@@ -370,9 +379,6 @@ namespace campvis {
         virtual cgt::Bounds getWorldBounds() const;
     };
 
-    /* Downcast the return value of DataHandle::getData to appropriate subclass */
-    %factory(AbstractData* campvis::DataHandle::getData, campvis::ImageData);
-
     /* DataContainer */
 
     class DataContainer {
@@ -391,8 +397,11 @@ namespace campvis {
 
         %immutable;
         sigslot::signal0 s_changed;
+        sigslot::signal2<std::string, DataHandle> s_dataAdded;
         %mutable;
     };
+
+    %clear AbstractData* data;
     
     /* Down casting or super classes.
      * Down casting follows the order of declaration.
@@ -446,6 +455,7 @@ namespace campvis {
 
         %immutable;
         sigslot::signal1<AbstractProcessor*> s_validated;
+        sigslot::signal1<AbstractProcessor*> s_invalidated;
         %mutable;
     };
 
@@ -453,10 +463,10 @@ namespace campvis {
 
     class AbstractPipeline : public HasPropertyCollection {
     public:
-        AbstractPipeline(DataContainer* dc);
+        AbstractPipeline(DataContainer& dc);
         virtual ~AbstractPipeline();
 
-        virtual const std::string getName() const = 0;
+        virtual std::string getName() const = 0;
 
         const DataContainer& getDataContainer() const;
         DataContainer& getDataContainer();
@@ -464,20 +474,51 @@ namespace campvis {
         virtual void addProcessor(AbstractProcessor* processor);
         virtual void executePipeline() = 0;
         AbstractProcessor* getProcessor(const std::string& name) const;
-        AbstractProcessor* getProcessor(int index) const;
+        AbstractProcessor* getProcessor(size_t index) const;
 
+        %immutable;
         sigslot::signal0 s_init;
         sigslot::signal0 s_deinit;
+        %mutable;
     };
 
     /* AutoEvaluationPipeline */
 
     class AutoEvaluationPipeline : public AbstractPipeline {
     public:
+        AutoEvaluationPipeline(DataContainer& dataContainer, const std::string& pipelineName);
+        virtual ~AutoEvaluationPipeline();
+        
+        std::string getName() const;
         virtual void addProcessor(AbstractProcessor* processor);
 
         void addEventListenerToBack(cgt::EventListener* e);
+        virtual void executePipeline();
     };
+
+    class AbstractWorkflow : public HasPropertyCollection {
+    public:
+        AbstractWorkflow(const std::string& title);
+        virtual ~AbstractWorkflow();
+
+        virtual std::vector<AbstractPipeline*> getPipelines() = 0;
+        virtual const std::string getName() const = 0;
+
+        virtual void init();
+        virtual void deinit();
+
+        DataContainer* getDataContainer();
+
+        virtual bool isStageAvailable(int stage) const;
+        int getCurrentStageId() const;
+        void setCurrentStage(int stage);
+
+        %immutable;
+        sigslot::signal2<int, int> s_stageChanged;
+        sigslot::signal0 s_stageAvailabilityChanged;
+        %mutable;
+    };
+
 
     /* VisualizationProcessor */
 
@@ -486,19 +527,30 @@ namespace campvis {
         explicit VisualizationProcessor(IVec2Property* viewportSizeProp);
         ~VisualizationProcessor();
     };
+
+
+
+    /* PipelineFactory and ProcessorFactory */
+
+    class PipelineFactory {
+    public:
+        static PipelineFactory& getRef();
+
+        std::vector<std::string> getRegisteredPipelines() const;
+        AbstractPipeline* createPipeline(const std::string& id, DataContainer& dc) const;
+        AbstractWorkflow* createWorkflow(const std::string& id) const;
+    };
+
+    class ProcessorFactory {
+    public:
+        static ProcessorFactory& getRef();
+    
+        std::vector<std::string> getRegisteredProcessors() const;
+        std::vector<std::string> getRegisteredRaycastingProcessors() const;
+        AbstractProcessor* createProcessor(const std::string& id, IVec2Property* viewPortSizeProp = nullptr) const;
+    };
 }
 
-
 %luacode {
-  function campvis.newPipeline (name, o)
-    if not name then
-      error("A name must be provided when creating a new pipeline!")
-    end
-
-    o = o or {}   -- create object if user does not provide one
-    setmetatable(o, {__index = instance})
-    return o
-  end
-
-  print("Module campvis loaded")
+  print("Module campvis-core loaded")
 }

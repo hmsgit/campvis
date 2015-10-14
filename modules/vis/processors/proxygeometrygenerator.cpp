@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -71,8 +71,8 @@ namespace campvis {
                 cgt::vec3 texURB(static_cast<float>(p_clipX.getValue().y), static_cast<float>(p_clipY.getValue().y), static_cast<float>(p_clipZ.getValue().y));
                 texURB /= numSlices;
 
-                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, cgt::Bounds(texLLF, texURB));
-                data.addData(p_geometryID.getValue(), cube);
+                std::unique_ptr<MeshGeometry> cube = GeometryDataFactory::createCube(volumeExtent, cgt::Bounds(texLLF, texURB));
+                data.addData(p_geometryID.getValue(), cube.release());
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

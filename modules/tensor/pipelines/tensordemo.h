@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,8 +30,6 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -45,8 +43,10 @@ namespace campvis {
     public:
         /**
          * Small demo pipeline for tensor data visualization.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        TensorDemo(DataContainer* dc);
+        explicit TensorDemo(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -56,9 +56,6 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        /// \see AbstractPipeline::getId()
         static const std::string getId() { return "TensorDemo"; };
 
     protected:
@@ -72,10 +69,6 @@ namespace campvis {
 
         IntProperty p_sliceNumber;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<TensorDemo>;
-
 }
 
 #endif // TENSORDEMO_H__

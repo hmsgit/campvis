@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -77,8 +77,6 @@ namespace campvis {
     void DevilImageReader::init() {
         AbstractImageReader::init();
         _shader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "#define NO_DEPTH\n");
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
     void DevilImageReader::deinit() {
@@ -248,7 +246,6 @@ namespace campvis {
             rd->addColorTexture(id);
 
             // create fake depth image
-            // TODO: think of a better solution to this...
             ImageData* idDepth = new ImageData(dimensionality, imageSize, 1);
             float* ptr = new float[cgt::hmul(imageSize)];
             memset(ptr, 0, cgt::hmul(imageSize) * sizeof(float));

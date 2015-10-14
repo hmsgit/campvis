@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -28,7 +28,6 @@
 #include "sigslot/sigslot.h"
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
-#include "cgt/logmanager.h"
 
 #include "core/coreapi.h"
 #include "core/pipeline/abstractprocessor.h"
@@ -94,7 +93,6 @@ namespace campvis {
         /**
          * Adds the given property \a prop to the set of shared properties.
          * All shared properties will be changed when this property changes.
-         * Overload in subclasses to make sure that shared properties are of the same type.
          * \note        Make sure not to build circular sharing or you will encounter endless loops!
          * \param prop  Property to add.
          */

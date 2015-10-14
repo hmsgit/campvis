@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -195,10 +195,9 @@ void ResourceManager<T>::dispose(T* ptr) {
 template <class T>
 void ResourceManager<T>::addPath(std::string path) {
     tbb::spin_mutex::scoped_lock lock(this->mutex_);
-
     pathList_.push_front(path);
+
     // remove duplicates
-    //TODO: better use std::set<> here
     pathList_.sort();
     pathList_.unique();
 }

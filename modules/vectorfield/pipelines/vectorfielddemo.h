@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,9 +30,6 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
-#include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -46,8 +43,10 @@ namespace campvis {
     public:
         /**
          * Small demo pipeline for vector field visualization.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        VectorFieldDemo(DataContainer* dc);
+        explicit VectorFieldDemo(DataContainer& dc);
 
         /**
          * Virtual Destructor
@@ -56,13 +55,9 @@ namespace campvis {
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
-
         /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        /// \see AbstractPipeline::getId()
         static const std::string getId() { return "VectorFieldDemo"; };
 
     protected:
@@ -89,9 +84,6 @@ namespace campvis {
         GenericOptionProperty<std::string> p_viewSelection;
         IntProperty p_time;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<VectorFieldDemo>;
 }
 
 #endif // VECTORFIELDDEMO_H__

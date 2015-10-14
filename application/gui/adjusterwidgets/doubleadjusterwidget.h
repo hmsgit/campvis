@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -26,6 +26,7 @@
 #define DOUBLEADJUSTERWIDGET_H__
 
 #include "abstractadjusterwidget.h"
+#include "application/applicationapi.h"
 
 namespace campvis {
     /**
@@ -34,7 +35,7 @@ namespace campvis {
      * DoubleAdjusterWidget consists of a slider, which can be used to quickly change numeric values, and a spin box,
      * which is better suited for precise adjustments.
      */
-    class DoubleAdjusterWidget : public AbstractAdjusterWidget<double> {
+    class CAMPVIS_APPLICATION_API DoubleAdjusterWidget : public AbstractAdjusterWidget<double> {
 
         Q_OBJECT
 
@@ -43,7 +44,7 @@ namespace campvis {
          * Creates a new DoubleAdjusterWidget.
          * \param   parent      parent Qt widget
          */
-        DoubleAdjusterWidget(QWidget* parent = 0);
+        explicit DoubleAdjusterWidget(QWidget* parent = 0);
 
         /**
          * Returns how many decimals the adjuster will use for displaying and doubleerpreting doubles.

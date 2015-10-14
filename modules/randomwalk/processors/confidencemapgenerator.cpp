@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -134,7 +134,7 @@ namespace campvis {
                                 _output[x + imageSize.x * y] = tmp[column + imageSize.y * row];
                             }
                             else {
-                                _output[x + imageSize.x * y] = 0.f;
+                                _output[x + imageSize.x * y] = 1.f;
                             }
                         }
                     }
@@ -193,6 +193,8 @@ namespace campvis {
 
     void ConfidenceMapGenerator::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
+        GenericImageRepresentationLocal<float, 1>::ScopedRepresentation previousResult(data, p_targetImageID.getValue());
+        GenericImageRepresentationLocal<float, 1>::ScopedRepresentation velocities(data, p_targetImageID.getValue() + "velocities");
 
         if (input != 0 && input->getDimensionality() >= 2 && input->getParent()->getNumChannels() >= 1) {
             const cgt::svec3& imageSize = input->getSize();
@@ -204,7 +206,48 @@ namespace campvis {
                 CMGenerator(input, outputValues, this));
 
             ImageData* output = new ImageData(input->getDimensionality(), cgt::svec3(input->getSize().x, input->getSize().y, 1), 1);
-            GenericImageRepresentationLocal<float, 1>::create(output, outputValues);
+            auto outRep = GenericImageRepresentationLocal<float, 1>::create(output, outputValues);
+
+            float dt = 0.5f;
+            float a = 0.36f;
+            float b = 0.005f;
+
+            if (previousResult && velocities && previousResult->getNumElements() == outRep->getNumElements() && velocities->getNumElements() == outRep->getNumElements()) {
+                tbb::parallel_for(tbb::blocked_range<size_t>(0, outRep->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
+                    for (size_t i = range.begin(); i != range.end(); ++i) {
+                        float xk = previousResult->getElement(i) + (velocities->getElement(i) * dt);
+                        float vk = velocities->getElement(i);
+
+                        float rk = outRep->getElement(i) - xk;
+
+                        xk += a * rk;
+                        vk += (b*rk) / dt;
+
+                        outRep->setElement(i, xk);
+                        const_cast<GenericImageRepresentationLocal<float, 1>*>(&*velocities)->setElement(i, vk);
+                    }
+                });
+            }
+            else {
+                ImageData* velocityImage = new ImageData(input->getDimensionality(), cgt::svec3(input->getSize().x, input->getSize().y, 1), 1);
+                auto veloRep = GenericImageRepresentationLocal<float, 1>::create(velocityImage, nullptr);
+
+                tbb::parallel_for(tbb::blocked_range<size_t>(0, outRep->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
+                    for (size_t i = range.begin(); i != range.end(); ++i) {
+                        float xk = 0.f;
+                        float vk = 0.f;
+                        float rk = outRep->getElement(i) - xk;
+
+                        xk += a * rk;
+                        vk += (b*rk) / dt;
+
+                        veloRep->setElement(i, vk);
+                    }
+                });
+
+                data.addData(p_targetImageID.getValue() + "velocities", velocityImage);
+            }
+
             data.addData(p_targetImageID.getValue(), output);
         }
         else {

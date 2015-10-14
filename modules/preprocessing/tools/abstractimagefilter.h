@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -34,49 +34,18 @@
 namespace campvis {
     class ImageRepresentationLocal;
 
-    struct CAMPVIS_MODULES_API AbstractImageFilter {
-        AbstractImageFilter(const ImageRepresentationLocal* input, ImageRepresentationLocal* output)
-            : _input(input)
-            , _output(output)
-        {
-            cgtAssert(input != 0, "Input image must not be 0.");
-            cgtAssert(output != 0, "Output image must not be 0.");
-        }
-
-        virtual void operator() (const tbb::blocked_range<size_t>& range) const = 0;
-
-    protected:
-        const ImageRepresentationLocal* _input;
-        ImageRepresentationLocal* _output;
-    };
-
-// ================================================================================================
-
-    struct CAMPVIS_MODULES_API ImageFilterMedian : public AbstractImageFilter {
+    struct CAMPVIS_MODULES_API ImageFilterMedian {
     public:
         ImageFilterMedian(const ImageRepresentationLocal* input, ImageRepresentationLocal* output, size_t kernelSize);
 
         void operator() (const tbb::blocked_range<size_t>& range) const;
 
     protected:
+        const ImageRepresentationLocal* _input;
+        ImageRepresentationLocal* _output;
         size_t _kernelSize;
     };
 
-// ================================================================================================
-
-    struct CAMPVIS_MODULES_API ImageFilterGauss : public AbstractImageFilter {
-    public:
-        ImageFilterGauss(const ImageRepresentationLocal* input, ImageRepresentationLocal* output, size_t kernelSize, float sigma);
-
-        void operator() (const tbb::blocked_range<size_t>& range) const;
-
-    protected:
-        size_t _kernelSize;
-        size_t _halfKernelSize;
-        float _sigma;
-        std::vector<float> _kernel;
-        float _norm;
-    };
 }
 
 #endif // ABSTRACTIMAGEFILTER_H__

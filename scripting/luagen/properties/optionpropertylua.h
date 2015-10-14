@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -27,7 +27,9 @@
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
+
 #include "core/properties/optionproperty.h"
+#include "scripting/scriptingapi.h"
 
 namespace campvis {
     class AbstractOptionProperty;
@@ -35,7 +37,7 @@ namespace campvis {
     /**
      * Lua generator for a OptionProperty
      */
-    class OptionPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API OptionPropertyLua : public AbstractPropertyLua {
 
     public:
         /**

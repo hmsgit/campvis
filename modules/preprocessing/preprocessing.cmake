@@ -6,6 +6,7 @@ IF(${ModuleEnabled})
 		modules/preprocessing/pipelines/*.cpp
 		modules/preprocessing/processors/*.cpp
 		modules/preprocessing/tools/*.cpp
+		modules/preprocessing/*.cpp
 	)
 
 	# Header files
@@ -16,7 +17,7 @@ IF(${ModuleEnabled})
 		modules/preprocessing/tools/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/preprocessing/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/preprocessing/glsl")
 	SET(ThisModDependencies vis)
 ENDIF(${ModuleEnabled})
 

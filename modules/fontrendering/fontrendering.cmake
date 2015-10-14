@@ -21,6 +21,7 @@ IF(${ModuleEnabled})
 		modules/fontrendering/pipelines/*.cpp
 		modules/fontrendering/processors/*.cpp
 		modules/fontrendering/tools/*.cpp
+		modules/fontrendering/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)
@@ -33,11 +34,11 @@ IF(${ModuleEnabled})
 		modules/fontrendering/tools/*.h
 	)
 
-	LIST (APPEND ThisModShaderDirectories "modules/fontrendering/fonts")
-	LIST (APPEND ThisModShaderDirectories "modules/fontrendering/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/fontrendering/fonts")
+	LIST(APPEND ThisModShaderDirectories "modules/fontrendering/glsl")
 
 	SET(ThisModDependencies base)
 ENDIF(${ModuleEnabled})
 
-SET(ThisModStatus TESTING)
+SET(ThisModStatus STABLE)
 SET(ThisModExternalDependencies FALSE)

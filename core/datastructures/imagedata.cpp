@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -108,6 +108,10 @@ namespace campvis {
         size_t y = (index % (_size.x * _size.y)) / _size.x;
         size_t x = index % _size.x;
         return cgt::svec3(x, y, z);
+    }
+
+    size_t ImageData::getNumRepresentations() const {
+        return _representations.size();
     }
 
     void ImageData::clearRepresentations() {

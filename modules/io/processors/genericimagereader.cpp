@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -43,7 +43,7 @@
 namespace campvis {
     namespace {
         struct checkExtension {
-            checkExtension(const std::string& str) : _str(str) {}
+            explicit checkExtension(const std::string& str) : _str(str) {}
 
             bool operator()(const std::pair<AbstractImageReader*, MetaProperty*>& v) const { 
                 return v.first->acceptsExtension(this->_str); 

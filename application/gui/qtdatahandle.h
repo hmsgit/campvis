@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -26,6 +26,8 @@
 #define QTQtDataHandle_H__
 
 #include "core/datastructures/datahandle.h"
+#include "application/applicationapi.h"
+
 #include <QMetaType>
 
 namespace campvis {
@@ -33,7 +35,7 @@ namespace campvis {
     /**
      * Wraps around a DataHandle to make it suitable for QVariant and queued connections.
      */
-    class QtDataHandle : public DataHandle {
+    class CAMPVIS_APPLICATION_API QtDataHandle : public DataHandle {
     public:
         /**
          * Creates a new QtDataHandle for the given data.

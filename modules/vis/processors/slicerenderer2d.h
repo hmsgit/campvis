@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -57,7 +57,7 @@ namespace campvis {
         /**
         * Constructs a new SliceRenderer2D Processor
         **/
-        SliceRenderer2D(IVec2Property* viewportSizeProp);
+        explicit SliceRenderer2D(IVec2Property* viewportSizeProp);
 
         /**
         * Destructor
@@ -69,9 +69,13 @@ namespace campvis {
 
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "SliceRenderer2D"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "SliceRenderer2D"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Applies a transfer function and other modifiers to a 2D input image"; };
         /// \see AbstractProcessor::getAuthor()
@@ -106,7 +110,6 @@ namespace campvis {
     private:
         cgt::ivec3 _lastImgSize;
     };
-
 }
 
 #endif // SLICERENDERER2D_H__

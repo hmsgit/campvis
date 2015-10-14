@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -226,11 +226,8 @@ namespace campvis {
     campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, int count)
         : AbstractOptionProperty(name, title)
     {
-        cgtAssert(options != 0, "Pointer to options array must not be 0.")
-        cgtAssert(count > 0, "The number of options must be greater 0.");
-
         _options.assign(options, options + count);
-        setMaxValue(count - 1);
+        setMaxValue(std::max(count - 1, 0));
         setValue(0);
         setMinValue(0);
     }

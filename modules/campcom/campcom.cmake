@@ -22,6 +22,7 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/campcom/pipelines/*.cpp
 		modules/campcom/processors/*.cpp
+		modules/campcom/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)
@@ -33,5 +34,5 @@ IF(${ModuleEnabled})
 	SET(ThisModDependencies vis)
 ENDIF(${ModuleEnabled})
 
-SET(ThisModStatus TESTING)
+SET(ThisModStatus EXPERIMENTAL)
 SET(ThisModExternalDependencies TRUE)

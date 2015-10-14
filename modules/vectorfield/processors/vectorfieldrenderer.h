@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -26,6 +26,7 @@
 #define VECTORFIELDRENDERER_H__
 
 #include <string>
+#include <memory>
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
@@ -57,15 +58,19 @@ namespace campvis {
         /**
          * Constructs a new VectorFieldRenderer Processor
          **/
-        VectorFieldRenderer(IVec2Property* viewportSizeProp);
+        explicit VectorFieldRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
          **/
         virtual ~VectorFieldRenderer();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "VectorFieldRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "VectorFieldRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Renders vector fields with arrows"; };
         /// \see AbstractProcessor::getAuthor()
@@ -120,12 +125,11 @@ namespace campvis {
          */
         void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const cgt::vec3& position, float scale);
 
-        GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
-        cgt::Shader* _shader;               ///< Shader for arrow rendering
+        std::unique_ptr<GeometryData> _arrowGeometry;   ///< Geometry for arrow rendering
+        cgt::Shader* _shader;                           ///< Shader for arrow rendering
         
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // VECTORFIELDRENDERER_H__

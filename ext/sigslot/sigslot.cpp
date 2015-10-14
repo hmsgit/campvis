@@ -98,6 +98,38 @@ namespace sigslot {
         _handlingMode = mode;
     }
 
+    void signal_manager::waitForSignalQueueFlushed() {
+        // nothing to wait for if current thread is signal_manager's thread.
+        if (isCurrentThreadSignalManagerThread())
+            return;
+        
+        // signal used to detect that the signal queue has been flushed
+        class SIGSLOT_API flushed_signal : public _signal_handle_base {
+        public:
+            flushed_signal(bool* ptr)
+                : _ptr(ptr)
+            {}
+
+            ~flushed_signal() {}
+
+            virtual void processSignal() const {
+                *_ptr = true;
+            }
+
+        private:
+            bool* _ptr;
+        };
+
+        bool signalVariable = false;
+        this->queueSignalImpl(new flushed_signal(&signalVariable));
+
+        while (! signalVariable) {
+            // so we do some busy waiting here - hopefully not too long...
+            std::this_thread::yield();
+            // make sure that the signal_manager thread is actually running, otherwise we wait forever.
+            _evaluationCondition.notify_all();
+        }
+    }
 
     const std::string signal_manager::loggerCat_;
 

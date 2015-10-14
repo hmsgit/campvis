@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -479,7 +479,7 @@ void Shader::activate() {
 }
 
 void Shader::activate(GLint id) {
-#if CGT_DEBUG
+#ifdef CGT_DEBUG
     if (cgt::getGlInt(GL_CURRENT_PROGRAM) != 0)
         LWARNING("Binding a new Shader while another Shader is active. Do you really want to do this?");
 #endif
@@ -951,14 +951,7 @@ bool Shader::setUniform(const string& name, Vector2f* vectors, GLsizei count) {
     GLint l = getUniformLocation(name);
     if (l == -1)
         return false;
-    //TODO: use the adress directly, without copying, same below. joerg
-    GLfloat* values = new GLfloat[2*count];
-    for (int i=0; i < count; i++){
-        values[2*i] = vectors[i].x;
-        values[2*i+1] = vectors[i].y;
-    }
-    glUniform2fv(l, count, values);
-    delete[] values;
+    glUniform2fv(l, count, vectors[0].elem);
     return true;
 }
 
@@ -974,14 +967,7 @@ bool Shader::setUniform(const string& name, Vector3f* vectors, GLsizei count) {
     GLint l = getUniformLocation(name);
     if (l == -1)
         return false;
-    GLfloat* values = new GLfloat[3*count];
-    for (int i=0; i < count; i++) {
-        values[3*i] = vectors[i].x;
-        values[3*i+1] = vectors[i].y;
-        values[3*i+2] = vectors[i].z;
-    }
-    glUniform3fv(l, count, values);
-    delete[] values;
+    glUniform3fv(l, count, vectors[0].elem);
     return true;
 }
 
@@ -997,15 +983,7 @@ bool Shader::setUniform(const string& name, Vector4f* vectors, GLsizei count) {
     GLint l = getUniformLocation(name);
     if (l == -1)
         return false;
-    GLfloat* values = new GLfloat[4*count];
-    for (int i=0; i < count; i++) {
-        values[4*i] = vectors[i].x;
-        values[4*i+1] = vectors[i].y;
-        values[4*i+2] = vectors[i].z;
-        values[4*i+3] = vectors[i].a;
-    }
-    glUniform4fv(l, count, values);
-    delete[] values;
+    glUniform4fv(l, count, vectors[0].elem);
     return true;
 }
 
@@ -1021,13 +999,7 @@ bool Shader::setUniform(const string& name, ivec2* vectors, GLsizei count) {
     GLint l = getUniformLocation(name);
     if (l == -1)
         return false;
-    GLint* values = new GLint[2*count];
-    for (int i=0; i < count; i++) {
-        values[2*i] = vectors[i].x;
-        values[2*i+1] = vectors[i].y;
-    }
-    glUniform2iv(l, count, values);
-    delete[] values;
+    glUniform2iv(l, count, vectors[0].elem);
     return true;
 }
 
@@ -1043,14 +1015,7 @@ bool Shader::setUniform(const string& name, ivec3* vectors, GLsizei count) {
     GLint l = getUniformLocation(name);
     if (l == -1)
         return false;
-    GLint* values = new GLint[3*count];
-    for (int i=0; i < count; i++) {
-        values[3*i] = vectors[i].x;
-        values[3*i+1] = vectors[i].y;
-        values[3*i+2] = vectors[i].z;
-    }
-    glUniform3iv(l, count, values);
-    delete[] values;
+    glUniform3iv(l, count, vectors[0].elem);
     return true;
 }
 
@@ -1066,15 +1031,7 @@ bool Shader::setUniform(const string& name, ivec4* vectors, GLsizei count) {
     GLint l = getUniformLocation(name);
     if (l == -1)
         return false;
-    GLint* values = new GLint[4*count];
-    for (int i=0; i < count; i++) {
-        values[4*i] = vectors[i].x;
-        values[4*i+1] = vectors[i].y;
-        values[4*i+2] = vectors[i].z;
-        values[4*i+3] = vectors[i].a;
-    }
-    glUniform4iv(l, count, values);
-    delete[] values;
+    glUniform4iv(l, count, vectors[0].elem);
     return true;
 }
 
@@ -1288,10 +1245,12 @@ void Shader::setAttribute(GLint index, const Vector4<GLuint>& v) {
     glVertexAttrib4uiv(index, v.elem);
 }
 
+// ATTENTION: This method was deliberately deactivated, since it was not working as expected
+//            with AMD GPUs.
 // Attribute locations
-void Shader::setAttributeLocation(GLuint index, const std::string& name) {
-    glBindAttribLocation(id_, index, name.c_str());
-}
+//void Shader::setAttributeLocation(GLuint index, const std::string& name) {
+//    glBindAttribLocation(id_, index, name.c_str());
+//}
 
 GLint Shader::getAttributeLocation(const string& name) {
     GLint l;

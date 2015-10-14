@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -36,9 +36,10 @@
 namespace campvis {
     PropertyCollectionWidget::PropertyCollectionWidget(QWidget* parent /*= 0*/)
         : QWidget(parent)
-        , _propCollection(0)
-        , _dataContainer(0)
-        , _layout(0)
+        , _propCollection(nullptr)
+        , _dataContainer(nullptr)
+        , _layout(nullptr)
+        , _strechWidget(nullptr)
     {
         setupWidget();
     }
@@ -63,7 +64,6 @@ namespace campvis {
             propertyCollection->s_propertyAdded.connect(this, &PropertyCollectionWidget::onPropCollectionPropAdded);
             propertyCollection->s_propertyRemoved.connect(this, &PropertyCollectionWidget::onPropCollectionPropRemoved);
         }
-        _layout->addStretch(1);
     }
 
     void PropertyCollectionWidget::setupWidget() {
@@ -71,7 +71,10 @@ namespace campvis {
         _layout->setSpacing(8);
         _layout->setMargin(0);
         setLayout(_layout);
-        connect(this, SIGNAL(s_propertyVisibilityChanged(const AbstractProperty*)), this, SLOT(onWidgetVisibilityChanged(const AbstractProperty*)), Qt::QueuedConnection);
+
+        _strechWidget = new QWidget(this);
+
+        connect(this, SIGNAL(s_propertyVisibilityChanged(const AbstractProperty*)), this, SLOT(onWidgetVisibilityChanged(const AbstractProperty*)));
         connect(this, SIGNAL(propertyAdded(AbstractProperty*)), this, SLOT(addProperty(AbstractProperty*)));
         connect(this, SIGNAL(propertyRemoved(AbstractProperty*, QWidget*)), this, SLOT(removeProperty(AbstractProperty*, QWidget*)));
     }
@@ -124,6 +127,9 @@ namespace campvis {
 
         _widgetMap.insert(std::make_pair(prop, propWidget));
         _layout->addWidget(propWidget);
+
+        _layout->removeWidget(_strechWidget);
+        _layout->addWidget(_strechWidget, 1);
 
         prop->s_visibilityChanged.connect(this, &PropertyCollectionWidget::onPropertyVisibilityChanged);
         prop->s_visibilityChanged.emitSignal(prop);

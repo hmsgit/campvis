@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -35,17 +35,22 @@
 #include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
+#include "core/pipeline/pipelinefactory.h"
+#include "core/pipeline/processorfactory.h"
 #include "core/tools/stringutils.h"
-#include "modules/pipelinefactory.h"
 
 #include <QScrollBar>
 #include <QFileDialog>
 
 #include <fstream>
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+#include "scripting/glue/globalluatable.h"
 #include "scripting/luagen/properties/propertycollectionluascriptgenerator.h"
 #include "scripting/luagen/properties/abstractpropertylua.h"
-
+#include "application/gui/luatablewidget.h"
+#include "application/gui/scriptingwidget.h"
+#endif
 
 namespace campvis {
 
@@ -67,6 +72,7 @@ namespace campvis {
         , _selectedDataContainer(0)
         , _logViewer(0)
         , _scriptingConsoleWidget(nullptr)
+        , _luaTreeWidget(nullptr)
         , _workflowWidget(nullptr)
     {
         cgtAssert(_application != 0, "Application must not be 0.");
@@ -85,7 +91,11 @@ namespace campvis {
 
         setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
         setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+#ifdef CAMPVIS_HAS_SCRIPTING
+        setCorner(Qt::BottomRightCorner, Qt::BottomDockWidgetArea);
+#else
         setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+#endif
         setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 
         setTabPosition(Qt::TopDockWidgetArea, QTabWidget::North);
@@ -97,30 +107,40 @@ namespace campvis {
         _containerWidget = new QWidget(this);
         QGridLayout* _cwLayout = new QGridLayout(_containerWidget);
 
+        int rowPosition = 0;
         _cbPipelineFactory = new QComboBox(_containerWidget);
         std::vector<std::string> registeredPipelines = PipelineFactory::getRef().getRegisteredPipelines();
         for (std::vector<std::string>::const_iterator it = registeredPipelines.begin(); it != registeredPipelines.end(); ++it)
             _cbPipelineFactory->addItem(QString::fromStdString(*it));
-        _cwLayout->addWidget(_cbPipelineFactory, 0, 0);
+        _cwLayout->addWidget(_cbPipelineFactory, rowPosition, 0);
 
         _btnPipelineFactory = new QPushButton("Add Pipeline", _containerWidget);
-        _cwLayout->addWidget(_btnPipelineFactory, 0, 1);
+        _cwLayout->addWidget(_btnPipelineFactory, rowPosition++, 1);
 
         _pipelineWidget = new PipelineTreeWidget(this);
         _containerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-        _cwLayout->addWidget(_pipelineWidget, 1, 0, 1, 2);
+        _cwLayout->addWidget(_pipelineWidget, rowPosition++, 0, 1, 2);
 
         _btnExecute = new QPushButton("Execute Selected Pipeline/Processor", _containerWidget);
-        _cwLayout->addWidget(_btnExecute, 2, 0, 1, 2);
+        _cwLayout->addWidget(_btnExecute, rowPosition++, 0, 1, 2);
+
+        _cbProcessorFactory = new QComboBox(_containerWidget);
+        std::vector<std::string> registeredProcessors = ProcessorFactory::getRef().getRegisteredProcessors();
+        for (std::vector<std::string>::const_iterator it = registeredProcessors.begin(); it != registeredProcessors.end(); ++it)
+            _cbProcessorFactory->addItem(QString::fromStdString(*it));
+        _cwLayout->addWidget(_cbProcessorFactory, rowPosition, 0);
+
+        _btnProcessorFactory = new QPushButton("Add Processor", _containerWidget);
+        _cwLayout->addWidget(_btnProcessorFactory, rowPosition++, 1);
 
         _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", _containerWidget);
-        _cwLayout->addWidget(_btnShowDataContainerInspector, 3, 0, 1, 2);
+        _cwLayout->addWidget(_btnShowDataContainerInspector, rowPosition++, 0, 1, 2);
 
 #ifdef CAMPVIS_HAS_SCRIPTING
         _btnLuaLoad = new QPushButton("Load Script", _containerWidget);
-        _cwLayout->addWidget(_btnLuaLoad, 4, 0, 1, 2);
+        _cwLayout->addWidget(_btnLuaLoad, rowPosition++, 0, 1, 2);
         _btnLuaSave = new QPushButton("Save Script", _containerWidget);
-        _cwLayout->addWidget(_btnLuaSave, 5, 0, 1, 2);
+        _cwLayout->addWidget(_btnLuaSave, rowPosition++, 0, 1, 2);
         connect(
             _btnLuaLoad, SIGNAL(clicked()), 
             this, SLOT(onBtnLuaLoadClicked()));
@@ -158,8 +178,13 @@ namespace campvis {
         _scriptingConsoleWidget = new ScriptingWidget(this);
         ui.scriptingConsoleDock->setWidget(_scriptingConsoleWidget);
         connect(_scriptingConsoleWidget, SIGNAL(s_commandExecuted(const QString&)), this, SLOT(onLuaCommandExecuted(const QString&)));
+
+        _luaTreeWidget = new LuaTableTreeWidget(this);
+        ui.scriptingInspectorDock->setWidget(_luaTreeWidget);
+
 #else
         ui.scriptingConsoleDock->setVisible(false);
+        ui.scriptingInspectorDock->setVisible(false);
 #endif
 
         _workflowWidget = new WorkflowControllerWidget(_application, this);
@@ -176,8 +201,8 @@ namespace campvis {
             this, SIGNAL(updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)), 
             _pipelineWidget, SLOT(update(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)));
         connect(
-            _pipelineWidget, SIGNAL(clicked(const QModelIndex&)), 
-            this, SLOT(onPipelineWidgetItemClicked(const QModelIndex&)));
+            _pipelineWidget, SIGNAL(itemChanged(const QModelIndex&)), 
+            this, SLOT(onPipelineWidgetItemChanged(const QModelIndex&)));
         connect(
             this, SIGNAL(updatePropCollectionWidget(HasPropertyCollection*, DataContainer*)),
             _propCollectionWidget, SLOT(updatePropCollection(HasPropertyCollection*, DataContainer*)));
@@ -190,6 +215,9 @@ namespace campvis {
         connect(
             _btnPipelineFactory, SIGNAL(clicked()), 
             this, SLOT(onBtnPipelineFactoryClicked()));
+        connect(
+            _btnProcessorFactory, SIGNAL(clicked()), 
+            this, SLOT(onBtnProcessorFactoryClicked()));
 
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
         _application->s_DataContainersChanged.connect(this, &MainWindow::onDataContainersChanged);
@@ -226,20 +254,14 @@ namespace campvis {
     }
 
     void MainWindow::onPipelinesChanged() {
-        std::vector<AbstractPipeline*> pipelines;
-        std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
-
-        emit updatePipelineWidget(_application->_dataContainers, pipelines);
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
     }
 
     void MainWindow::onDataContainersChanged() {
-        std::vector<AbstractPipeline*> pipelines;
-        std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
-
-        emit updatePipelineWidget(_application->_dataContainers, pipelines);
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
     }
 
-    void MainWindow::onPipelineWidgetItemClicked(const QModelIndex& index) {
+    void MainWindow::onPipelineWidgetItemChanged(const QModelIndex& index) {
         if (index.isValid()) {
             // Yak, this is so ugly - another reason why GUI programming sucks...
             QVariant item = index.data(Qt::UserRole);
@@ -298,7 +320,7 @@ namespace campvis {
 #ifdef CAMPVIS_HAS_SCRIPTING
         const QString dialogCaption = QString::fromStdString("Select File");
         const QString directory = QString::fromStdString(".");
-        const QString fileFilter = tr("All files (*)");
+        const QString fileFilter = tr("Lua Scripts (*.lua)");
 
         QString filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
         if (filename != nullptr && _application->getLuaVmState() != nullptr) {
@@ -311,31 +333,29 @@ namespace campvis {
 #ifdef CAMPVIS_HAS_SCRIPTING
         const QString dialogCaption = QString::fromStdString("Save File as");
         const QString directory = QString::fromStdString(".");
-        const QString fileFilter = tr("All files (*)");
+        const QString fileFilter = tr("Lua Scripts (*.lua)");
 
         QString filename = QFileDialog::getSaveFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
 
         if (filename != nullptr) {
             if (_selectedProcessor != 0 && _selectedPipeline != 0) {
-                PropertyCollectionLuaScriptGenerator* _pcLua = new PropertyCollectionLuaScriptGenerator();
+                PropertyCollectionLuaScriptGenerator pcLua;
                 
-                std::string pipeScript = "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n";
+                std::string pipeScript = "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n";
                 for (size_t i = 0; i < _selectedPipeline->getProcessors().size(); i++) {
+                    pipeScript += "\n-- Restoring property state for " + _selectedPipeline->getProcessor(i)->getName() + " processor\n";
                     pipeScript += "proc = pipeline:getProcessor(" + StringUtils::toString(i) + ")\n";
-                    AbstractProcessor* proc = _selectedPipeline->getProcessor(int(i));
+                    AbstractProcessor* proc = _selectedPipeline->getProcessor(i);
 
-                    _pcLua->updatePropCollection(proc, &_selectedPipeline->getDataContainer());
-                    std::string res = _pcLua->getLuaScript(std::string(""), std::string("proc:"));
+                    pcLua.updatePropCollection(proc, &_selectedPipeline->getDataContainer());
+                    std::string res = pcLua.getLuaScript(std::string(""), std::string("proc:"));
                     pipeScript += res;
                 }
-                if (pipeScript != "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n") {
-                    std::ofstream file;
-                    file.open(filename.toStdString());
-                    file << pipeScript.c_str();
-                    file.close();
-                }
-                
-                delete _pcLua;
+
+                std::ofstream file;
+                file.open(filename.toStdString(), std::ofstream::out |std::ofstream::trunc);
+                file << pipeScript.c_str();
+                file.close();
             }
         }
 #endif
@@ -360,8 +380,10 @@ namespace campvis {
 
         _logViewer->init();
 
+#ifdef CAMPVIS_HAS_SCRIPTING
         if (_scriptingConsoleWidget)
             _scriptingConsoleWidget->init();
+#endif
     }
 
     void MainWindow::deinit() {
@@ -370,8 +392,10 @@ namespace campvis {
 
         _logViewer->deinit();
 
+#ifdef CAMPVIS_HAS_SCRIPTING
         if (_scriptingConsoleWidget)
             _scriptingConsoleWidget->deinit();
+#endif
     }
 
     MdiDockableWindow * MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {
@@ -406,8 +430,27 @@ namespace campvis {
         if (dc == 0) {
             dc = _application->createAndAddDataContainer("DataContainer #" + StringUtils::toString(_application->_dataContainers.size() + 1));
         }
-        AbstractPipeline* p = PipelineFactory::getRef().createPipeline(name, dc);
-        _application->addPipeline(name, p);
+        AbstractPipeline* p = PipelineFactory::getRef().createPipeline(name, *dc);
+        _application->addPipeline(p);
+    }
+
+    void MainWindow::onBtnProcessorFactoryClicked() {
+        cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+
+        std::string name = this->_cbProcessorFactory->currentText().toStdString();
+        if (_selectedPipeline == nullptr) 
+            return;
+
+        IVec2Property temp = _selectedPipeline->getCanvasSize();
+        IVec2Property *viewPort = new IVec2Property(temp.getName(), temp.getTitle(), temp.getValue(), temp.getMinValue(), temp.getMaxValue(), temp.getStepValue());
+        AbstractProcessor* p = ProcessorFactory::getRef().createProcessor(name, viewPort);
+        if (p == nullptr)
+            return;
+        
+        p->init();
+        _selectedPipeline->addProcessor(p);
+
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
     }
 
     void MainWindow::onRebuildShadersClicked() {
@@ -419,6 +462,10 @@ namespace campvis {
         if (_application->getLuaVmState() != nullptr) {
             cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             _application->getLuaVmState()->execString(cmd.toStdString());
+
+            _application->getLuaVmState()->getGlobalTable()->updateValueMap();
+            _scriptingConsoleWidget->_editCommand->setCompleter(new LuaCompleter(_application->getLuaVmState(), _scriptingConsoleWidget->_editCommand));
+            _luaTreeWidget->update(_application->getLuaVmState(), LuaTreeItem::FULL_MODEL);
         }
 #endif
     }
@@ -426,6 +473,15 @@ namespace campvis {
     void MainWindow::setWorkflow(AbstractWorkflow* w) {
         ui.workflowDock->setVisible(true);
         _workflowWidget->setWorkflow(w);
+    }
+
+    void MainWindow::enableKioskMode() {
+        ui.logViewerDock->hide();
+        ui.pipelineTreeDock->hide();
+        ui.pipelinePropertiesDock->hide();
+        ui.scriptingConsoleDock->hide();
+        ui.workflowDock->show();
+
     }
 
 }

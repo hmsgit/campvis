@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -67,7 +67,7 @@ namespace campvis {
              * Constructs a new Scoped lock, locking \a p and unlocking \a p on destruction.
              * \param   p                   Processor to lock
              */
-            ScopedLock(AbstractProcessor* p) 
+            explicit ScopedLock(AbstractProcessor* p) 
                 : _p(p)
             {
                 _p->lockProcessor();

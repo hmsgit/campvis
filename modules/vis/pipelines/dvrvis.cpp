@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -25,15 +25,14 @@
 #include "dvrvis.h"
 
 #include "cgt/event/keyevent.h"
-#include "core/datastructures/imagedata.h"
-
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
+#include "core/datastructures/imagedata.h"
 
 namespace campvis {
 
-    DVRVis::DVRVis(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    DVRVis::DVRVis(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()

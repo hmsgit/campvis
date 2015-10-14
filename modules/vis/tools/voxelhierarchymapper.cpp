@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -43,7 +43,10 @@ namespace campvis {
     std::string VoxelHierarchyMapper::loggerCat_ = "CAMPVis.modules.vis.VoxelHierarchyMapper";
 
     VoxelHierarchyMapper::VoxelHierarchyMapper()
-        : _xorBitmaskShader(nullptr)
+        : _brickSize(0)
+        , _brickDepth(0)
+        , _maxMipmapLevel(0)
+        , _xorBitmaskShader(nullptr)
         , _hierarchyRendererShader(nullptr)
         , _mimapRendererShader(nullptr)
         , _fbo(nullptr)
@@ -68,7 +71,6 @@ namespace campvis {
 
         delete _xorBitmaskTexture;
         delete _hierarchyTexture;
-        delete _quad;
     }
 
     void VoxelHierarchyMapper::createHierarchy(const ImageRepresentationGL* image, AbstractTransferFunction* transferFunction) {

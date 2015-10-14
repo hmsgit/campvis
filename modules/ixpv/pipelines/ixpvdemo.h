@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,8 +30,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/devil/processors/devilimagereader.h"
@@ -52,9 +50,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API IxpvDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a IxpvDemo pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        IxpvDemo(DataContainer* dc);
+        explicit IxpvDemo(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -64,8 +64,6 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "IxpvDemo"; };
 
         //virtual void keyEvent(cgt::KeyEvent* e);
@@ -93,10 +91,6 @@ namespace campvis {
 
         MWheelToNumericPropertyEventListener _wheelHandler;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<IxpvDemo>;
-
 }
 
 #endif // IXPVDEMO_H__

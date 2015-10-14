@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -95,6 +95,10 @@ namespace fontrendering {
 
 
     private:
+        // disable copying and assignment
+        explicit FontAtlas(const FontAtlas& rhs);
+        FontAtlas& operator=(FontAtlas rhs);
+
         /// Struct storing glyph parameters of each printable ASCII character
         struct {
             cgt::vec2 advance;          ///< Advance of this glyph
@@ -107,6 +111,7 @@ namespace fontrendering {
         FT_Face _ftFace;                ///< Pointer to the font face
         cgt::Texture* _texture;         ///< OpenGL texture storing the texture atlas
         cgt::Shader* _shader;           ///< Shader used for font rendering
+        int _height;
 
         static const int MAX_TEXTURE_WIDTH;
         static const std::string loggerCat_;

@@ -35,7 +35,6 @@ SET(CGT_SOURCES
 	init.cpp
 	logmanager.cpp
 	job.cpp
-	openglgarbagecollector.cpp
 	opengljobprocessor.cpp
 	painter.cpp
 	runnable.cpp
@@ -96,3 +95,5 @@ IF(CAMPVIS_ADD_INSTALL_TARGET)
 	)
 ENDIF()
 
+
+INSTALL(TARGETS cgt DESTINATION exports EXPORT campvis-targets)

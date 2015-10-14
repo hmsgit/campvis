@@ -3,7 +3,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -40,17 +40,19 @@
 namespace campvis {
     const std::string AbstractPipeline::loggerCat_ = "CAMPVis.core.datastructures.AbstractPipeline";
 
-    AbstractPipeline::AbstractPipeline(DataContainer* dc) 
+    AbstractPipeline::AbstractPipeline(DataContainer& dc) 
         : HasPropertyCollection()
         , cgt::EventHandler()
         , cgt::EventListener()
-        , _data(dc)
+        , _dataContainer(&dc)
         , _canvas(0)
         , _canvasSize("CanvasSize", "Canvas Size", cgt::ivec2(128, 128), cgt::ivec2(1, 1), cgt::ivec2(4096, 4096))
         , _ignoreCanvasSizeUpdate(false)
         , _renderTargetID("renderTargetID", "Render Target ID", "AbstractPipeline.renderTarget", DataNameProperty::READ)
     {
-        cgtAssert(_data != 0, "Pointer to the DataContainer for this pipeline must not be 0!");
+        cgtAssert(_dataContainer != nullptr, "Pointer to the DataContainer for this pipeline must not be 0!");
+
+        _painter.reset(new PipelinePainter(nullptr, this));
 
         _enabled = false;
         _pipelineDirty = true;
@@ -60,10 +62,12 @@ namespace campvis {
     }
 
     AbstractPipeline::~AbstractPipeline() {
-
     }
 
     void AbstractPipeline::init() {
+        _dataContainer->s_dataAdded.connect(this, &AbstractPipeline::onDataContainerDataAdded);
+
+        _painter->init();
         initAllProperties();
 
         // initialize all processors:
@@ -81,10 +85,13 @@ namespace campvis {
     }
 
     void AbstractPipeline::deinit() {
+        _dataContainer->s_dataAdded.disconnect(this);
+
         // use trigger signal to enforce blocking call
         s_deinit.triggerSignal();
 
         deinitAllProperties();
+        _painter->deinit();
 
         // deinitialize all processors:
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
@@ -99,7 +106,7 @@ namespace campvis {
 
 
         // clear DataContainer
-        _data->clear();
+        _dataContainer->clear();
     }
 
     void AbstractPipeline::run() {
@@ -141,12 +148,16 @@ namespace campvis {
         }
     }
 
+    void AbstractPipeline::paint() {
+        // render nothing. May be overridden in sub classes.
+    }
+
     const DataContainer& AbstractPipeline::getDataContainer() const {
-        return *_data;
+        return *_dataContainer;
     }
 
     DataContainer& AbstractPipeline::getDataContainer() {
-        return *_data;
+        return *_dataContainer;
     }
 
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
@@ -160,7 +171,7 @@ namespace campvis {
                     startTime = tbb::tick_count::now();
 
                 try {
-                    processor->process(*_data);
+                    processor->process(*_dataContainer);
                 }
                 catch (std::exception& e) {
                     LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": " << e.what());
@@ -232,7 +243,13 @@ namespace campvis {
     }
 
     void AbstractPipeline::setCanvas(cgt::GLCanvas* canvas) {
+        if (_canvas != nullptr)
+            _canvas->setPainter(nullptr);
+
         _canvas = canvas;
+
+        if (_canvas != nullptr)
+            _canvas->setPainter(_painter.get());
     }
 
     void AbstractPipeline::setRenderTargetSize(const cgt::ivec2& size) {
@@ -270,12 +287,29 @@ namespace campvis {
         return nullptr;
     }
 
-    AbstractProcessor* AbstractPipeline::getProcessor(int index ) const {
-        if (index < 0 || (size_t) index >= _processors.size())
+    AbstractProcessor* AbstractPipeline::getProcessor(size_t index) const {
+        if (index >= _processors.size())
             return nullptr;
         return _processors[index];
     }
 
+    void AbstractPipeline::onDataContainerDataAdded(std::string name, DataHandle dh) {
+        if (name == _renderTargetID.getValue())
+            setPipelineDirty();
+    }
+    void AbstractPipeline::forceExecuteProcessor(AbstractProcessor* processor) {
+        bool enabledState = processor->getEnabled();
+        
+        processor->setEnabled(true);
+        processor->invalidate(AbstractProcessor::INVALID_RESULT);
+        executeProcessor(processor);
+
+        processor->setEnabled(enabledState);
+    }
+
+    const std::unique_ptr<PipelinePainter>& AbstractPipeline::getPipelinePainter() const {
+        return _painter;
+    }
 
 
 }

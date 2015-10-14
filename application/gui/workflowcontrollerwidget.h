@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -27,6 +27,7 @@
 
 #include "core/pipeline/abstractworkflow.h"
 
+#include "application/applicationapi.h"
 #include "application/gui/properties/propertycollectionwidget.h"
 
 #include <QLabel>
@@ -49,7 +50,7 @@ namespace campvis {
      * It has two buttons to navigate through the workflow and displays the properties
      * of the \a AbstractWorkflow using a \a PropertyCollectionWidget.
      */
-    class WorkflowControllerWidget : public QWidget, public sigslot::has_slots {
+    class CAMPVIS_APPLICATION_API WorkflowControllerWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:

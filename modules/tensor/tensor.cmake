@@ -5,6 +5,7 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/tensor/processors/*.cpp
 		modules/tensor/pipelines/*.cpp
+		modules/tensor/*.cpp
 	)
 
 	# Header files
@@ -14,8 +15,8 @@ IF(${ModuleEnabled})
 		modules/tensor/pipelines/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/tensor/glsl")
-	SET(ThisModShaderDirectories "modules/tensor/sampledata")
+	LIST(APPEND ThisModShaderDirectories "modules/tensor/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/tensor/sampledata")
 	SET(ThisModDependencies io vis)
 ENDIF(${ModuleEnabled})
 

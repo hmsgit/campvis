@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -27,8 +27,6 @@
  **********************************************************************/
 
 #include "buffer.h"
-#include "cgt/openglgarbagecollector.h"
-
 
 namespace cgt {
     BufferObject::BufferObject(TargetType target, UsageType usage) throw (cgt::Exception)
@@ -47,9 +45,7 @@ namespace cgt {
     }
 
     BufferObject::~BufferObject() {
-        if (_id != 0) {
-            GLGC.addGarbageBufferObject(_id);
-        }
+        glDeleteBuffers(1, &_id);
     }
 
     void BufferObject::bind() {

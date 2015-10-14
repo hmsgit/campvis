@@ -4,15 +4,16 @@ IF(${ModuleEnabled})
     FIND_PACKAGE (ITK REQUIRED)
         
     IF(ITK_FOUND)
-        INCLUDE( ${ITK_USE_FILE} ) 
-    
         # Since we use ITK classes also in the core module, we need to set global include dirs and global external libs
         LIST(APPEND CampvisGlobalIncludeDirs ${ITK_INCLUDE_DIRS})
         LIST(APPEND CampvisGlobalExternalLibs ${ITK_LIBRARIES})
         
         IF(${BUILD_SHARED_LIBS} AND WIN32)
-            LIST(APPEND CampvisExternalDllsDebug "${ITK_DIR}/bin/Debug/ITKCommon-${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.dll")
-            LIST(APPEND CampvisExternalDllsRelease "${ITK_DIR}/bin/Release/ITKCommon-${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.dll")
+            # check whether DLLs exist (they don't for static ITK builds)
+            IF(EXISTS "${ITK_DIR}/bin/Debug/ITKCommon-${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.dll")
+                LIST(APPEND CampvisExternalDllsDebug "${ITK_DIR}/bin/Debug/ITKCommon-${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.dll")
+                LIST(APPEND CampvisExternalDllsRelease "${ITK_DIR}/bin/Release/ITKCommon-${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.dll")
+            ENDIF()
         ENDIF(${BUILD_SHARED_LIBS} AND WIN32)
         
         
@@ -29,6 +30,7 @@ IF(${ModuleEnabled})
     FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
         modules/itk/pipelines/*.cpp
         modules/itk/processors/*.cpp
+        modules/itk/*.cpp
     )
 
     # Header files

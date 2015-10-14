@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -60,8 +60,6 @@ namespace campvis {
     void QuadView::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/quadview.frag", "");
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
     void QuadView::deinit() {

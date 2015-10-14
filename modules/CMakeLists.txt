@@ -2,18 +2,11 @@ PROJECT(campvis-modules)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 #INCLUDE(../cmake/commonconf.cmake)
 
-MESSAGE(STATUS "Configuring Campvis Modules")
-WRITE_PIPELINE_REGISTRATION("gen_pipelineregistration.h")
+MESSAGE(STATUS "Configuring CAMPVis-Modules")
 
 LIST(APPEND CampvisModulesHeaders
     modulesapi.h
-    gen_pipelineregistration.h
-    pipelinefactory.h
 )
-LIST(APPEND CampvisModulesSources
-    pipelinefactory.cpp
-)
-
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 
@@ -33,3 +26,6 @@ IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisModulesSources ${CampvisHome} "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisModulesHeaders ${CampvisHome} "")
 ENDIF()
+
+
+INSTALL(TARGETS campvis-modules DESTINATION exports EXPORT campvis-targets)

@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,6 +30,7 @@
 
 #include "cgt/logmanager.h"
 #include "cgt/vector.h"
+
 
 #include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"
@@ -168,6 +169,12 @@ namespace campvis {
          */
         template<typename T>
         const T* getRepresentation(bool performConversion = true) const;
+
+        /**
+         * Returns the number of currently stored representations.
+         * \return  _representations.size();
+         */
+        size_t getNumRepresentations() const;
 
     protected:
         template<typename T>

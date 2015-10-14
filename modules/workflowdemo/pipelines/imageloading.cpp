@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,8 +30,8 @@
 namespace campvis {
 namespace workflowdemo {
 
-    ImageLoading::ImageLoading(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    ImageLoading::ImageLoading(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _imageReader()
     {
         addProcessor(&_imageReader);

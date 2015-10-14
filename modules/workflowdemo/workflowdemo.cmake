@@ -5,6 +5,7 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/workflowdemo/pipelines/*.cpp
 		modules/workflowdemo/workflows/*.cpp
+		modules/workflowdemo/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)

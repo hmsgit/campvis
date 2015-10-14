@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="13.3">
+  <zoom_level>8</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>384</x>
+      <y>312</y>
+      <w>256</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>//style=autoresize
+bg=#729fcf
+*ImageData*
+--
+_dimensionality: size_t
+_size: svec3
+_numChannels: size_t
+--
+positionToIndex(svec3): size_t
+indexToPosition(size_t): svec3
+getWorldBounds()
+getRepresentation&lt;T&gt;(performConversion: bool)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>432</x>
+      <y>200</y>
+      <w>160</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>//style=autoresize
+bg=#729fcf
+*/AbstractData/*
+--
+--
+/clone()/
+/getLocalMemoryFootprint()/
+/getVideoMemoryFootprint()/
+/getTypeAsString()/</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>424</x>
+      <y>536</y>
+      <w>176</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>//style=autoresize
+bg=#e9b96e
+*/AbstractImageRepresentation/*
+--
+--
+/clone()/</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>64</x>
+      <y>648</y>
+      <w>208</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>style=autoresize
+bg=#e9b96e
+*ImageRepresentationDisk*
+--
+_url: string
+_offset: size_t
+_type: WeaklyTypedPointer::BaseType
+_endianess
+_stride: svec3
+--
+_create(parent, url, type, ...)_
+getWeaklyTypedPointer()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>312</x>
+      <y>648</y>
+      <w>240</w>
+      <h>136</h>
+    </coordinates>
+    <panel_attributes>style=autoresize
+bg=#e9b96e
+/*ImageRepresentationLocal*/
+--
+_baseType: WeaklyTypedPointer::BaseType
+--
+_create(parent, weaklyTypedPointer)_
+/getWeaklyTypedPointer()/
+/getElementNormalized(...): float/
+/setElementNormalized(..., value: float)/
+/getElementNormalizedLinear(...): float/
+/setElementNormalizedLinear(..., value: float)/
+getNormalizedIntensityRange(): Interval&lt;float&gt;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>592</x>
+      <y>648</y>
+      <w>224</w>
+      <h>112</h>
+    </coordinates>
+    <panel_attributes>style=autoresize
+bg=#e9b96e
+*ImageRepresentationGL*
+--
+_texture: Texture*
+--
+_create(parent, texture)_
+_create(parent, weaklyTypedPointer)_
+bind(shader, textureUnit, ...)
+getWeaklyTypedPointerCopy()
+getWeaklyTypedPointerConvert(dataType)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>784</x>
+      <y>456</y>
+      <w>304</w>
+      <h>136</h>
+    </coordinates>
+    <panel_attributes>//style=autoresize
+bg=#c17d11
+transparency=40
+template=RepresentationType
+*ScopedRepresentation*
+/RepresentationType::ScopedRepresentation/
+/&lt;&lt;Proxy&gt;&gt;/
+--
+dh: DataHandle
+data: ImageData*
+representation: RepresentationType*
+--
+ScopedRepresentation(dataContainer, name)
+operator-&gt;(): RepresentationType*</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>864</x>
+      <y>656</y>
+      <w>328</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>style=autoresize
+bg=#e9b96e
+template=Basetype, Numchannels, Dim
+*GenericImageRepresentationItk*
+--
+_itkImage: ItkImageType::Pointer
+--
+_create(parent, itkImage: ItkImageType::Pointer)_
+getWeaklyTypedPointer()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>320</x>
+      <y>808</y>
+      <w>296</w>
+      <h>112</h>
+    </coordinates>
+    <panel_attributes>//style=autoresize
+bg=#e9b96e
+template=Basetype, Numchannels
+*GenericImageRepresentationLocal*
+--
+_data: ElementType*
+--
+_create(parent, data: ElementType*)_
+getElement(...): ElementType
+setElement(..., value: ElementType)
+getImageData(): ElementType*</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>784</x>
+      <y>192</y>
+      <w>280</w>
+      <h>104</h>
+    </coordinates>
+    <panel_attributes>//style=autoresize
+bg=#75507b
+transparency=40
+template=DataType
+*ScopedTypedData*
+/&lt;&lt;Proxy&gt;&gt;/
+--
+dh: DataHandle
+data: DataType*
+--
+ScopedRepresentation(dataContainer, name)
+operator-&gt;(): DataType*</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>32</x>
+      <y>200</y>
+      <w>176</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>//style=autoresize
+bg=#ad7fa8
+*DataHandle*
+--
+--
+DataHandle(data: AbstractData*)
+getData(): AbstractData*</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>504</x>
+      <y>272</y>
+      <w>24</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>200</x>
+      <y>224</y>
+      <w>248</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>290.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>496</x>
+      <y>576</y>
+      <w>528</w>
+      <h>104</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0;640.0;50.0;640.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>424</x>
+      <y>576</y>
+      <w>96</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>100.0;10.0;100.0;50.0;10.0;50.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>496</x>
+      <y>576</y>
+      <w>224</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0;260.0;50.0;260.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>160</x>
+      <y>576</y>
+      <w>360</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>430.0;10.0;430.0;50.0;10.0;50.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>424</x>
+      <y>776</y>
+      <w>24</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>848</x>
+      <y>632</y>
+      <w>360</w>
+      <h>128</h>
+    </coordinates>
+    <panel_attributes>/ITK Module/
+bg=#cccccc</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>488</x>
+      <y>424</y>
+      <w>120</w>
+      <h>128</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-&gt;
+m1=*
+m1pos=-20,10
+m2=1
+m2pos=-20,-10
+r1=_representations
+r1pos=10,20
+r2=_parent
+r2pos=10,-20</panel_attributes>
+    <additional_attributes>20.0;140.0;20.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>32</x>
+      <y>272</y>
+      <w>176</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>bg=#ad7fa8
+DataHandles act as shared pointer for AbstractData in DataContainers. They ensure correct life time management in the multithreaded CAMPVis environment.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>168</x>
+      <y>512</y>
+      <w>240</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>bg=#e9b96e
+Image representations contain the actual image data. Conversion between different representations is automatically and transpraently handled by CAMPVis. Just request the representation type you need from your ImageData obejct.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>272</x>
+      <y>312</y>
+      <w>96</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>bg=#729fcf
+ImageData acts only as a descriptor for an image and does not contain any image data itself.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1048</x>
+      <y>216</y>
+      <w>160</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>bg=#75507b
+transparency=40
+ScopedTypedData&lt;T&gt; act as transparent proxy class to automatically retreive data from a DataContainer with a certain name and type.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1048</x>
+      <y>480</y>
+      <w>160</w>
+      <h>112</h>
+    </coordinates>
+    <panel_attributes>bg=#c17d11
+transparency=40
+Works similar to ScopedTypedData&lt;T&gt; but additionally retreives the given image representation type from the DataContainer. 
+Access it through RepresentationType::ScopedRepresentation</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

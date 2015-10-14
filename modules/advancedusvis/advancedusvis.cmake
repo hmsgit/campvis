@@ -7,6 +7,7 @@ IF(${ModuleEnabled})
 		modules/advancedusvis/pipelines/*.cpp
 		modules/advancedusvis/processors/*.cpp
 		modules/advancedusvis/properties/*.cpp
+		modules/advancedusvis/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)
@@ -24,8 +25,8 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModApplicationHeaders RELATIVE ${ModulesDir} modules/advancedusvis/widgets/*.h)
 	FILE(GLOB ThisModApplicationToBeMocced RELATIVE ${ModulesDir} modules/advancedusvis/widgets/*.h)
 
-	SET(ThisModShaderDirectories "modules/advancedusvis/glsl")
-	SET(ThisModShaderDirectories "modules/advancedusvis/sampledata")
+	LIST(APPEND ThisModShaderDirectories "modules/advancedusvis/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/advancedusvis/sampledata")
 	SET(ThisModDependencies vis io preprocessing randomwalk)
 ENDIF(${ModuleEnabled})
 

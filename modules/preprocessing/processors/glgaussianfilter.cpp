@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -48,7 +48,7 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "GlGaussianFilter.out", DataNameProperty::WRITE)
-        , p_sigma("Sigma", "Sigma (relates to kernel size)", 2.5f, 1.f, MAX_SIGMA, .1f, 1)
+        , p_sigma("Sigma", "Sigma (relates to kernel size)", 2.5f, 0.4f, MAX_SIGMA, .1f, 1)
         , _shader2D(0)
         , _shader3D(0)
         , _kernelBuffer(0)
@@ -56,7 +56,7 @@ namespace campvis {
     {
         addProperty(p_inputImage);
         addProperty(p_outputImage);
-        addProperty(p_sigma);
+        addProperty(p_sigma, INVALID_RESULT | INVALID_PROPERTIES);
     }
 
     GlGaussianFilter::~GlGaussianFilter() {
@@ -67,12 +67,7 @@ namespace campvis {
         VisualizationProcessor::init();
 
         _shader2D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glgaussianfilter.frag", "#define GAUSSIAN_2D\n");
-        _shader2D->setAttributeLocation(0, "in_Position");
-        _shader2D->setAttributeLocation(1, "in_TexCoord");
-
         _shader3D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glgaussianfilter.frag", "#define GAUSSIAN_3D\n");
-        _shader3D->setAttributeLocation(0, "in_Position");
-        _shader3D->setAttributeLocation(1, "in_TexCoord");
 
         // create kernel buffer
         cgt::TextureUnit inputUnit;
@@ -80,6 +75,8 @@ namespace campvis {
 
         _kernelBuffer = new cgt::BufferObject(cgt::BufferObject::TEXTURE_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
         glGenTextures(1, &_kernelBufferTexture);
+
+        invalidate(INVALID_PROPERTIES);
         LGL_ERROR;
     }
 
@@ -109,13 +106,6 @@ namespace campvis {
                 for (size_t i = 0; i < 2; ++i) {
                     resultTextures[i] = new cgt::Texture(img->getTexture()->getType(), size, img->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
                 }
-
-                // create and upload kernel buffer
-                GLfloat kernel[MAX_HALF_KERNEL_SIZE];
-                for (int i = 0; i <= halfKernelSize; ++i) {
-                    kernel[i] = exp(- static_cast<GLfloat>(i*i) / (2.f * p_sigma.getValue() * p_sigma.getValue()));
-                }
-                _kernelBuffer->data(kernel, (halfKernelSize + 1) * sizeof(GLfloat), cgt::BufferObject::FLOAT, 1);
 
                 // we need to distinguish 2D and 3D case
                 cgt::Shader* leShader = (size.z == 1) ? _shader2D : _shader3D;
@@ -193,7 +183,7 @@ namespace campvis {
                 leShader->deactivate();
 
                 // put resulting image into DataContainer
-                ImageData* id = new ImageData(3, size, img->getParent()->getNumChannels());
+                ImageData* id = new ImageData(img->getParent()->getDimensionality(), size, img->getParent()->getNumChannels());
                 ImageRepresentationGL::create(id, resultTextures[0]);
                 id->setMappingInformation(img->getParent()->getMappingInformation());
                 data.addData(p_outputImage.getValue(), id);
@@ -211,5 +201,17 @@ namespace campvis {
             LDEBUG("No suitable input image found.");
         }
     }
-    
+
+    void GlGaussianFilter::updateProperties(DataContainer& data) {
+        int halfKernelSize = static_cast<int>(2.5 * p_sigma.getValue());
+        cgtAssert(halfKernelSize < MAX_HALF_KERNEL_SIZE, "halfKernelSize too big -> kernel uniform buffer will be out of bounds!")
+
+        // create and upload kernel buffer
+        GLfloat kernel[MAX_HALF_KERNEL_SIZE];
+        for (int i = 0; i <= halfKernelSize; ++i) {
+            kernel[i] = exp(-static_cast<GLfloat>(i*i) / (2.f * p_sigma.getValue() * p_sigma.getValue()));
+        }
+        _kernelBuffer->data(kernel, (halfKernelSize + 1) * sizeof(GLfloat), cgt::BufferObject::FLOAT, 1);
+    }
+
 }

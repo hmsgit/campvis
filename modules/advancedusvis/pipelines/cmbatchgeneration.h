@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,8 +30,6 @@
 #include "core/properties/allproperties.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
@@ -41,9 +39,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API CmBatchGeneration : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline. 
+         * Creates a CmBatchGeneration pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        CmBatchGeneration(DataContainer* dc);
+        explicit CmBatchGeneration(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -52,12 +52,9 @@ namespace campvis {
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
-
         /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "CmBatchGeneration"; };
 
         /**
@@ -84,16 +81,14 @@ namespace campvis {
         BoolProperty p_autoExecution;
 
         StringProperty p_sourcePath;
+        StringProperty p_targetPathCm;
+        StringProperty p_targetPathColorOverlay;
         StringProperty p_targetPathColor;
         StringProperty p_targetPathFuzzy;
         IVec2Property p_range;
 
         ButtonProperty p_execute;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<CmBatchGeneration>;
-
 }
 
 #endif // CMBATCHGENERATION_H__

@@ -5,6 +5,7 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/ivus_tc/pipelines/*.cpp
 		modules/ivus_tc/processors/*.cpp
+		modules/ivus_tc/*.cpp
 	)
 
 	# Header files (including GLSL files so that they'll appear in VS projects)
@@ -16,7 +17,7 @@ IF(${ModuleEnabled})
 		modules/ivus_tc/processors/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/ivus_tc/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/ivus_tc/glsl")
 	SET(ThisModDependencies base io devil vis advancedusvis)
 ENDIF(${ModuleEnabled})
 

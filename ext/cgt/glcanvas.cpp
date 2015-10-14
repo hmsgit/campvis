@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -48,7 +48,6 @@ GLCanvas::GLCanvas(const std::string& title,
       stereoViewing_(false),
       fullscreen_(false),
       autoFlush_(true),
-      initialized_(false),
       painter_(0) ,
       eventHandler_(new EventHandler())
 {}
@@ -78,29 +77,16 @@ void GLCanvas::paint() {
 }
 
 void GLCanvas::init() {
-    if (!initialized_)
-        initialized_ = true;
+    // nothing here, may be implemented in sub classes.
 }
 
-void GLCanvas::setPainter(Painter* p, bool initP) {
+void GLCanvas::setPainter(Painter* p) {
     painter_ = p;
     painter_->setCanvas(this);
-    if (initP)
-        initPainter();
 }
 
 Painter* GLCanvas::getPainter() const {
     return painter_;
-}
-
-void GLCanvas::initPainter() {
-    if (painter_) {
-        {
-            GLContextScopedLock lock(this);
-            painter_->init();
-        }
-        painter_->sizeChanged(size_);
-    }
 }
 
 EventHandler* GLCanvas::getEventHandler() const {

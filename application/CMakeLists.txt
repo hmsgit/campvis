@@ -2,10 +2,10 @@ PROJECT(campvis-application)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 INCLUDE(../cmake/commonconf.cmake)
 
-MESSAGE(STATUS "Configuring CAMPVis Application")
+MESSAGE(STATUS "Configuring CAMPVis-Application")
 
 FILE(GLOB CampvisApplicationSources
-    *.cpp
+    campvisapplication.cpp
     gui/*.cpp
     gui/adjusterwidgets/*.cpp
     gui/mdi/*.cpp
@@ -14,7 +14,8 @@ FILE(GLOB CampvisApplicationSources
 )
 
 FILE(GLOB CampvisApplicationHeaders
-    *.h
+    applicationapi.h
+    campvisapplication.h
     glsl/*.frag
     glsl/*.vert
     gui/*.h
@@ -28,7 +29,6 @@ FILE(GLOB CampvisApplicationForms
 )
 
 SET(CampvisApplicationToBeMocced
-    qtjobprocessor.h
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
     gui/datacontainerinspectorwidget.h
@@ -39,7 +39,6 @@ SET(CampvisApplicationToBeMocced
     gui/qtdatahandle.h
     gui/logviewerwidget.h
     gui/loghighlighter.h
-    gui/scriptingwidget.h
     gui/workflowcontrollerwidget.h
     gui/mdi/mdidockarea.h
     gui/mdi/mdidockablewindow.h
@@ -64,9 +63,30 @@ SET(CampvisApplicationToBeMocced
     gui/properties/stringpropertywidget.h
     gui/properties/statuspropertywidget.h
     gui/properties/transferfunctionpropertywidget.h
-    tools/qtexteditlog.h
     tools/bufferinglog.h
+    tools/qtexteditlog.h
+    tools/qtjobprocessor.h
 )
+
+
+IF(CAMPVIS_ENABLE_SCRIPTING)
+    LIST(APPEND CampvisApplicationToBeMocced
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/completinglualineedit.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/luatablewidget.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/scriptingwidget.h
+    )
+ELSE(CAMPVIS_ENABLE_SCRIPTING)
+    LIST(REMOVE_ITEM CampvisApplicationSources
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/completinglualineedit.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/luatablewidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/scriptingwidget.cpp
+    )
+    LIST(REMOVE_ITEM CampvisApplicationHeaders
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/completinglualineedit.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/luatablewidget.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/gui/scriptingwidget.h
+    )
+ENDIF(CAMPVIS_ENABLE_SCRIPTING)
 
 
 # add additional sources from the activated modules
@@ -103,18 +123,30 @@ IF(CAMPVIS_ENABLE_SCRIPTING)
     LIST(APPEND CampvisMainLibs campvis-scripting)
 ENDIF(CAMPVIS_ENABLE_SCRIPTING)
 
-ADD_EXECUTABLE(campvis-application
+ADD_LIBRARY(campvis-application-lib
     ${CampvisApplicationSources} ${CampvisApplicationHeaders}
     ${CampvisApplicationMoc}
 )
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-application ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+
+# if campvis-core is built as a shared library, CMake will define the following flag to instruct
+# the code to export DLL symbols
+SET_TARGET_PROPERTIES(campvis-application-lib PROPERTIES DEFINE_SYMBOL "CAMPVIS_APPLICATION_BUILD_DLL")
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationSources ${CampvisHome} "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationHeaders ${CampvisHome} "")
 ENDIF()
+
+INSTALL(TARGETS campvis-application-lib DESTINATION exports EXPORT campvis-targets)
+
+
+ADD_EXECUTABLE(campvis-application "campvis.cpp")
+TARGET_LINK_LIBRARIES(campvis-application campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+
+
 
 IF(CAMPVIS_DEPLOY_SHADERS)
     LIST(APPEND CampvisShaderDirectories "application/data")

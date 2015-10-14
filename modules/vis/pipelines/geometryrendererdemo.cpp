@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -36,8 +36,8 @@
 
 namespace campvis {
 
-    GeometryRendererDemo::GeometryRendererDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
+    GeometryRendererDemo::GeometryRendererDemo(DataContainer& dc)
+        : AutoEvaluationPipeline(dc, getId())
         , _tcp(&_canvasSize)
         , _lsp()
         , _geometryReader()
@@ -77,13 +77,13 @@ namespace campvis {
         _geometryReader.s_validated.connect(this, &GeometryRendererDemo::onProcessorValidated);
 
         // create Teapot
-        MultiIndexedGeometry* teapot = GeometryDataFactory::createTeapot();
+        auto teapot = GeometryDataFactory::createTeapot();
         teapot->applyTransformationToVertices(cgt::mat4::createTranslation(cgt::vec3(5.f, 10.f, 5.f)) * cgt::mat4::createScale(cgt::vec3(16.f)));
-        getDataContainer().addData("teapot", teapot);
+        getDataContainer().addData("teapot", teapot.release());
 
         // create cube
-        MeshGeometry* cube = GeometryDataFactory::createCube(cgt::Bounds(cgt::vec3(7.f), cgt::vec3(9.f)), cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
-        getDataContainer().addData("cube", cube);
+        auto cube = GeometryDataFactory::createCube(cgt::Bounds(cgt::vec3(7.f), cgt::vec3(9.f)), cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
+        getDataContainer().addData("cube", cube.release());
 
         // setup pipeline
         _geometryReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/left_ventricle_mesh.vtk"));
@@ -129,9 +129,9 @@ namespace campvis {
     void GeometryRendererDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_geometryReader) {
             // update camera
-            ScopedTypedData<IHasWorldBounds> lv(*_data, _geometryReader.p_targetImageID.getValue());
-            ScopedTypedData<IHasWorldBounds> teapot(*_data, "teapot");
-            ScopedTypedData<IHasWorldBounds> cube(*_data, "cube");
+            ScopedTypedData<IHasWorldBounds> lv(*_dataContainer, _geometryReader.p_targetImageID.getValue());
+            ScopedTypedData<IHasWorldBounds> teapot(*_dataContainer, "teapot");
+            ScopedTypedData<IHasWorldBounds> cube(*_dataContainer, "cube");
             if (lv != 0 && teapot != 0) {
                 cgt::Bounds unionBounds;
                 unionBounds.addVolume(lv->getWorldBounds());

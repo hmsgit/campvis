@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -25,7 +25,6 @@
 #include "imagerepresentationconversioncore.h"
 
 #include "cgt/assert.h"
-#include "cgt/logmanager.h"
 
 namespace campvis {
 
@@ -35,7 +34,7 @@ namespace campvis {
 
         // test source image type via dynamic cast
         if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
-            WeaklyTypedPointer wtp = tester->getImageData();
+            WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
 
             if (wtp._pointer == nullptr) {
                 LERRORC("CAMPVis.core.datastructures.GlConversion", "Could not load image from disk during conversion.");
@@ -90,7 +89,7 @@ namespace campvis {
 
         // test source image type via dynamic cast
         if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
-            return ImageRepresentationLocal::create(tester->getParent(), tester->getImageData());
+            return ImageRepresentationLocal::create(tester->getParent(), tester->getWeaklyTypedPointer());
         }
         else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
             cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;

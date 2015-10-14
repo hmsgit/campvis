@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -65,7 +65,7 @@ class CGT_API Trackball : public Navigation {
         ///                           cgt::Timer-object. As we need a toolkit-specific timer,
         ///                           trackball cannot create it itself, the user has to provide
         ///                           it to the constructor.
-        Trackball(IHasCamera* hcam, const ivec2& viewportSize, bool defaultEventHandling = true, Timer* continousSpinTimer = NULL);
+        Trackball(AbstractCameraProxy* hcam, const ivec2& viewportSize, bool defaultEventHandling = true, Timer* continousSpinTimer = NULL);
 
         /// Destructor
         virtual ~Trackball();
@@ -325,7 +325,7 @@ class CGT_API Trackball : public Navigation {
         KeyEvent::KeyCode keyRotateUp_              ; ///< at which key code rotate up
         KeyEvent::KeyCode keyRotateDown_            ; ///< at which key code rotate down
         int keyRotateMod_                           ; ///< at which modifiers to rotate by keys
-        bool keyRotatePressed_                      ; // FIXME: cannot remember. not in use anyway...
+        bool keyRotatePressed_                      ;
         MouseEvent::MouseButtons mouseMoveButton_   ;
         int mouseMoveMod_                           ;
         float keyMoveAcuteness_                     ;
@@ -334,7 +334,7 @@ class CGT_API Trackball : public Navigation {
         KeyEvent::KeyCode keyMoveUp_                ;
         KeyEvent::KeyCode keyMoveDown_              ;
         int keyMoveMod_                             ;
-        bool keyMovePressed_                        ; // FIXME: cannot remember, not in use
+        bool keyMovePressed_                        ;
         MouseEvent::MouseButtons mouseZoomButton_   ;
         vec2 mouseZoomInDirection_                  ;
         int mouseZoomMod_                           ;
@@ -346,7 +346,7 @@ class CGT_API Trackball : public Navigation {
         KeyEvent::KeyCode keyZoomIn_                ;
         KeyEvent::KeyCode keyZoomOut_               ;
         int keyZoomMod_                             ;
-        bool keyZoomPressed_                        ; // FIXME: cannot remember, not in use
+        bool keyZoomPressed_                        ;
         MouseEvent::MouseButtons mouseRollButton_   ;
         float mouseRollAcuteness_                   ;
         int mouseRollMod_                           ;
@@ -358,7 +358,7 @@ class CGT_API Trackball : public Navigation {
         KeyEvent::KeyCode keyRollLeft_              ;
         KeyEvent::KeyCode keyRollRight_             ;
         int keyRollMod_                             ;
-        bool keyRollPressed_                        ; // FIXME: cannot remember, not in use
+        bool keyRollPressed_                        ;
 
         bool tracking_; ///< Are we tracking mouse move events? Only when we received a
                         ///< mousePressEvent before.

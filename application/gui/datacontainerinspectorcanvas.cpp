@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -37,6 +37,7 @@
 #include "core/datastructures/geometrydatafactory.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/geometry1dtransferfunction.h"
+#include "core/tools/simplejobprocessor.h"
 
 #include "datacontainerinspectorwidget.h"
 
@@ -55,6 +56,7 @@ namespace campvis {
         , p_renderAChannel("RenderAChannel", "Render Alpha Channel", true)
         , p_geometryRendererProperties("GeometryRendererProperties", "GeometryRenderer Properties")
         , _texturesDirty(true)
+        , _geometriesDirty(true)
         , _dataContainer(nullptr)
         , _paintShader(nullptr)
         , _quad(nullptr)
@@ -111,12 +113,10 @@ namespace campvis {
         initAllProperties();
 
         _paintShader = ShdrMgr.load("core/glsl/passthrough.vert", "application/glsl/datacontainerinspector.frag", "");
-        _paintShader->setAttributeLocation(0, "in_Position");
-        _paintShader->setAttributeLocation(1, "in_TexCoords");
         createQuad();
 
         // set this as painter to get notified when window size changes
-        setPainter(this, false);
+        setPainter(this);
         getEventHandler()->addEventListenerToFront(this);
 
         _geometryRenderer.init();
@@ -135,7 +135,7 @@ namespace campvis {
         _localDataContainer.clear();
         _textures.clear();
         ShdrMgr.dispose(_paintShader);
-        delete _quad;
+        _quad = nullptr;
 
         GLCtxtMgr.removeContext(this);
     }
@@ -254,16 +254,15 @@ namespace campvis {
         if (_quad != 0 && _paintShader != 0) {
             // avoid recursive paints.
             if (! cgt::GlContextManager::getRef().checkWhetherThisThreadHasAcquiredOpenGlContext()) {
-                // TODO: check, whether this should be done in an extra thread
-                cgt::GLContextScopedLock lock(this);
-                paint();
+                SimpleJobProc.enqueueJob([this] () {
+                    cgt::GLContextScopedLock lock(this);
+                    paint();
+                });
             }
         }
     }
 
     void DataContainerInspectorCanvas::createQuad() {
-        delete _quad;
-        _quad = 0;
         _quad = GeometryDataFactory::createQuad(cgt::vec3(0.f), cgt::vec3(1.f), cgt::vec3(0.f, 1.f, 0.f), cgt::vec3(1.f, 0.f, 0.f));
     }
 
@@ -431,7 +430,7 @@ namespace campvis {
         }
 
         if (maxSlices == 1)
-            maxSlices = -1;
+            maxSlices = 0;
         p_currentSlice.setMaxValue(maxSlices - 1);
         _texturesDirty = false;
         _geometriesDirty = false;

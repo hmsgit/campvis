@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -53,8 +53,10 @@ namespace campvis {
         **/
         virtual ~ItkRegistration();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "ItkRegistration"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "ItkRegistration"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs registration between 2 input images using ITK."; };
         /// \see AbstractProcessor::getAuthor()

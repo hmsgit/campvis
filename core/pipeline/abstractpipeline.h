@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -38,11 +38,13 @@
 
 #include "core/coreapi.h"
 #include "core/datastructures/datacontainer.h"
+#include "core/pipeline/pipelinepainter.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/propertycollection.h"
 
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace cgt {
@@ -62,10 +64,10 @@ namespace campvis {
          * If you derive from AbstractPipeline, you will have to implement the pipeline evaluation
          * logic yourself. You might want to have a look at AutoEvaluationPipeline.
          * 
-         * \param   dc  Pointer to the DataContainer containing local working set of data for this 
-         *              pipeline, must not be 0, must be valid the whole lifetime of this pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        AbstractPipeline(DataContainer* dc);
+        explicit AbstractPipeline(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -76,7 +78,7 @@ namespace campvis {
          * Gets the name of this very pipeline. To be defined by every subclass.
          * \return  The name of this pipeline.
          */
-        virtual const std::string getName() const = 0;
+        virtual std::string getName() const = 0;
 
 
         /**
@@ -126,16 +128,28 @@ namespace campvis {
          * To be implemented in the subclass.
          */
         virtual void executePipeline() = 0;
+        
+        /**
+         * Sets the resultDirty flag of this pipeline and starts its execution if necessary.
+         */
+        void setPipelineDirty();
+
+        /**
+         * Paints an additional overlay directly onto the frame buffer.
+         * Gets called from CampvisPainter just after copying the rendered image and just before
+         * swapping the canvas' buffers. The default implementation performs nothing.
+         */
+        virtual void paint();
 
         /**
          * Returns the DataContainer of this pipeline, const version.
-         * \return _data
+         * \return _dataContainer
          */
         const DataContainer& getDataContainer() const;
 
         /**
          * Returns the DataContainer of this pipeline, non-const version.
-         * \return _data
+         * \return _dataContainer
          */
         DataContainer& getDataContainer();
 
@@ -157,7 +171,7 @@ namespace campvis {
          * \param   index    The index of the processor to get
          * \return  The first processor whose name matches \a name, 0 if no such processor exists.
          */
-        AbstractProcessor* getProcessor(int index) const;
+        AbstractProcessor* getProcessor(size_t index) const;
 
         /**
          * Gets the flag whether this pipeline is currently enabled.
@@ -194,6 +208,18 @@ namespace campvis {
          * \return  The DataHandle named _renderTargetID in the pipeline's DataContainer, 0 if no such handle exists.
          */
         const std::string& getRenderTargetID() const;
+        
+        /**
+         * Returns the canvas size 
+         * \return  The IVec2Property with current canvas size on it
+         */
+        IVec2Property& getCanvasSize() { return _canvasSize; }
+
+        /**
+         * Returns this pipelines PipelinePainter.
+         * \return  _painter
+         */
+        const std::unique_ptr<PipelinePainter>& getPipelinePainter() const;
 
         /// Signal emitted at the end of AbstractPipeline::init()
         sigslot::signal0 s_init;
@@ -202,9 +228,10 @@ namespace campvis {
 
     protected:
         /**
-         * Sets the resultDirty flag of this pipeline and starts its execution if necessary.
+         * Forces the execution of the given processor regardless of its invalidation or enabled state.
+         * \param   processor   Processor to execute.
          */
-        void setPipelineDirty();
+        void forceExecuteProcessor(AbstractProcessor* processor);
 
         /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
@@ -220,6 +247,14 @@ namespace campvis {
         void executeProcessorAndCheckOpenGLState(AbstractProcessor* processor);
 
         /**
+         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
+         * If \a name equals the name of the renderTarget, setPipelineDirty will be called.
+         * \param   name    Name of the added data.
+         * \param   dh      DataHandle to the newly added data.
+         */
+        virtual void onDataContainerDataAdded(std::string name, DataHandle dh);
+
+        /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * The default behaviour is just to set the invalidation level to invalid.
          * \param   prop    Property that emitted the signal
@@ -228,11 +263,12 @@ namespace campvis {
 
 
         /// Pointer to the DataContainer containing local working set of data for this Pipeline, must not be 0.
-        DataContainer* _data;
+        DataContainer* _dataContainer;
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
 
-        cgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
+        cgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline. We do *not* own this pointer.
+        std::unique_ptr<PipelinePainter> _painter;          ///< PipelinePainter used to paint this pipeline's result onto the canvas.
         IVec2Property _canvasSize;                          ///< original canvas size
         bool _ignoreCanvasSizeUpdate;
 

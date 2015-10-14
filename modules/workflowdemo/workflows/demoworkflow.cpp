@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -32,9 +32,9 @@ namespace workflowdemo {
     DemoWorkflow::DemoWorkflow() 
         : AbstractWorkflow("DemoWorkflow")
     {
-        _loaderPipeline = new ImageLoading(_dataContainer);
-        _filterPipeline = new ImageFiltering(_dataContainer);
-        _visPipeline = new ImageVis(_dataContainer);
+        _loaderPipeline = new ImageLoading(*_dataContainer);
+        _filterPipeline = new ImageFiltering(*_dataContainer);
+        _visPipeline = new ImageVis(*_dataContainer);
 
         typedef std::vector< std::pair<AbstractPipeline*, bool> > VisVec;
         typedef std::vector<AbstractProperty*> PropVec;

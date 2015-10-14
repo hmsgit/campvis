@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -55,12 +55,12 @@ namespace cgt {
  * Intermediate wrapper class for easier integration of cgt::Navigation into projects using
  * separated cameras and canvases.
  */
-class CGT_API IHasCamera {
+class CGT_API AbstractCameraProxy {
 public:
     /**
      * Pure virtual destructor
      */
-    virtual ~IHasCamera() {};
+    virtual ~AbstractCameraProxy() {};
 
     /**
      * Returns the camera to modify by Navigation.
@@ -89,12 +89,12 @@ protected:
 
     // navigation manipulates the camera of a certain canvas.
     // we only need a pointer to this canvas, not to the camera (see getCamera).
-    IHasCamera* hcam_;
+    AbstractCameraProxy* hcam_;
 
 
 public:
 
-    Navigation(IHasCamera* hcam) {
+    Navigation(AbstractCameraProxy* hcam) {
         hcam_ = hcam;
     }
 

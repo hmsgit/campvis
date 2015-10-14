@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -25,10 +25,10 @@
 #ifndef IMAGEREPRESENTATIONCONVERSIONCORE_H__
 #define IMAGEREPRESENTATIONCONVERSIONCORE_H__
 
+#include "cgt/logmanager.h"
 #include "cgt/opengljobprocessor.h"
 
 #include "core/coreapi.h"
-
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
@@ -73,7 +73,7 @@ namespace campvis {
         INSTANTIATE_TEMPLATE_N(2);
         INSTANTIATE_TEMPLATE_N(3);
         INSTANTIATE_TEMPLATE_N(4);
-		INSTANTIATE_TEMPLATE_N(6);
+        INSTANTIATE_TEMPLATE_N(6);
 
 
 // = Template definition ==========================================================================
@@ -86,7 +86,7 @@ namespace campvis {
             if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
                 // converting from disk representation
                 if (tester->getBaseType() == TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType && tester->getParent()->getNumChannels() == NUMCHANNELS) {
-                    WeaklyTypedPointer wtp = tester->getImageData();
+                    WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
                     return GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
                 }
                 else {

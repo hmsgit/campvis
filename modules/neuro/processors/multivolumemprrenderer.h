@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -56,7 +56,7 @@ namespace neuro {
         /**
          * Constructs a new MultiVolumeMprRenderer Processor
          **/
-        MultiVolumeMprRenderer(IVec2Property* viewportSizeProp);
+        explicit MultiVolumeMprRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -69,8 +69,10 @@ namespace neuro {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "MultiVolumeMprRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "MultiVolumeMprRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs an MPR rendering of multiple images at the same time."; };
         /// \see AbstractProcessor::getAuthor()

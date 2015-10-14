@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -68,7 +68,7 @@ public:
      */
     class CGT_API GlVersion {
         public:
-        GlVersion(int major = 0, int minor = 0, int release = 0);
+        explicit GlVersion(int major = 0, int minor = 0, int release = 0);
 
         /**
          * Parse OpenGL version string as specified:
@@ -174,7 +174,7 @@ public:
      * on the graphics card before initGL() is called. Otherwise GpuCapabilities tries to
      * detect GL values while initGL() isn't called yet and produces a crash.
      */
-    GpuCapabilities(bool detectCaps = true);
+    explicit GpuCapabilities(bool detectCaps = true);
 
     virtual ~GpuCapabilities() {}
 

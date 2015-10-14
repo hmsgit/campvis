@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -27,6 +27,8 @@
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
+
+#include "scripting/scriptingapi.h"
 #include "core/properties/numericproperty.h"
 #include "core/tools/stringutils.h"
 
@@ -34,7 +36,7 @@ namespace campvis {
     /**
      * Lua generator for a IntProperty
      */
-    class IntPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API IntPropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new IntPropertyLua for the property \a property.

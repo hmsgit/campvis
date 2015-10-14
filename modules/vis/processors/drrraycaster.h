@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -49,15 +49,19 @@ namespace campvis {
         /**
          * Constructs a new DRRRaycaster Processor
          **/
-        DRRRaycaster(IVec2Property* viewportSizeProp);
+        explicit DRRRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
          **/
         virtual ~DRRRaycaster();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "DRRRaycaster"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "DRRRaycaster"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates a Digitally Reconstructed Radiograph."; };
         /// \see AbstractProcessor::getAuthor()
@@ -81,7 +85,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // DRRRAYCASTER_H__

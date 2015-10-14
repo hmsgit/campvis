@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -53,7 +53,7 @@ namespace campvis {
         /**
          * Constructs a new AdvancedUsFusion Processor
          **/
-        AdvancedUsFusion(IVec2Property* viewportSizeProp);
+        explicit AdvancedUsFusion(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -66,8 +66,10 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "AdvancedUsFusion"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "AdvancedUsFusion"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Extracts a single slice from the input image and renders it using a transfer function."; };
         /// \see AbstractProcessor::getAuthor()
@@ -81,6 +83,7 @@ namespace campvis {
         DataNameProperty p_confidenceImageID;
         DataNameProperty p_targetImageID;                  ///< image ID for output image
 
+        BoolProperty p_renderToTexture;
         IntProperty p_sliceNumber;                       ///< number of the slice to extract
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
         TransferFunctionProperty p_confidenceTF;         ///< Transfer function confidence to uncertainty
@@ -88,13 +91,14 @@ namespace campvis {
         FloatProperty p_blurredScaling;
         FloatProperty p_confidenceScaling;
         FloatProperty p_hue;
+        FloatProperty p_mixFactor;
         BoolProperty p_use3DTexture;
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
         /// adapts the range of the p_sliceNumber property to the image
-        virtual void updateProperties(DataContainer dc);
+        virtual void updateProperties(DataContainer& dc);
 
         std::string generateHeader() const;
 

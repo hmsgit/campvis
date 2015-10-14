@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -188,6 +188,65 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
 
     delete [] buffer;
     return t;
+}
+
+Texture* TextureReaderTga::loadTextureArray(const std::vector<std::string>& filenames, Texture::Filter filter) {
+    if (filenames.empty())
+        return nullptr;
+
+    GLubyte* data = nullptr;
+    GLint format = 0;
+    GLint internalFormat = 0;
+    GLenum dataType = GL_UNSIGNED_BYTE;
+    size_t numBytesPerTexture = 0;
+    cgt::ivec3 dimensions;
+
+    // quick and dirty hack with bad performance (unnecessary copies)
+    for (size_t i = 0; i < filenames.size(); ++i) {
+        Texture* tmp = loadTexture(filenames[i], filter);
+
+        if (data == nullptr) {
+            switch (tmp->getNumChannels()) {
+                case 1:
+                    format = GL_RED;
+                    LDEBUG("GL_RED");
+                    break;
+                case 3:
+                    format = GL_RGB;
+                    LDEBUG("RGB");
+                    break;
+                case 4:
+                    format = GL_RGBA;
+                    LDEBUG("RGBA");
+                    break;
+                default:
+                    cgtAssert(false, "Should not reach this! Wrong number of channels.");
+                    break;
+            }
+
+            internalFormat = tmp->getInternalFormat();
+            dimensions = tmp->getDimensions();
+            numBytesPerTexture = cgt::hmul(dimensions) * tmp->getNumChannels();
+            data = new GLubyte[filenames.size() * numBytesPerTexture];
+        }
+        else {
+            if (dimensions != tmp->getDimensions() || internalFormat != tmp->getInternalFormat()) {
+                LERROR("Dimensions of texture array textures or internal formats mismatch, aborting!");
+                delete [] data;
+                delete tmp;
+                return nullptr;
+            }
+        }
+
+        GLubyte* buffer = tmp->downloadTextureToBuffer(format, dataType);
+        memcpy(data + (i * numBytesPerTexture), buffer, numBytesPerTexture);
+        delete [] buffer;
+        delete tmp;
+    }
+
+    Texture* toReturn = new Texture(GL_TEXTURE_2D_ARRAY, cgt::ivec3(dimensions.xy(), int(filenames.size())), internalFormat, data, format, dataType, filter);
+    delete data;
+    return toReturn;
 }
 
 } // namespace cgt

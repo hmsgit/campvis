@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -23,6 +23,7 @@
 // ================================================================================================
 
 #include "abstractproperty.h"
+#include "cgt/logmanager.h"
 
 namespace campvis {
 
@@ -49,12 +50,16 @@ namespace campvis {
     }
 
     void AbstractProperty::addSharedProperty(AbstractProperty* prop) {
-        cgtAssert(prop != 0, "Shared property must not be 0!");
+        cgtAssert(prop != nullptr, "Shared property must not be 0!");
         cgtAssert(prop != this, "Shared property must not be this!");
-        cgtAssert(typeid(this) == typeid(prop), "Shared property must be of the same type as this property.");
 
-        tbb::spin_mutex::scoped_lock lock(_localMutex);
-        _sharedProperties.insert(prop);
+        if (typeid(this) == typeid(prop)) {
+            tbb::spin_mutex::scoped_lock lock(_localMutex);
+            _sharedProperties.insert(prop);
+        }
+        else {
+            LERROR("Could not add " << prop->getName() << " as shared property of " << getName() << " since they are not of the same type.");
+        }
     }
 
     void AbstractProperty::removeSharedProperty(AbstractProperty* prop) {
@@ -88,8 +93,10 @@ namespace campvis {
     }
 
     void AbstractProperty::setVisible(bool isVisible) {
-        _isVisible = isVisible;
-        s_visibilityChanged.emitSignal(this);
+        if (_isVisible != isVisible) {
+            _isVisible = isVisible;
+            s_visibilityChanged.emitSignal(this);
+        }
     }
 
 }

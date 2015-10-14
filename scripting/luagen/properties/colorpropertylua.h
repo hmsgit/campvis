@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -29,13 +29,14 @@
 #include "propertyluafactory.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/colorproperty.h"
+#include "scripting/scriptingapi.h"
 
 
 namespace campvis {
     /**
      * Lua generator for a ColorProperty
      */
-    class ColorPropertyLua : public AbstractPropertyLua {
+    class CAMPVIS_SCRIPTING_API ColorPropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new FloatPropertyLua for the property \a property.

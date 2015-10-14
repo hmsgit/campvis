@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -67,7 +67,6 @@ uniform float _maxDepth;    ///< Maximum depth of exit points
 uniform float _kappaS;      ///< k_s parameter from the paper
 uniform float _kappaT;      ///< l_t parameter from the paper
 
-// TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
 /**

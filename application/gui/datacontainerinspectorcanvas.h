@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -33,6 +33,7 @@
 #include "cgt/qt/qtthreadedcanvas.h"
 #include "tbb/mutex.h"
 
+#include "application/applicationapi.h"
 #include "application/gui/qtdatahandle.h"
 
 #include "core/properties/metaproperty.h"
@@ -43,6 +44,8 @@
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/vis/processors/geometryrenderer.h"
+
+#include <memory>
 
 
 namespace cgt {
@@ -60,7 +63,7 @@ namespace campvis {
     class GeometryData;
     class DataContainerInspectorWidget;
 
-    class DataContainerInspectorCanvas : public cgt::QtThreadedCanvas, cgt::Painter, public cgt::EventListener, public HasPropertyCollection {
+    class CAMPVIS_APPLICATION_API DataContainerInspectorCanvas : public cgt::QtThreadedCanvas, cgt::Painter, public cgt::EventListener, public HasPropertyCollection {
         Q_OBJECT;
 
     public:
@@ -213,7 +216,7 @@ namespace campvis {
         tbb::mutex _localMutex;                     ///< Mutex protecting the local members
 
         cgt::Shader* _paintShader;                  ///< GLSL shader for rendering the textures
-        FaceGeometry* _quad;                        ///< Quad used for rendering
+        std::unique_ptr<FaceGeometry> _quad;        ///< Quad used for rendering
 
         cgt::ivec2 _numTiles;                       ///< number of tiles on texture overview
         cgt::ivec2 _quadSize;                       ///< size in pixels for each tile in overview

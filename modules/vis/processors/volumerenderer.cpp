@@ -3,7 +3,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,8 +30,11 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-
 #include "core/classification/simpletransferfunction.h"
+#include "core/pipeline/processorfactory.h"
+
+#include "cgt/opengljobprocessor.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
     const std::string VolumeRenderer::loggerCat_ = "CAMPVis.modules.vis.VolumeRenderer";
@@ -46,9 +49,12 @@ namespace campvis {
         , p_pgProps("PGGProps", "Proxy Geometry Generator")
         , p_eepProps("EEPProps", "Entry/Exit Points Generator")
         , p_raycasterProps("RaycasterProps", "Raycaster")
+        , p_orientationOverlayProps("OrientationOverlayProps", "Orientation Overlay")
+        , p_raycastingProcSelector("RaycasterSelector", "Select Raycaster to Use", nullptr, 0)
         , _pgGenerator()
         , _eepGenerator(viewportSizeProp)
         , _raycaster(raycaster)
+        , _orientationOverlay(viewportSizeProp)
     {
         _raycaster->setViewportSizeProperty(viewportSizeProp);
 
@@ -70,6 +76,15 @@ namespace campvis {
         _eepGenerator.p_exitImageID.setVisible(false);
         addProperty(p_eepProps, AbstractProcessor::VALID);
 
+        const std::vector<std::string>& raycasters = ProcessorFactory::getRef().getRegisteredRaycastingProcessors();
+        for (size_t i = 0; i < raycasters.size(); i++) {
+            p_raycastingProcSelector.addOption(GenericOption<std::string>(raycasters[i], raycasters[i]));
+        }
+        if (_raycaster != nullptr) {
+            p_raycastingProcSelector.selectByOption(_raycaster->getName());
+        }
+        addProperty(p_raycastingProcSelector);
+
         p_raycasterProps.addPropertyCollection(*_raycaster);
         _raycaster->p_lqMode.setVisible(false);
         _raycaster->p_camera.setVisible(false);
@@ -79,15 +94,20 @@ namespace campvis {
         _raycaster->p_targetImageID.setVisible(false);
         addProperty(p_raycasterProps, AbstractProcessor::VALID);
 
+        p_orientationOverlayProps.addPropertyCollection(_orientationOverlay);
+        addProperty(p_orientationOverlayProps, VALID);
+
         // setup shared properties
         p_inputVolume.addSharedProperty(&_pgGenerator.p_sourceImageID);
         p_inputVolume.addSharedProperty(&_eepGenerator.p_sourceImageID);
         p_inputVolume.addSharedProperty(&_raycaster->p_sourceImageID);
+        p_inputVolume.addSharedProperty(&_orientationOverlay.p_sourceImageId);
 
         p_camera.addSharedProperty(&_eepGenerator.p_camera);
         p_camera.addSharedProperty(&_raycaster->p_camera);
+        p_camera.addSharedProperty(&_orientationOverlay.p_camera);
 
-        p_outputImage.addSharedProperty(&_raycaster->p_targetImageID);
+        p_outputImage.addSharedProperty(&_orientationOverlay.p_targetImageId);
     }
 
     VolumeRenderer::~VolumeRenderer() {
@@ -98,6 +118,7 @@ namespace campvis {
         VisualizationProcessor::init();
         _pgGenerator.init();
         _eepGenerator.init();
+        _orientationOverlay.init();
         _raycaster->init();
 
         p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
@@ -105,6 +126,7 @@ namespace campvis {
         _pgGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
+        _orientationOverlay.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
 
         glGenQueries(1, &_timerQueryRaycaster);
     }
@@ -115,10 +137,12 @@ namespace campvis {
         _pgGenerator.s_invalidated.disconnect(this);
         _eepGenerator.s_invalidated.disconnect(this);
         _raycaster->s_invalidated.disconnect(this);
+        _orientationOverlay.s_invalidated.disconnect(this);
 
         _pgGenerator.deinit();
         _eepGenerator.deinit();
         _raycaster->deinit();
+        _orientationOverlay.deinit();
 
         VisualizationProcessor::deinit();
     }
@@ -144,6 +168,8 @@ namespace campvis {
                 _raycaster->process(data);
             }            
         }
+
+        _orientationOverlay.process(data);
 
         validate(INVALID_RESULT | PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);
     }
@@ -172,13 +198,68 @@ namespace campvis {
 
             _eepGenerator.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
             _raycaster->p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
+
+            _raycaster->p_targetImageID.setValue(p_outputImage.getValue() + ".raycasted");
+            _orientationOverlay.p_passThroughImageId.setValue(p_outputImage.getValue() + ".raycasted");
         }
+        if (prop == &p_raycastingProcSelector) {
+            // lock this processor while we exchange the ray caster to make sure nobody
+            // will call process() in between.
+            AbstractProcessor::ScopedLock lockGuard(this);
+
+            RaycastingProcessor *currentRaycaster = _raycaster;
+            if (p_raycastingProcSelector.getOptionId() == currentRaycaster->getName()) {
+                return;
+            }
+
+            p_lqMode.removeSharedProperty(&currentRaycaster->p_lqMode);
+            p_inputVolume.removeSharedProperty(&currentRaycaster->p_sourceImageID);
+            p_camera.removeSharedProperty(&currentRaycaster->p_camera);
+            p_outputImage.removeSharedProperty(&currentRaycaster->p_targetImageID);
+            p_raycasterProps.clearProperties();
+            currentRaycaster->s_invalidated.disconnect(this);
+            
+            _raycaster = dynamic_cast<RaycastingProcessor*>(ProcessorFactory::getRef().createProcessor(p_raycastingProcSelector.getOptionId(), _viewportSizeProperty));
+            cgtAssert(_raycaster != 0, "Raycaster must not be 0.");
+
+            p_raycasterProps.addPropertyCollection(*_raycaster);
+            _raycaster->p_lqMode.setVisible(false);
+            _raycaster->p_camera.setVisible(false);
+            _raycaster->p_sourceImageID.setVisible(false);
+            _raycaster->p_entryImageID.setVisible(false);
+            _raycaster->p_exitImageID.setVisible(false);
+            _raycaster->p_targetImageID.setVisible(false);
+
+            p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
+            p_inputVolume.addSharedProperty(&_raycaster->p_sourceImageID);
+            p_camera.addSharedProperty(&_raycaster->p_camera);
+            p_outputImage.addSharedProperty(&_raycaster->p_targetImageID);
+            _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
+            
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            _raycaster->init();
+            _raycaster->p_sourceImageID.setValue(currentRaycaster->p_sourceImageID.getValue());
+            _raycaster->p_entryImageID.setValue(currentRaycaster->p_entryImageID.getValue());
+            _raycaster->p_exitImageID.setValue(currentRaycaster->p_exitImageID.getValue());
+            _raycaster->p_targetImageID.setValue(currentRaycaster->p_targetImageID.getValue());
+            _raycaster->p_camera.setValue(currentRaycaster->p_camera.getValue());
+            _raycaster->p_transferFunction.replaceTF(currentRaycaster->p_transferFunction.getTF()->clone());
+            _raycaster->p_jitterStepSizeMultiplier.setValue(currentRaycaster->p_jitterStepSizeMultiplier.getValue());
+            _raycaster->p_samplingRate.setValue(currentRaycaster->p_samplingRate.getValue());
+
+            currentRaycaster->deinit();
+            invalidate(PG_INVALID | EEP_INVALID | RAYCASTER_INVALID | AbstractProcessor::INVALID_RESULT);
+
+            delete currentRaycaster;
+        }
+
         VisualizationProcessor::onPropertyChanged(prop);
     }
 
     void VolumeRenderer::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
         _eepGenerator.setViewportSizeProperty(viewportSizeProp);
         _raycaster->setViewportSizeProperty(viewportSizeProp);
+        _orientationOverlay.setViewportSizeProperty(viewportSizeProp);
 
         VisualizationProcessor::setViewportSizeProperty(viewportSizeProp);
     }
@@ -190,5 +271,6 @@ namespace campvis {
     RaycastingProcessor* VolumeRenderer::getRaycastingProcessor() {
         return _raycaster;
     }
+
 }
 

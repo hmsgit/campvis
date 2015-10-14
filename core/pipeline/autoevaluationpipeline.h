@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -38,16 +38,17 @@ namespace campvis {
      * Specializtaion of AbstractPipeline performing automatic execution of invalidated processors.
      * AutoEvaluationPipeline connects to the s_(in)validated signals of all of its processors and
      * executes processors with invalid results using the correct threads.
-     * 
-     * \param   dc  Pointer to the DataContainer containing local working set of data for this 
-     *              pipeline, must not be 0, must be valid the whole lifetime of this pipeline.
      */
     class CAMPVIS_CORE_API AutoEvaluationPipeline : public AbstractPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
+         * 
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
+         * \param   pipelineName    Name of this pipeline.
          */
-        AutoEvaluationPipeline(DataContainer* dc);
+        AutoEvaluationPipeline(DataContainer& dataContainer, const std::string& pipelineName);
 
         /**
          * Virtual Destructor
@@ -55,16 +56,18 @@ namespace campvis {
         virtual ~AutoEvaluationPipeline();
 
 
+        /// \see AbstractPipeline::getName()
+        virtual std::string getName() const override;
         /// \see AbstractPipeline::init()
-        virtual void init();
+        virtual void init() override;
         /// \see AbstractPipeline::deinit()
-        virtual void deinit();
+        virtual void deinit() override;
 
         /// \see AbstractPipeline::addProcessor()
-        virtual void addProcessor(AbstractProcessor* processor);
+        virtual void addProcessor(AbstractProcessor* processor) override;
 
         /// \see AbstractPipeline::executePipeline()
-        virtual void executePipeline();
+        virtual void executePipeline() override;
 
     protected:
 
@@ -74,6 +77,8 @@ namespace campvis {
          * \param   processor   The processor that emitted the signal
          */
         virtual void onProcessorInvalidated(AbstractProcessor* processor);
+
+        std::string _pipelineName;    ///< Name of this pipeline
 
         static const std::string loggerCat_;
 
@@ -91,6 +96,20 @@ namespace campvis {
          * \param   dh      DataHandle to the newly added data.
          */
         virtual void onDataContainerDataAdded(std::string name, DataHandle dh);
+
+        /**
+         * Callback when a property was added to one of the PropertyCollections.
+         * This property will be added to the port map.
+         * \param   property    Property that was added to the collection.
+         */
+        virtual void onPropertyCollectionPropertyAdded(AbstractProperty* property);
+
+        /**
+         * Callback when a property was removed from one of the PropertyCollections.
+         * This property will be removed from the port map.
+         * \param   property    Property that was added removed from collection.
+         */
+        virtual void onPropertyCollectionPropertyRemoved(AbstractProperty* property);
 
         /**
          * Recursively looks for all DataNameProperties in \a pc and adds them to the port map.

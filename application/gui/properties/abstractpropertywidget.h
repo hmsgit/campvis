@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -27,6 +27,9 @@
 
 #include "sigslot/sigslot.h"
 #include "tbb/atomic.h"
+
+#include "application/applicationapi.h"
+
 #include <QBoxLayout>
 #include <QLabel>
 #include <QWidget>
@@ -38,7 +41,7 @@ namespace campvis {
     /**
      * Abstract base class for property widgets.
      */
-    class AbstractPropertyWidget : public QWidget, public sigslot::has_slots {
+    class CAMPVIS_APPLICATION_API AbstractPropertyWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:
@@ -59,6 +62,13 @@ namespace campvis {
          */
         virtual ~AbstractPropertyWidget();
 
+        /**
+         * Shows or hides the label that appears on the left hand side of the widget.
+         *
+         * \param   isVisible       Wether the label should be shown or not
+         */
+        void setLabelVisibile(bool isVisible);
+
     protected:
         /**
          * Adds a widget to the local Qt layout.
@@ -75,7 +85,7 @@ namespace campvis {
         /**
          * Gets called when the property has changed, so that widget can update its state.
          */
-        virtual void updateWidgetFromProperty() = 0;
+        virtual void updateWidgetFromProperty() {};
 
     signals:
         /**

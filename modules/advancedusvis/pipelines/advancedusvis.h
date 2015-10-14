@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -28,9 +28,8 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
 
-#include "modules/io/processors/mhdimagereader.h"
+#include "modules/io/processors/genericimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/vis/processors/quadview.h"
@@ -39,9 +38,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API AdvancedUsVis : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline. 
+         * Creates a AdvancedUsVis pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        AdvancedUsVis(DataContainer* dc);
+        explicit AdvancedUsVis(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -50,20 +51,16 @@ namespace campvis {
 
         /// \see VisualizationPipeline::init()
         virtual void init();
-
         /// \see VisualizationPipeline::deinit()
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        /// \see AbstractPipeline::getId()
         static const std::string getId() { return "AdvancedUsVis"; };
 
         virtual void keyEvent(cgt::KeyEvent* e);
 
     protected:
-        MhdImageReader _usReader;
-        MhdImageReader _confidenceReader;
+        GenericImageReader _usReader;
+        GenericImageReader _confidenceReader;
 
         AdvancedUsFusion _usFusion1;
         AdvancedUsFusion _usFusion2;
@@ -73,10 +70,6 @@ namespace campvis {
 
         QuadView _quadView;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<AdvancedUsVis>;
-
 }
 
 #endif // ADVANCEDUSVIS_H__

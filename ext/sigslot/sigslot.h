@@ -346,6 +346,13 @@ namespace sigslot {
         /// \see Runnable:run
         virtual void run();
 
+
+        /**
+         * Halts the calling thread until the current signal queue has been flushed.
+         * Flushing means that all signals currently in the signal queue have been fully handled.
+         */
+        void waitForSignalQueueFlushed();
+
     private:
         /// Private constructor only for singleton
         signal_manager();
@@ -354,15 +361,15 @@ namespace sigslot {
 
         /// Typedef for the signal queue
         typedef tbb::concurrent_queue<_signal_handle_base*> SignalQueue;
+        /// Typedef for signal pool's allocator
+        typedef std::allocator<_signal_handle_base> pool_allocator_t;
 
         SignalHandlingMode _handlingMode;               ///< Mode for handling signals
         SignalQueue _signalQueue;                       ///< Queue for signals to be dispatched
+        tbb::memory_pool<pool_allocator_t> _signalPool; ///< Memory pool for the signals
 
         std::mutex _ecMutex;                            ///< Mutex for protecting _evaluationCondition
-        std::thread::id _this_thread_id;
-
-        typedef std::allocator<_signal_handle_base> pool_allocator_t;
-        tbb::memory_pool<pool_allocator_t> _signalPool; ///< Memory pool for the signals
+        std::thread::id _this_thread_id;                ///< Thread ID of signal_manager thread
 
         static const std::string loggerCat_;
     };
@@ -444,6 +451,11 @@ namespace sigslot {
     class SIGSLOT_API _signal_base
     {
     public:
+        ~_signal_base() {
+            if (signal_manager::isInited())
+                signal_manager::getRef().waitForSignalQueueFlushed();
+        }
+
         virtual void slot_disconnect(has_slots* pslot) = 0;
         virtual void slot_duplicate(has_slots const* poldslot, has_slots* pnewslot) = 0;
 

@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -73,6 +73,10 @@ namespace cgt {
             ~ScopedSynchronousGlJobExecution();
 
         private:
+            // disable copying
+            explicit ScopedSynchronousGlJobExecution(const ScopedSynchronousGlJobExecution& rhs);
+            ScopedSynchronousGlJobExecution& operator=(ScopedSynchronousGlJobExecution rhs);
+
             cgt::GLContextScopedLock* _lock;
         };
 
@@ -119,24 +123,12 @@ namespace cgt {
          */
         void enqueueJob(AbstractJob* job);
 
-        /**
-         * Enqueue OpenGL Garbage collection job
-         */
-        void enqueueGarbageCollection();
-
-
     protected:
-        /**
-         * Performs a OpenGL Garbage Collection if necessary.
-         */
-        void performGarbageCollectionIfNecessary();
-
         // Protected constructor since it's a singleton
         OpenGLJobProcessor();
 
         cgt::GLCanvas* _context;                        ///< The OpenGL context to use
         tbb::concurrent_queue<AbstractJob*> _jobQueue;  ///< The OpenGL job queue
-        tbb::atomic<bool> _performGarbageCollection;    ///< Flag whether to perform garbage cxollection
 
         tbb::atomic<int> _pause;                        ///< Counter of pause requests
 

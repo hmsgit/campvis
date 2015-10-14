@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -54,7 +54,7 @@ namespace campvis {
         /**
          * Constructs a new ScanlineDistributionComputation Processor
          **/
-        ScanlineDistributionComputation(IVec2Property* viewportSizeProp);
+        explicit ScanlineDistributionComputation(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -66,8 +66,10 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// To be used in ProcessorFactory static methods
+        static const std::string getId() { return "ScanlineDistributionComputation"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "ScanlineDistributionComputation"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Computes the intensity distribution profile for each voxel along the scanline."; };
         /// \see AbstractProcessor::getAuthor()

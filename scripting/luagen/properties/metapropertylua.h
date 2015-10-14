@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -26,19 +26,19 @@
 #define METAPROPERTYLUA_H__
 
 
+#include "scripting/scriptingapi.h"
 #include "core/properties/metaproperty.h"
+
 #include "abstractpropertylua.h"
 #include "propertycollectionluascriptgenerator.h"
 #include "propertyluafactory.h"
 
 namespace campvis {
-    class DataContainer;
-
     /**
      * Lua for a MetaProperty.
      * Forwards the call to the PropertyCollectionLua
      */
-    class MetaPropertyLua : public PropertyCollectionLuaScriptGenerator {
+    class CAMPVIS_SCRIPTING_API MetaPropertyLua : public PropertyCollectionLuaScriptGenerator {
     public:
         /**
          * Creates a new MetaPropertyLua for the property \a property.

@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -126,7 +126,7 @@ namespace cgt {
      */
     class CGT_API GLContextScopedLock {
     public:
-        GLContextScopedLock(GLCanvas* context)
+        explicit GLContextScopedLock(GLCanvas* context)
             : _context(context)
         {
             if (_context) {

@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -25,11 +25,11 @@
 #include "gtest/gtest.h"
 
 #include "core/datastructures/imagedata.h"
-
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
+#include "core/tools/simplejobprocessor.h"
 
 using namespace campvis;
 
@@ -149,4 +149,23 @@ TEST_F(ImageRepresentationTest, conversion_disk_gl_local_test) {
  */
 TEST_F(ImageRepresentationTest, basetype_conversion_test) {
     performBasetypeConversionTest();
+}
+
+/**
+ * Tests multiple concurrent conversions.
+ * Tests that no redundant representations are created.
+ */
+TEST_F(ImageRepresentationTest, concurrent_conversion_test) {
+    tbb::atomic<int> _counter;
+    _counter = 0;
+
+    // hopefully, these jobs are spawned fast enough to simulate concurrent conversions...
+    const int numInstantiations = 128;
+    for (int i = 0; i < numInstantiations; ++i)
+        SimpleJobProc.enqueueJob([&] () { this->convertLocalGl(); ++_counter; });
+
+    while (_counter != numInstantiations)
+        std::this_thread::yield();
+
+    EXPECT_EQ(this->_image->getNumRepresentations(), 3U);
 }

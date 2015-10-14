@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -203,11 +203,11 @@ namespace campvis {
     }
 
     bool IndexedMeshGeometry::hasTextureCoordinates() const {
-        return ! _textureCoordinates.empty();
+        return !_textureCoordinates.empty();
     }
 
     bool IndexedMeshGeometry::hasPickingInformation() const {
-        return _pickingInformation.empty();
+        return !_pickingInformation.empty();
     }
 
     void IndexedMeshGeometry::applyTransformationToVertices(const cgt::mat4& t) {

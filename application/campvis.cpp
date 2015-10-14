@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -24,10 +24,6 @@
 
 #include "application/campvisapplication.h"
 
-#ifdef Q_WS_X11
-#include <X11/Xlib.h>
-#endif
-  
 using namespace campvis;
 
 /**
@@ -38,9 +34,8 @@ using namespace campvis;
  * \return  0 if program exited successfully
  **/
 int main(int argc, char** argv) {
-    #ifdef Q_WS_X11
-        XInitThreads();
-    #endif
+    // Make Xlib and GLX thread safe under X11
+    QCoreApplication::setAttribute(Qt::AA_X11InitThreads);
 
     CampVisApplication app(argc, argv);
     app.init();

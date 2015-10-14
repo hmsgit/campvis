@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -26,6 +26,7 @@
 #define MDIDOCKAREA_H__
 
 #include "mdidockablewindow.h"
+#include "application/gui/qtcolortools.h"
 
 #include <QMdiArea>
 
@@ -41,7 +42,7 @@ namespace campvis {
      * - dockable windows can be created using the addWidget method, which returns an
      *   MdiDockableWindow instance
      */
-    class MdiDockArea : public QMdiArea {
+    class CAMPVIS_APPLICATION_API MdiDockArea : public QMdiArea {
 
         Q_OBJECT
 

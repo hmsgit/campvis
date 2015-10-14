@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -82,6 +82,7 @@ namespace campvis {
          * \note    When overwriting this method, make sure to call the base class version at the end.
          */
         virtual void deinit();
+        
 
         DataNameProperty p_sourceImageID;                ///< image ID for input image
         DataNameProperty p_entryImageID;                 ///< image ID for output entry points image

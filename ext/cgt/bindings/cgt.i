@@ -160,9 +160,9 @@ namespace cgt {
         virtual ~Camera();
     };
 
-    class IHasCamera {
+    class AbstractCameraProxy {
     public:
-        virtual ~IHasCamera();
+        virtual ~AbstractCameraProxy();
 
     virtual Camera* getCamera() = 0;
     virtual void update() = 0;

@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -62,7 +62,8 @@ namespace campvis {
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
-        , _arrowGeometry(0)
+        , _arrowGeometry(nullptr)
+        , _shader(nullptr)
     {
         addProperty(p_inputVectors, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_camera);
@@ -96,14 +97,13 @@ namespace campvis {
     void VectorFieldRenderer::deinit() {
         ShdrMgr.dispose(_shader);
 
-        delete _arrowGeometry;
-        _arrowGeometry = 0;
+        _arrowGeometry = nullptr;
 
         VisualizationProcessor::deinit();
     }
 
     void VectorFieldRenderer::updateResult(DataContainer& dataContainer) {
-        if (_arrowGeometry == 0 ) {
+        if (_arrowGeometry == nullptr ) {
             LERROR("Error initializing arrow geometry.");
             return;
         }

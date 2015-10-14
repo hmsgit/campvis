@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -62,7 +62,7 @@ namespace campvis {
          *
          * \param   str     Input string to parse.
          *
-         * \note    TODO: The detection algorithm is a little simplified and will not yield correct results
+         * \note    The detection algorithm is a little simplified and may not yield correct results
          *          in every case.
          **/
         static std::vector<std::string> parseFloats(const std::string& str);

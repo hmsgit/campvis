@@ -2,10 +2,11 @@ PROJECT(campvis-core)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 #INCLUDE(../cmake/commonconf.cmake)
 
-MESSAGE(STATUS "Configuring CAMPVis Core")
+MESSAGE(STATUS "Configuring CAMPVis-Core")
 
 # glob sources from core directories
 FILE(GLOB CampvisCoreSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    *.cpp
     classification/*.cpp
     datastructures/*.cpp
     eventhandlers/*.cpp
@@ -43,11 +44,6 @@ FOREACH(CampvisModulesCoreHeader ${CampvisModulesCoreHeaders})
     LIST(APPEND CampvisCoreHeaders ${ModHeaderFile})
 ENDFOREACH()
 
-FOREACH(HeaderFile ${CampvisCoreHeaders})
-    PARSE_HEADER_FOR_CONVERTER(${HeaderFile})
-ENDFOREACH()
-WRITE_CONVERTER_REGISTRATION("gen_converterregistration.h")
-
 ADD_LIBRARY(campvis-core 
     ${CampvisCoreSources} ${CampvisCoreHeaders} 
 )
@@ -59,8 +55,10 @@ TARGET_LINK_LIBRARIES(campvis-core cgt sigslot ${CampvisGlobalExternalLibs})
 # the code to export DLL symbols
 SET_TARGET_PROPERTIES(campvis-core PROPERTIES DEFINE_SYMBOL "CAMPVIS_CORE_BUILD_DLL")
 
-
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisCoreSources ${CampvisHome} "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisCoreHeaders ${CampvisHome} "")
 ENDIF()
+
+
+INSTALL(TARGETS campvis-core DESTINATION exports EXPORT campvis-targets)

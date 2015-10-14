@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Constructs a new GlImageCrop Processor
          **/
-        GlImageCrop(IVec2Property* viewportSizeProp);
+        explicit GlImageCrop(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -57,9 +57,13 @@ namespace campvis {
         virtual void init();
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "GlImageCrop"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "GlImageCrop"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Quantizes image intensities into a fixed number of bins using the GPU."; };
         /// \see AbstractProcessor::getAuthor()
@@ -79,11 +83,11 @@ namespace campvis {
         /// \see AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
 
-        cgt::Shader* _shader;               ///< Shader for resampling
+        cgt::Shader* _shader2D;             ///< Shader for cropping 2D data
+        cgt::Shader* _shader3D;             ///< Shader for cropping 3D data
 
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // GLIMAGECROP_H__

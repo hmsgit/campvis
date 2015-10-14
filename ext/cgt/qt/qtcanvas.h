@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -69,9 +69,6 @@ public:
      */
     virtual ~QtCanvas();
 
-
-    /// initialize canvas
-    virtual void init();
 
     /**
      * Called by the Qt framework once at the beginning, before rendering starts.

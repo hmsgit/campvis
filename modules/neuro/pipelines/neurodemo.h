@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -30,8 +30,6 @@
 #include "core/pipeline/viewportsplitter.h"
 
 #include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/genericimagereader.h"
@@ -43,9 +41,11 @@ namespace campvis {
     class CAMPVIS_MODULES_API NeuroDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a NeuroDemo pipeline.
+         * \param   dataContainer   Reference to the DataContainer containing local working set of data
+         *                          for this pipeline, must be valid the whole lifetime of this pipeline.
          */
-        NeuroDemo(DataContainer* dc);
+        explicit NeuroDemo(DataContainer& dataContainer);
 
         /**
          * Virtual Destructor
@@ -56,9 +56,6 @@ namespace campvis {
         virtual void init();
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        /// \see AbstractPipeline::getId()
         static const std::string getId() { return "NeuroDemo"; };
 
         /// \see AbstractPipeline::executePipeline()
@@ -91,10 +88,6 @@ namespace campvis {
     private:
         std::vector<cgt::vec3> _mprBasePoints;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<NeuroDemo>;
-
 }
 
 #endif // NEURODEMO_H__

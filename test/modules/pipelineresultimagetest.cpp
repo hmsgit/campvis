@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -32,10 +32,10 @@
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/abstractpipeline.h"
+#include "core/pipeline/pipelinefactory.h"
 #include "core/properties/allproperties.h"
 #include "core/tools/stringutils.h"
 
-#include "modules/pipelinefactory.h"
 #include "modules/devil/processors/devilimagewriter.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 
@@ -83,7 +83,7 @@ protected:
 
     void init() {
         // create pipeline
-        _pipeline = PipelineFactory::getRef().createPipeline(_pipelineName, &_dataContainer);
+        _pipeline = PipelineFactory::getRef().createPipeline(_pipelineName, _dataContainer);
 
         if (_pipeline != nullptr) {
             // setup pipeline
@@ -98,10 +98,15 @@ protected:
                 processors[i]->invalidate(AbstractProcessor::INVALID_RESULT);
             }
         }
+        else {
+            FAIL() << "Could not instantiate pipeline '" << _pipelineName << "'";
+        }
     }
 
     void execute() {
         if (_pipeline != nullptr) {
+            sigslot::signal_manager::getRef().waitForSignalQueueFlushed();
+
             for (size_t i = 0; i < _pipeline->getProcessors().size(); ++i)
                 _pipeline->executePipeline();
 
@@ -112,6 +117,8 @@ protected:
             _imageWriter.process(_dataContainer);
 
             _wroteFile = cgt::FileSystem::fileExists(_fileName);
+
+            sigslot::signal_manager::getRef().waitForSignalQueueFlushed();
         }
     }
 
@@ -211,3 +218,4 @@ TEST_F(PipelineWriteResultImageTest, TensorDemo) {
 }
 
 #endif
+

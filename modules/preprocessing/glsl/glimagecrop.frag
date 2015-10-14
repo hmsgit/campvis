@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -26,11 +26,15 @@ in vec3 ex_TexCoord;
 out vec4 out_Color;
 
 #include "tools/gradient.frag"
-#include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
 
+#ifdef GLIMAGECROP_3D
 uniform sampler3D _texture;
-uniform TextureParameters3D _textureParams;
+#endif
+
+#ifdef GLIMAGECROP_2D
+uniform sampler2D _texture;
+#endif
 
 uniform ivec3 _outputSize;
 uniform ivec3 _offset;
@@ -39,6 +43,14 @@ uniform int _zTexel;
 void main() {
     //ivec2 texel = ivec2(((1.0 / vec2(_outputSize.xy)) + ex_TexCoord.xy) * vec2(_outputSize.xy));
     ivec2 texel = ivec2(ex_TexCoord.xy * vec2(_outputSize.xy));
+
+    #ifdef GLIMAGECROP_3D
     vec4 intensity = texelFetch(_texture, ivec3(texel, _zTexel) + _offset, 0);
+    #endif
+
+    #ifdef GLIMAGECROP_2D
+    vec4 intensity = texelFetch(_texture, texel + _offset.xy, 0);
+    #endif
+
     out_Color = intensity;
 }

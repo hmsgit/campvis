@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -25,6 +25,8 @@
 #ifndef TRANSFERFUNCTIONEDITORFACTORY_H__
 #define TRANSFERFUNCTIONEDITORFACTORY_H__
 
+#include "application/applicationapi.h"
+
 namespace campvis {
     class AbstractTransferFunction;
     class AbstractTransferFunctionEditor;
@@ -34,7 +36,7 @@ namespace campvis {
      * Factory class offering the static method createEditor to create transfer function editors
      * for a given transfer function (depending on its type).
      */
-    class TransferFunctionEditorFactory {
+    class CAMPVIS_APPLICATION_API TransferFunctionEditorFactory {
     public:
         /**
          * Creates the corresponding TransferFunctionEditor for the given transfer function \a tf.

@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -26,6 +26,7 @@
 #define INTADJUSTERWIDGET_H__
 
 #include "abstractadjusterwidget.h"
+#include "application/applicationapi.h"
 
 namespace campvis {
     /**
@@ -34,7 +35,7 @@ namespace campvis {
      * IntAdjusterWidget consists of a slider, which can be used to quickly change integer values, and a spin box,
      * which is better suited for precise adjustments.
      */
-    class IntAdjusterWidget : public AbstractAdjusterWidget<int> {
+    class CAMPVIS_APPLICATION_API IntAdjusterWidget : public AbstractAdjusterWidget<int> {
         Q_OBJECT
 
     public:
@@ -42,7 +43,7 @@ namespace campvis {
          * Creates a new IntAdjusterWidget.
          * \param   parent      Parent Qt widget
          */
-        IntAdjusterWidget(QWidget* parent = 0);
+        explicit IntAdjusterWidget(QWidget* parent = 0);
 
         /**
          * Change the adjuster's current value.

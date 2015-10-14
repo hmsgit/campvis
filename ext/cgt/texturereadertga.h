@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -41,6 +41,8 @@ public:
     TextureReaderTga();
     virtual Texture* loadTexture(const std::string& filename, Texture::Filter filter, bool compress = false,
                                  bool keepPixels = false, bool createOGLTex = true, bool textureRectangle = false);
+
+    Texture* loadTextureArray(const std::vector<std::string>& filenames, Texture::Filter filter);
 };
 
 

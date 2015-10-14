@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -52,6 +52,8 @@ namespace campvis {
         , _customGlslVersion(customGlslVersion)
         , _shader(0)
         , _bindEntryExitDepthTextures(bindEntryExitDepthTextures)
+        , _minReduction(nullptr)
+        , _maxReduction(nullptr)
     {
         addProperty(p_sourceImageID, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES);
         addProperty(p_entryImageID);
@@ -70,8 +72,6 @@ namespace campvis {
     void RaycastingProcessor::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", _fragmentShaderFilename, generateHeader(), _customGlslVersion);
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
 
         _minReduction = new GlReduction(GlReduction::MIN);
         _maxReduction = new GlReduction(GlReduction::MAX);

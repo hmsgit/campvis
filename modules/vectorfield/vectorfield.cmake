@@ -3,6 +3,7 @@
 IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
+        modules/vectorfield/*.cpp
 		modules/vectorfield/processors/*.cpp
 		modules/vectorfield/pipelines/*.cpp
 	)
@@ -15,8 +16,8 @@ IF(${ModuleEnabled})
 		modules/vectorfield/pipelines/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/vectorfield/glsl")
-	SET(ThisModShaderDirectories "modules/vectorfield/sampledata")
+	LIST(APPEND ThisModShaderDirectories "modules/vectorfield/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/vectorfield/sampledata")
 	SET(ThisModDependencies io vis)
 ENDIF(${ModuleEnabled})
 

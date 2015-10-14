@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -51,7 +51,7 @@ namespace cgt {
      */
     class CGT_API VertexArrayObject {
     public:
-        VertexArrayObject(bool autoBind = true) throw (cgt::Exception);
+        explicit VertexArrayObject(bool autoBind = true) throw (cgt::Exception);
 
         /**
          * Destructor, deletes the whole VAO.

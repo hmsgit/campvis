@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Constructs a new GlGradientVolumeGenerator Processor
          **/
-        GlGradientVolumeGenerator(IVec2Property* viewportSizeProp);
+        explicit GlGradientVolumeGenerator(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -57,9 +57,13 @@ namespace campvis {
         virtual void init();
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "GlGradientVolumeGenerator"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "GlGradientVolumeGenerator"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates the gradient volume for the given intensity volume using OpenGL."; };
         /// \see AbstractProcessor::getAuthor()
@@ -82,7 +86,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // GLGRADIENTVOLUMEGENERATOR_H__

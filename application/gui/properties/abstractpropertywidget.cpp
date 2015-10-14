@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -59,12 +59,16 @@ namespace campvis {
         }
 
         _property->s_changed.connect(this, &AbstractPropertyWidget::onPropertyChanged);
-        // cppcheck-suppress pureVirtualCall
         connect(this, SIGNAL(s_propertyChanged(const AbstractProperty*)), this, SLOT(updateWidgetFromProperty()));
     }
 
     AbstractPropertyWidget::~AbstractPropertyWidget() {
         _property->s_changed.disconnect(this);
+    }
+
+    void AbstractPropertyWidget::setLabelVisibile(bool isVisible) {
+        if (_titleLabel)
+            _titleLabel->setVisible(isVisible);
     }
 
     void AbstractPropertyWidget::addWidget(QWidget* widget, int stretch) {

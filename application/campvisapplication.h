@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -34,11 +34,7 @@
 #include <vector>
 
 #include "core/datastructures/datacontainer.h"
-
-
-#ifdef CAMPVIS_HAS_SCRIPTING
-#include "scripting/glue/luavmstate.h"
-#endif
+#include "application/applicationapi.h"
 
 namespace cgt {
     class GLCanvas;
@@ -50,7 +46,6 @@ namespace campvis {
     class AbstractPipeline;
     class AbstractWorkflow;
     class MainWindow;
-    class CampVisPainter;
     class MdiDockableWindow;
     class LuaVmState;
 
@@ -66,16 +61,10 @@ namespace campvis {
      *  5. call deinit()
      *  6. You can now safely destroy your CampVisApplication
      */
-    class CampVisApplication : public QApplication {
+    class CAMPVIS_APPLICATION_API CampVisApplication : public QApplication {
     friend class MainWindow;
 
     public:
-        /// Record storing a pipeline together with its painter and Lua VM state.
-        struct PipelineRecord {
-            AbstractPipeline* _pipeline;
-            CampVisPainter* _painter;
-        };
-
         /**
          * Creates a new CampVisApplication.
          * \param   argc        number of passed arguments
@@ -104,10 +93,9 @@ namespace campvis {
          * Each pipeline will automatically get its own OpenGL context, the corresponding CampvisPainter
          * and all necessary connections will be created.
          * 
-         * \param   name    Name of the OpenGL context to create for the pipeline.
          * \param   vp      AbstractPipeline to add.
          */
-        void addPipeline(const std::string& name, AbstractPipeline* pipeline);
+        void addPipeline(AbstractPipeline* pipeline);
 
         /**
          * Adds a dock widget to the main window.
@@ -167,7 +155,7 @@ namespace campvis {
         std::vector<AbstractWorkflow*> _workflows;
 
         /// All pipelines 
-        std::vector<PipelineRecord> _pipelines;
+        std::vector<AbstractPipeline*> _pipelines;
 
         /// Map of all pipelines with their MDI windows
         std::map<AbstractPipeline*, MdiDockableWindow*> _pipelineWindows;

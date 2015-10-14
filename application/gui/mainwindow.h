@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -26,12 +26,12 @@
 #define CAMPVISMAINWINDOW_H__
 
 #include "sigslot/sigslot.h"
+#include "application/applicationapi.h"
 #include "application/campvisapplication.h"
 #include "application/gui/mdi/mdidockarea.h"
 #include "application/gui/pipelinetreewidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
 #include "application/gui/logviewerwidget.h"
-#include "application/gui/scriptingwidget.h"
 #include "application/gui/workflowcontrollerwidget.h"
 #include "application/tools/qtexteditlog.h"
 #include "application/ui_mainwindow.h"
@@ -48,12 +48,14 @@ namespace campvis {
     class DataContainerInspectorWidget;
     class DataContainerInspectorCanvas;
     class MdiDockableWindow;
+    class LuaTableTreeWidget;
+    class ScriptingWidget;
 
     /**
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the CampVisApplication instance given during creation.
      */
-    class MainWindow : public QMainWindow, public sigslot::has_slots {
+    class CAMPVIS_APPLICATION_API MainWindow : public QMainWindow, public sigslot::has_slots {
         Q_OBJECT
 
     public:
@@ -99,6 +101,12 @@ namespace campvis {
          */
         void setWorkflow(AbstractWorkflow* w);
 
+        /**
+         * Enables the kiosk mode of the MainWindow.
+         * In kiosk mode, all docks but the main canvas and the workflow dock are hidden.
+         */
+        void enableKioskMode();
+
     protected:
         /**
          * Listens to resize events on _pipelinePropertiesWidget and resizes _pipelinePropertiesScrollArea accordingly
@@ -119,8 +127,8 @@ namespace campvis {
          * Slot to be called by the PipelineWidget when the selected item changes.
          * \param   index   Index of the selected item
          */
-        void onPipelineWidgetItemClicked(const QModelIndex& index);
-        
+        void onPipelineWidgetItemChanged(const QModelIndex& index);
+
         /**
          * Slot to be called when _btnExecute was clicked.
          */
@@ -144,6 +152,9 @@ namespace campvis {
         /// Slot to be called when _btnPipelineFactory was clicked;
         void onBtnPipelineFactoryClicked();
 
+        /// Slot to be called when _btnProcessorFactory was clicked;
+        void onBtnProcessorFactoryClicked();
+
         /// Slot to be called when all shaders shall be rebuilt.
         void onRebuildShadersClicked();
 
@@ -160,7 +171,7 @@ namespace campvis {
         /**
          * Slot to be called by the application when its collection of DataContainers has changed.
          */
-        void onDataContainersChanged();
+        void onDataContainersChanged(); 
 
         /**
          * Setup Qt GUI stuff
@@ -208,7 +219,11 @@ namespace campvis {
 
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         ScriptingWidget* _scriptingConsoleWidget;           ///< Widget showing the scripting console (if available)
+        LuaTableTreeWidget* _luaTreeWidget;                 ///< Tree widget showing the global Lua variables
         WorkflowControllerWidget* _workflowWidget;          ///< Widget showing the workflow controller
+        
+        QComboBox* _cbProcessorFactory;                      ///< Combobox for selecting the Processor from the ProcessorFactory
+        QPushButton* _btnProcessorFactory;                   ///< Button to add a Processor from the factory to the selected Pipeline
 
         QPushButton* _btnLuaLoad;
         QPushButton* _btnLuaSave;

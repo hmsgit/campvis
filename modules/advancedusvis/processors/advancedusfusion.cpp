@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2015, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
@@ -41,7 +41,7 @@
 namespace campvis {
     const std::string AdvancedUsFusion::loggerCat_ = "CAMPVis.modules.vis.AdvancedUsFusion";
 
-    GenericOption<std::string> viewOptions[12] = {
+    GenericOption<std::string> viewOptions[14] = {
         GenericOption<std::string>("us", "Ultrasound Only"),
         GenericOption<std::string>("smoothed", "Smoothed US Only"),
         GenericOption<std::string>("cm", "Confidence Map US Only"),
@@ -53,7 +53,9 @@ namespace campvis {
         GenericOption<std::string>("mappingLAB", "Mapping Uncertainty L*a*b*"),
         GenericOption<std::string>("mappingHunterLAB", "Mapping Uncertainty Hunter L*a*b*"),
         GenericOption<std::string>("mappingSharpness", "Mapping Uncertainty to Sharpness"),
-        GenericOption<std::string>("pixelate", "Pixelate (Experimental)")
+        GenericOption<std::string>("pixelate", "Pixelate (Experimental)"),
+        GenericOption<std::string>("colorOverlay", "Color Overlay"),
+        GenericOption<std::string>("mappingHybrid", "Hybrid Mapping to Chroma and Sharpness")
     };
 
     AdvancedUsFusion::AdvancedUsFusion(IVec2Property* viewportSizeProp)
@@ -63,13 +65,15 @@ namespace campvis {
         , p_gradientImageID("GradientImageId", "Gradient Input Image", "", DataNameProperty::READ)
         , p_confidenceImageID("ConfidenceImageId", "Confidence Map Input", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
+        , p_renderToTexture("RenderToTexture", "Render to an OpenGL Texture", false)
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_confidenceTF("ConfidenceTF", "Confidence to Uncertainty TF", new Geometry1DTransferFunction(256))
-        , p_view("View", "Image to Render", viewOptions, 12)
+        , p_view("View", "Image to Render", viewOptions, 14)
         , p_blurredScaling("BlurredScaling", "Blurred Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f)
+        , p_mixFactor("MixFactor", "Mix Factor", .5f, 0.f, 1.f, .1f, 1)
         , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)
         , _shader(0)
     {
@@ -78,6 +82,7 @@ namespace campvis {
         addProperty(p_gradientImageID);
         addProperty(p_confidenceImageID);
         addProperty(p_blurredScaling);
+        addProperty(p_renderToTexture);
         addProperty(p_targetImageID);
         addProperty(p_sliceNumber);
         addProperty(p_transferFunction);
@@ -85,6 +90,8 @@ namespace campvis {
         addProperty(p_view);
         addProperty(p_confidenceScaling);
         addProperty(p_hue);
+        addProperty(p_mixFactor);
+        p_mixFactor.setVisible(false);
 
         Geometry1DTransferFunction* tf = static_cast<Geometry1DTransferFunction*>(p_confidenceTF.getTF());
         tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 96), cgt::col4(0, 0, 0, 0)));
@@ -99,8 +106,6 @@ namespace campvis {
     void AdvancedUsFusion::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/advancedusvis/glsl/advancedusfusion.frag", generateHeader());
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
     void AdvancedUsFusion::deinit() {
@@ -123,6 +128,7 @@ namespace campvis {
                 _shader->setUniform("_confidenceScaling", p_confidenceScaling.getValue());
                 _shader->setUniform("_hue", p_hue.getValue());
                 _shader->setUniform("_blurredScale", 1.f / p_blurredScaling.getValue());
+                _shader->setUniform("_mixFactor", p_mixFactor.getValue());
                 
                 cgt::TextureUnit usUnit, blurredUnit, confidenceUnit, tfUnit, tf2Unit;
                 img->bind(_shader, usUnit, "_usImage", "_usTextureParams");
@@ -131,18 +137,42 @@ namespace campvis {
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
                 p_confidenceTF.getTF()->bind(_shader, tf2Unit, "_confidenceTF", "_confidenceTFParams");
 
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
+                if (p_renderToTexture.getValue() == true) {
+                    cgt::vec3 size = img->getSize();
+                    cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_2D, size, GL_RGB8, cgt::Texture::LINEAR);
 
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                QuadRdr.renderQuad();
+                    _fbo->activate();
+                    glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
+                    _fbo->attachTexture(resultTexture, GL_COLOR_ATTACHMENT0, 0, 0);
+                    LGL_ERROR;
 
-                decorateRenderEpilog(_shader);
-                _shader->deactivate();
-                cgt::TextureUnit::setZeroUnit();
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    QuadRdr.renderQuad();
 
-                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+                    _fbo->detachAll();
+                    _fbo->deactivate();
+                    _shader->deactivate();
+                    ImageData* id = new ImageData(img->getParent()->getDimensionality(), size, 3);
+                    ImageRepresentationGL::create(id, resultTexture);
+                    id->setMappingInformation(img->getParent()->getMappingInformation());
+                    cgt::TextureUnit::setZeroUnit();
+
+                    data.addData(p_targetImageID.getValue(), id);
+                }
+                else {
+                    FramebufferActivationGuard fag(this);
+                    createAndAttachColorTexture();
+                    createAndAttachDepthTexture();
+
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    QuadRdr.renderQuad();
+
+                    decorateRenderEpilog(_shader);
+                    _shader->deactivate();
+                    cgt::TextureUnit::setZeroUnit();
+
+                    data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+                }
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");
@@ -153,15 +183,19 @@ namespace campvis {
         }
     }
 
-    void AdvancedUsFusion::updateProperties(DataContainer dc) {
+    void AdvancedUsFusion::updateProperties(DataContainer& dc) {
         ScopedTypedData<ImageData> img(dc, p_usImageId.getValue());
 
         p_transferFunction.setImageHandle(img.getDataHandle());
-        const cgt::svec3& imgSize = img->getSize();
-        if (static_cast<cgt::svec3::ElemType> (p_sliceNumber.getMaxValue()) != imgSize.z - 1){
-            p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+        if (img != nullptr) {
+            const cgt::svec3& imgSize = img->getSize();
+            if (static_cast<cgt::svec3::ElemType> (p_sliceNumber.getMaxValue()) != imgSize.z - 1){
+                p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+            }
+            p_use3DTexture.setValue(img->getDimensionality() == 3);
         }
-        p_use3DTexture.setValue(img->getDimensionality() == 3);
+
+        p_mixFactor.setVisible(p_view.getOptionId() == "mappingHybrid");
     }
 
     std::string AdvancedUsFusion::generateHeader() const {

@@ -12,6 +12,8 @@
 project(alglib CXX C)
 cmake_minimum_required(VERSION 2.6.2)
 
+MESSAGE(STATUS "  Configuring external library: Alglib")
+
 # Where .h files can be found.
 include_directories(
   ${alglib_SOURCE_DIR}
@@ -72,3 +74,5 @@ if ( MSVC )
     set_property( TARGET alglib APPEND_STRING PROPERTY COMPILE_FLAGS "/W1 /EHsc" )
 endif ( MSVC )
 
+# define export targets
+INSTALL(TARGETS alglib DESTINATION exports EXPORT campvis-targets)

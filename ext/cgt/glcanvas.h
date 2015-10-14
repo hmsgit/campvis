@@ -1,6 +1,6 @@
 /**********************************************************************
  *                                                                    *
- * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2015               *
  *     Chair for Computer Aided Medical Procedures                    *
  *     Technische Universitaet Muenchen, Germany.                     *
  *     <http://campar.in.tum.de/>                                     *
@@ -132,17 +132,9 @@ public:
 
     /// Set the painter the Canvas will use to draw it's content
     /// @param p the Painter
-    /// @initPainter wheather to initialize the painter, @see GLCanvas::initPainter()
-    void setPainter(Painter* p, bool initPainter = true);
+    void setPainter(Painter* p);
 
     Painter* getPainter() const;
-
-    /// Calls init()- and sizeChanged()-method of the canvas' painter. These methods shall
-    /// initializes OpenGL context (and maybe some user dependant stuff of the painter) and
-    /// make the painter adapt to the current width and height of the canvas.
-    /// @see Painter::init()
-    /// @see Painter::sizeChanged()
-    void initPainter();
 
     EventHandler* getEventHandler() const;
     void setEventHandler(EventHandler* handler);
@@ -179,9 +171,6 @@ public:
     /// Getter
     bool isDoubleBuffered() const { return doubleBuffered_; }
 
-    /// Getter
-    bool isInitialized() const { return initialized_; }
-
     /// Acqures this canvas as current context
     virtual void acquireAsCurrentContext() = 0;
     /// Releases this canvas as current context
@@ -204,7 +193,6 @@ protected:
     bool    stereoViewing_;
     bool    fullscreen_;
     bool    autoFlush_; ///< whether to call glFlush or swap automatically
-    bool    initialized_; // FIXME: does this make sense?
 
     Painter* painter_;  ///< the painter that will be used for rendering
 
