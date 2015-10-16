@@ -129,8 +129,8 @@ namespace campvis {
         MetaProperty p_geometryRendererProperties;      ///< MetaProperty for the GeometryRenderer
 
     signals:
-        void s_colorChanged(const cgt::vec4&);
-        void s_depthChanged(float depth);
+        void s_colorChanged(const cgt::svec3& texel, const cgt::vec4&);
+        void s_depthChanged(const cgt::svec3& texel, float depth);
 
     private slots:
         /**

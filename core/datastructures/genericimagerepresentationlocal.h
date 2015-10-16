@@ -399,10 +399,12 @@ namespace campvis {
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     typename campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElementLinear(const cgt::vec3 position) const {
-        // yet to be implemented
-        // TODO: Check wether pixel/voxel coordinates lie on the edges or on the center of the pixels/voxels
-        cgtAssert(false, "Yet to be implemented!");
-        return ElementType(0);
+        ElementType toReturn;
+        for (size_t i = 0; i < NUMCHANNELS; ++i) {
+            float channelValue = getElementNormalizedLinear(position, i);
+            TypeTraits<BASETYPE, NUMCHANNELS>::setChannel(toReturn, i, TypeNormalizer::denormalizeFromFloat<BASETYPE>(channelValue));
+        }
+        return toReturn;
     }
 
 

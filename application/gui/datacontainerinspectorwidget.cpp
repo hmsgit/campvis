@@ -227,11 +227,11 @@ namespace campvis {
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _canvas, SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
         connect(
-            _canvas, SIGNAL(s_colorChanged(const cgt::vec4&)),
-            this, SLOT(onColorChanged(const cgt::vec4&)));
+            _canvas, SIGNAL(s_colorChanged(const cgt::svec3&, const cgt::vec4&)),
+            this, SLOT(onColorChanged(const cgt::svec3&, const cgt::vec4&)));
         connect(
-            _canvas, SIGNAL(s_depthChanged(float)),
-            this, SLOT(onDepthChanged(float)));
+            _canvas, SIGNAL(s_depthChanged(const cgt::svec3&, float)),
+            this, SLOT(onDepthChanged(const cgt::svec3&, float)));
         connect(
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
@@ -540,16 +540,18 @@ namespace campvis {
         
     }
 
-    void DataContainerInspectorWidget::onColorChanged(const cgt::vec4& color) {
-        _lblColorVal->setText(QString("Color: [%1, %2, %3, %4]").arg(QString::number(color.r), QString::number(color.g), QString::number(color.b), QString::number(color.a)));
+    void DataContainerInspectorWidget::onColorChanged(const cgt::svec3& texel, const cgt::vec4& color) {
+        _lblColorVal->setText(QString("Color @ [%1, %2, %3]: [%4, %5, %6, %7]")
+            .arg(QString::number(texel.x), QString::number(texel.y), QString::number(texel.z), QString::number(color.r), QString::number(color.g), QString::number(color.b), QString::number(color.a)));
 
         cgt::ivec4 clamped(cgt::clamp(color * 255.f, 0.f, 255.f));
         _colorValWidgetPalette.setColor(QPalette::Background, QColor(clamped.r, clamped.g, clamped.b, clamped.a));
         _colorValWidget->setPalette(_colorValWidgetPalette);
     }
 
-    void DataContainerInspectorWidget::onDepthChanged(float depth) {
-        _lblColorVal->setText(QString("Depth: %1").arg(QString::number(depth)));
+    void DataContainerInspectorWidget::onDepthChanged(const cgt::svec3& texel, float depth) {
+        _lblColorVal->setText(QString("Depth @ [%1, %2, %3]: %4")
+            .arg(QString::number(texel.x), QString::number(texel.y), QString::number(texel.z), QString::number(depth)));
 
         cgt::ivec4 clamped(cgt::clamp(depth * 255.f, 0.f, 255.f));
         _colorValWidgetPalette.setColor(QPalette::Background, QColor(clamped.r, clamped.g, clamped.b, clamped.a));
