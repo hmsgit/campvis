@@ -26,12 +26,13 @@
 
 #include "cgt/filesystem.h"
 #include "cgt/glcontextmanager.h"
+#include "cgt/shadermanager.h"
 #include "cgt/event/keyevent.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/renderdata.h"
+#include "core/datastructures/facegeometry.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include <IL/il.h>
@@ -50,22 +51,27 @@ namespace campvis {
         , _usBlurFilter(&_canvasSize)
         , _usFusion(&_canvasSize)
         , p_autoExecution("AutoExecution", "Automatic Execution", false)
+        , p_showFan("ShowFan", "Show Fan", true)
         , p_sourcePath("SourcePath", "Source Files Path", "", StringProperty::DIRECTORY)
-        , p_targetPathCm("TargetPathCm", "Target Path Confidence Map Files", "", StringProperty::DIRECTORY)
+        , p_targetPathResampled("TargetPathResampled", "Target Path Resampled Files", "", StringProperty::DIRECTORY)
+        , p_targetPathCmCpu("TargetPathCm", "Target Path Confidence Map Files", "", StringProperty::DIRECTORY)
         , p_targetPathColorOverlay("TargetPathColorOverlay", "Target Path Color Overlay Files", "", StringProperty::DIRECTORY)
         , p_targetPathColor("TargetPathColor", "Target Path Color Files", "", StringProperty::DIRECTORY)
         , p_targetPathFuzzy("TargetPathFuzzy", "Target Path Fuzzy Files", "", StringProperty::DIRECTORY)
         , p_range("Range", "Files Range", cgt::ivec2(0, 1), cgt::ivec2(0, 0), cgt::ivec2(10000, 10000))
         , p_execute("Execute", "Execute Batch Pipeline")
+        , _shader(nullptr)
     {
         addProcessor(&_usReader);
+        addProcessor(&_scanlineConverter);
         addProcessor(&_confidenceGenerator);
         addProcessor(&_usFusion);
         addProcessor(&_usBlurFilter);
 
         addProperty(p_autoExecution);
         addProperty(p_sourcePath);
-        addProperty(p_targetPathCm);
+        addProperty(p_targetPathResampled);
+        addProperty(p_targetPathCmCpu);
         addProperty(p_targetPathColorOverlay);
         addProperty(p_targetPathColor);
         addProperty(p_targetPathFuzzy);
@@ -78,31 +84,37 @@ namespace campvis {
 
     void CmBatchGeneration::init() {
         AutoEvaluationPipeline::init();
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/passthrough.frag", "");
+        _imageWriter.init();
 
         p_sourcePath.setValue("D:\\cm_stuff\\original");
-        p_targetPathCm.setValue("D:\\cm_stuff\\cm");
+        p_targetPathResampled.setValue("D:\\cm_stuff\\resampled");
+        p_targetPathCmCpu.setValue("D:\\cm_stuff\\cm");
         p_targetPathColorOverlay.setValue("D:\\cm_stuff\\colorOverlay");
         p_targetPathColor.setValue("D:\\cm_stuff\\color");
         p_targetPathFuzzy.setValue("D:\\cm_stuff\\fuzzy");
         p_range.setValue(cgt::ivec2(0, 1));
-        p_execute.s_clicked.connect(this, &CmBatchGeneration::execute);
+        p_execute.s_clicked.connect(this, &CmBatchGeneration::startBatchProcess);
 
         _usReader.p_url.setValue("D:\\cm_stuff\\original\\export0000.bmp");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_importType.selectById("localIntensity");
-        _usReader.p_targetImageID.addSharedProperty(&_confidenceGenerator.p_sourceImageID);
-        _usReader.p_targetImageID.addSharedProperty(&_usFusion.p_usImageId);
-        _usReader.p_targetImageID.addSharedProperty(&_usBlurFilter.p_inputImage);
+        _usReader.p_targetImageID.addSharedProperty(&_scanlineConverter.p_sourceImageID);
+
+        _scanlineConverter.p_targetImageID.setValue("us.resampled");
+        _scanlineConverter.p_targetImageID.addSharedProperty(&_confidenceGenerator.p_sourceImageID);
+        _scanlineConverter.p_targetImageID.addSharedProperty(&_usFusion.p_usImageId);
+        _scanlineConverter.p_targetImageID.addSharedProperty(&_usBlurFilter.p_inputImage);
 
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
         _confidenceGenerator.p_targetImageID.addSharedProperty(&_usFusion.p_confidenceImageID);
-        _confidenceGenerator.p_curvilinear.setValue(true);
-        _confidenceGenerator.p_origin.setValue(cgt::vec2(340.f, 540.f));
-        _confidenceGenerator.p_angles.setValue(cgt::vec2(4.064f, 5.363f));
-        //_confidenceGenerator.p_angles.setValue(cgt::vec2(232.f / 180.f * cgt::PIf, 307.f / 180.f * cgt::PIf));
-        //_confidenceGenerator.p_origin.setValue(cgt::vec2(320.f, 35.f));
-        //_confidenceGenerator.p_angles.setValue(cgt::vec2(45.f / 180.f * cgt::PIf, 135.f / 180.f * cgt::PIf));
-        _confidenceGenerator.p_lengths.setValue(cgt::vec2(116.f, 543.f));
+        //_confidenceGenerator.p_curvilinear.setValue(true);
+        //_confidenceGenerator.p_origin.setValue(cgt::vec2(340.f, 540.f));
+        //_confidenceGenerator.p_angles.setValue(cgt::vec2(4.064f, 5.363f));
+        ////_confidenceGenerator.p_angles.setValue(cgt::vec2(232.f / 180.f * cgt::PIf, 307.f / 180.f * cgt::PIf));
+        ////_confidenceGenerator.p_origin.setValue(cgt::vec2(320.f, 35.f));
+        ////_confidenceGenerator.p_angles.setValue(cgt::vec2(45.f / 180.f * cgt::PIf, 135.f / 180.f * cgt::PIf));
+        //_confidenceGenerator.p_lengths.setValue(cgt::vec2(116.f, 543.f));
         _confidenceGenerator.p_alpha.setValue(2.f);
         _confidenceGenerator.p_beta.setValue(80.f);
         _confidenceGenerator.p_gamma.setValue(.05f);
@@ -127,59 +139,103 @@ namespace campvis {
     }
 
     void CmBatchGeneration::deinit() {
+        _imageWriter.deinit();
+        ShdrMgr.dispose(_shader);
         AutoEvaluationPipeline::deinit();
     }
 
-    void CmBatchGeneration::execute() {
+    void CmBatchGeneration::paint() {
+        if (p_showFan.getValue()) {
+            ImageRepresentationLocal::ScopedRepresentation input(getDataContainer(), _usReader.p_targetImageID.getValue());
+            if (input) {
+                const cgt::ivec2 inputSize = input->getSize().xy();
+                auto vertices = _scanlineConverter.generateLookupVertices(input->getParent());
+                _shader->activate();
+
+                _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(-1.f, -1.f, -1.f)) * cgt::mat4::createScale(cgt::vec3(2.f, 2.f, 2.f)));
+                _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(1.f / float(inputSize.x), 1.f / float(inputSize.y), 1.f)));
+                glPointSize(3.f);
+
+                glEnable (GL_BLEND);
+                glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+                std::vector<cgt::vec4> colors(vertices.size(), cgt::vec4(1.f, 0.7f, 0.f, 0.4f));
+                FaceGeometry face(vertices, std::vector<cgt::vec3>(), colors);
+                face.render(GL_POINTS);
+                glDisable(GL_BLEND);
+
+                glPointSize(1.f);
+                _shader->deactivate();
+            }
+        }
+    }
+
+    void CmBatchGeneration::onPropertyChanged(const AbstractProperty* p) {
+        if (p == &p_showFan)
+            setPipelineDirty();
+        else 
+            AutoEvaluationPipeline::onPropertyChanged(p);
+    }
+
+    void CmBatchGeneration::onProcessorInvalidated(AbstractProcessor* processor) {
+        if (processor == &_scanlineConverter && p_showFan.getValue()) {
+            setPipelineDirty();
+        }
+
+        AutoEvaluationPipeline::onProcessorInvalidated(processor);
+    }
+
+    void CmBatchGeneration::startBatchProcess() {
         if (p_range.getValue().x > p_range.getValue().y)
             return;
 
         p_autoExecution.setValue(false);
 
-        cgt::GLContextScopedLock lock(_canvas);
-
         getDataContainer().removeData(_confidenceGenerator.p_targetImageID.getValue());
         getDataContainer().removeData(_confidenceGenerator.p_targetImageID.getValue() + "velocities");
 
+        cgt::GLContextScopedLock lock(_canvas);
+
+        cgt::ivec2 originalCanvasSize = _canvasSize.getValue();
+        _canvasSize.setValue(_scanlineConverter.p_targetSize.getValue());
+        
         for (int i = p_range.getValue().x; i < p_range.getValue().y; ++i) {
             executePass(i);
         }
-    }
 
-    void CmBatchGeneration::onProcessorInvalidated(AbstractProcessor* processor) {
-        if (p_autoExecution.getValue())
-            AutoEvaluationPipeline::onProcessorInvalidated(processor);
+        _canvasSize.setValue(originalCanvasSize);
     }
 
     void CmBatchGeneration::executePass(int path) {
-        std::stringstream ss;
-
         // set up processors:
-        ss << p_sourcePath.getValue() << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".bmp";
-        _usReader.p_url.setValue(ss.str());
+        std::stringstream ss;
+        ss << "export" << std::setfill('0') << std::setw(4) << path << ".bmp";
+        std::string fileName = ss.str();
 
+        // read image
+        _usReader.p_url.setValue(p_sourcePath.getValue() + "\\" + fileName);
         forceExecuteProcessor(&_usReader);
-
-        DataHandle dh = _dataContainer->getData(_usReader.p_targetImageID.getValue());
-        if (dh.getData() != 0) {
-            if (const ImageData* tester = dynamic_cast<const ImageData*>(dh.getData())) {
-            	_canvasSize.setValue(tester->getSize().xy());
-            }
-        }
-
+        forceExecuteProcessor(&_scanlineConverter);
         forceExecuteProcessor(&_confidenceGenerator);
         forceExecuteProcessor(&_usBlurFilter);
+
         _usFusion.p_transferFunction.setAutoFitWindowToData(false);
         _usFusion.p_transferFunction.getTF()->setIntensityDomain(cgt::vec2(0.f, 1.f));
-
         {
-            // Confidence Map
+            // Resampled
             Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
             tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 1.0f), cgt::col4(0, 0, 0, 255), cgt::col4(0, 0, 0, 0)));
             _usFusion.p_confidenceTF.replaceTF(tf);
+            _usFusion.p_view.selectById("us");
+            forceExecuteProcessor(&_usFusion);
+            save(_usFusion.p_targetImageID.getValue(), p_targetPathResampled.getValue() + "\\" + fileName);
+        }
+
+        {
+            // Confidence Map
             _usFusion.p_view.selectById("cm");
             forceExecuteProcessor(&_usFusion);
-            save(path, p_targetPathCm.getValue());
+            save(_usFusion.p_targetImageID.getValue(), p_targetPathCmCpu.getValue() + "\\" + fileName);
         }
 
         {
@@ -190,7 +246,7 @@ namespace campvis {
             _usFusion.p_hue.setValue(0.15f);
             _usFusion.p_view.selectById("colorOverlay");
             forceExecuteProcessor(&_usFusion);
-            save(path, p_targetPathColorOverlay.getValue());
+            save(_usFusion.p_targetImageID.getValue(), p_targetPathColorOverlay.getValue() + "\\" + fileName);
         }
 
         {
@@ -201,7 +257,7 @@ namespace campvis {
             _usFusion.p_hue.setValue(0.23f);
             _usFusion.p_view.selectById("mappingLAB");
             forceExecuteProcessor(&_usFusion);
-            save(path, p_targetPathColor.getValue());
+            save(_usFusion.p_targetImageID.getValue(), p_targetPathColor.getValue() + "\\" + fileName);
         }
 
         {
@@ -211,53 +267,15 @@ namespace campvis {
             _usFusion.p_confidenceTF.replaceTF(tf);
             _usFusion.p_view.selectById("mappingSharpness");
             forceExecuteProcessor(&_usFusion);
-            save(path, p_targetPathFuzzy.getValue());
+            save(_usFusion.p_targetImageID.getValue(), p_targetPathFuzzy.getValue() + "\\" + fileName);
         }
-        
     }
 
-    void CmBatchGeneration::save(int path, const std::string& basePath) {
-        // get result
-        ScopedTypedData<RenderData> rd(*_dataContainer, _usFusion.p_targetImageID.getValue());
-        const ImageRepresentationGL* rep = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>(false);
-        if (rep != 0) {
-#ifdef CAMPVIS_HAS_MODULE_DEVIL
-            if (! cgt::FileSystem::dirExists(basePath))
-                cgt::FileSystem::createDirectory(basePath);
-
-            std::stringstream sss;
-            sss << basePath << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".bmp";
-            std::string filename = sss.str();
-            if (cgt::FileSystem::fileExtension(filename).empty()) {
-                LERROR("Filename has no extension");
-                return;
-            }
-
-            // get color buffer content
-            GLubyte* colorBuffer = rep->getTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_SHORT);
-            cgt::ivec2 size = rep->getSize().xy();
-
-            // create Devil image from image data and write it to file
-            ILuint img;
-            ilGenImages(1, &img);
-            ilBindImage(img);
-
-            // put pixels into IL-Image
-            ilTexImage(size.x, size.y, 1, 4, IL_RGBA, IL_UNSIGNED_SHORT, colorBuffer);
-            ilEnable(IL_FILE_OVERWRITE);
-            ilResetWrite();
-            ILboolean success = ilSaveImage(filename.c_str());
-            ilDeleteImages(1, &img);
-
-            delete[] colorBuffer;
-
-            if (!success) {
-                LERROR("Could not save image to file: " << ilGetError());
-            }
-#else
-            return;
-#endif
-        }
+    void CmBatchGeneration::save(const std::string& dataName, const std::string& fileName) {
+        _imageWriter.p_inputImage.setValue(dataName);
+        _imageWriter.p_url.setValue(fileName);
+        _imageWriter.p_writeDepthImage.setValue(false);
+        forceExecuteProcessor(&_imageWriter);
     }
 
 }
