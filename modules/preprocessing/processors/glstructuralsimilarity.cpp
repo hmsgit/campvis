@@ -58,7 +58,7 @@ namespace campvis {
     void GlStructuralSimilarity::init() {
         VisualizationProcessor::init();
 
-        _shader2D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glstructuralsimilarity.frag", "");
+        _shader2D = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/preprocessing/glsl/glstructuralsimilarity.frag", "", "400");
     }
 
     void GlStructuralSimilarity::deinit() {
@@ -77,7 +77,7 @@ namespace campvis {
             img1Unit.activate();
 
             // create texture for result
-            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_2D, originalSize, img1->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
+            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_2D, originalSize, GL_R32F, cgt::Texture::LINEAR);
             LGL_ERROR;
 
             // activate shader and bind textures
@@ -99,7 +99,7 @@ namespace campvis {
             _shader2D->deactivate();
 
             // put resulting image into DataContainer
-            ImageData* id = new ImageData(img1->getParent()->getDimensionality(), originalSize, img1->getParent()->getNumChannels());
+            ImageData* id = new ImageData(img1->getParent()->getDimensionality(), originalSize, 1);
             ImageRepresentationGL::create(id, resultTexture);
             id->setMappingInformation(img1->getParent()->getMappingInformation());
             data.addData(p_outputImage.getValue(), id);

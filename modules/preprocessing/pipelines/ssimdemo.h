@@ -25,12 +25,14 @@
 #ifndef SSIMDEMO_H__
 #define SSIMDEMO_H__
 
+#include "core/tools/glreduction.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/modulesapi.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/preprocessing/processors/glstructuralsimilarity.h"
+#include "modules/vis/processors/usfanrenderer.h"
 
 namespace campvis {
     class CAMPVIS_MODULES_API SsimDemo : public AutoEvaluationPipeline {
@@ -47,16 +49,31 @@ namespace campvis {
          **/
         virtual ~SsimDemo();
 
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
+        virtual void init() override;
+        virtual void deinit() override;
 
 
         static const std::string getId() { return "SsimDemo"; };
 
     protected:
-        DevilImageReader _imageReader;
-        GlGaussianFilter _gaussian;
+        void onProcessorValidated(AbstractProcessor* p);
+
+        void executeBatchProcess();
+
+        DevilImageReader _imageReader1;
+        DevilImageReader _imageReader2;
         GlStructuralSimilarity _ssim;
+        UsFanRenderer _fanRenderer;
+
+        GlReduction* _sumReduction;
+        GlReduction* _minReduction;
+        bool _currentlyBatchProcessing;
+
+        StringProperty p_sourcePath1;
+        StringProperty p_sourcePath2;
+
+        IVec2Property p_range;                          ///< Range for image iteration
+        ButtonProperty p_execute;                       ///< Button to start the batch process
     };
 }
 
