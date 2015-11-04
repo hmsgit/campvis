@@ -36,7 +36,7 @@ vec3 computeGradientForwardDifferencesLod(in sampler3D tex, in TextureParameters
     float dx = textureLodOffset(tex, texCoords, lod, ivec3(1, 0, 0)).r;
     float dy = textureLodOffset(tex, texCoords, lod, ivec3(0, 1, 0)).r;
     float dz = textureLodOffset(tex, texCoords, lod, ivec3(0, 0, 1)).r;
-    return vec3(v - dx, v - dy, v - dz) * texParams._voxelSize;
+    return vec3(dx - v, dy - v, dz - v) * texParams._voxelSize;
 }
 
 /**
@@ -63,7 +63,7 @@ vec3 computeGradientCentralDifferencesLod(in sampler3D tex, in TextureParameters
     float mdx = textureLodOffset(tex, texCoords, lod, ivec3(-1, 0, 0)).r;
     float mdy = textureLodOffset(tex, texCoords, lod, ivec3(0, -1, 0)).r;
     float mdz = textureLodOffset(tex, texCoords, lod, ivec3(0, 0, -1)).r;
-    return vec3(mdx - dx, mdy - dy, mdz - dz) * texParams._voxelSize * 0.5;
+    return vec3(dx - mdx, dy - mdy, dz - mdz) * texParams._voxelSize * 0.5;
 }
 
 /**
@@ -200,7 +200,7 @@ vec3 computeGradientSobel(in sampler3D tex, in vec3 texCoords) {
     sobel.y += value; 
     sobel.z += value; 
    
-    return -sobelScale * sobel;
+    return sobelScale * sobel;
 }
 
 
