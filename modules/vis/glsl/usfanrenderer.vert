@@ -22,21 +22,29 @@
 // 
 // ================================================================================================
 
-#include "core/pipeline/pipelinefactory.h"
-#include "core/pipeline/processorfactory.h"
+in vec3 in_Position;        ///< incoming vertex position
+in vec3 in_TexCoord;        ///< incoming texture coordinate
 
-#include "modules/cudaconfidencemaps/pipelines/cudaconfidencemapsdemo.h"
-#include "modules/cudaconfidencemaps/pipelines/cudaconfidencemapsworkflow.h"
+out vec3 ex_TexCoord;       ///< outgoing texture coordinate
 
-#include "modules/cudaconfidencemaps/processors/cudaconfidencemapssolver.h"
+/// Matrix defining projection transformation
+uniform mat4 _projectionMatrix = mat4(
+    1.0, 0.0, 0.0, 0.0,
+    0.0, 1.0, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 0.0, 1.0);
 
-namespace campvis {
+// Parameters defining fan geometry
+uniform float halfAngle;
+uniform float innerRadius;
 
-    // explicitly instantiate templates to register the pipelines
-    template class PipelineRegistrar<CudaConfidenceMapsDemo>;
 
-    template class WorkflowRegistrar<CudaConfidenceMapsWorkflow>;
-    
-    template class SmartProcessorRegistrar<CudaConfidenceMapsSolver>;
+void main() {
+    float radius = innerRadius + (1 - innerRadius) * in_Position.y;
+    vec4 pos = vec4(sin(halfAngle * in_Position.x*2) * radius,
+                    cos(halfAngle * in_Position.x*2) * radius,
+                    in_Position.z, 1);
 
+    gl_Position = _projectionMatrix * pos;
+    ex_TexCoord = in_TexCoord;
 }

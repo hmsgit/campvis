@@ -60,15 +60,14 @@ namespace campvis {
         cgtAssert(inputImage != nullptr, "Input image must not be 0!");
         std::vector<cgt::vec3> vertices;
 
-        const cgt::ivec2 inputSize = inputImage->getSize().xy();
         const cgt::ivec2& outputSize = p_targetSize.getValue();
         const float rarara = cgt::PIf / 180.f;
         Interval<float> fanAngles(p_angles.getValue().x * rarara, p_angles.getValue().y * rarara);
         Interval<float> fanSize(p_lengths.getValue().x, p_lengths.getValue().y);
 
 
-        for (size_t y = 0; y < outputSize.y; ++y) {
-            float r = fanSize.getLeft() + static_cast<float>(outputSize.y - 1 -y) / static_cast<float>(outputSize.y) * fanSize.size();
+        for (int y = 0; y < outputSize.y; ++y) {
+            float r = fanSize.getLeft() + static_cast<float>(outputSize.y - 1 - y) / static_cast<float>(outputSize.y) * fanSize.size();
 
             for (int x = 0; x < outputSize.x; ++x) {
                 float phi = fanAngles.getLeft() + (static_cast<float>(x) / static_cast<float>(outputSize.x) * fanAngles.size());

@@ -48,6 +48,7 @@
 #include "modules/vis/processors/sliceextractor.h"
 #include "modules/vis/processors/slicerenderer2d.h"
 #include "modules/vis/processors/slicerenderer3d.h"
+#include "modules/vis/processors/usfanrenderer.h"
 #include "modules/vis/processors/virtualmirrorcombine.h"
 #include "modules/vis/processors/virtualmirrorgeometrygenerator.h"
 #include "modules/vis/processors/volumeexplorer.h"
@@ -79,6 +80,7 @@ namespace campvis {
     template class SmartProcessorRegistrar<SliceExtractor>;
     template class SmartProcessorRegistrar<SliceRenderer2D>;
     template class SmartProcessorRegistrar<SliceRenderer3D>;
+    template class SmartProcessorRegistrar<UsFanRenderer>;
     template class SmartProcessorRegistrar<VirtualMirrorCombine>;
     template class SmartProcessorRegistrar<VirtualMirrorGeometryGenerator>;
     template class SmartProcessorRegistrar<VolumeExplorer>;
