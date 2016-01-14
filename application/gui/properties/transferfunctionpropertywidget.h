@@ -27,7 +27,6 @@
 
 #include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/transferfunctionproperty.h"
 
 class QDockWidget;
@@ -115,9 +114,6 @@ namespace campvis {
 
         bool wasVisible;                    ///< remembers whether _docWidget was visible or not
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<TransferFunctionPropertyWidget, TransferFunctionProperty>;
 }
 
 #endif // TRANSFERFUNCTIONPROPERTYWIDGET_H__

@@ -27,7 +27,6 @@
 
 #include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 
 #include "core/properties/statusproperty.h"
 
@@ -66,8 +65,5 @@ namespace campvis {
         QLabel * _statusLabel;
 
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<StatusPropertyWidget, StatusProperty>;
 }
 #endif // STATUSPROPERTYWIDGET_H__

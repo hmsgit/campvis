@@ -28,7 +28,6 @@
 #include "application/applicationapi.h"
 #include "application/gui/adjusterwidgets/doubleadjusterwidget.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 #include "application/gui/qtcolortools.h"
 
 #include "core/properties/floatingpointproperty.h"
@@ -75,11 +74,6 @@ namespace campvis {
         ColorPickerWidget * _colorPicker;        ///< color picker widget allowing to change color
 
     }; 
-
-// ================================================================================================
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.   
-    template class PropertyWidgetRegistrar<ColorPropertyWidget, ColorProperty>;
 
 }
 

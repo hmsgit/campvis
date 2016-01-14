@@ -29,7 +29,6 @@
 #include "core/properties/datanameproperty.h"
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 
 class QComboBox;
 class QLineEdit;
@@ -89,9 +88,7 @@ namespace campvis {
         QComboBox* _combobox;
 
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<DataNamePropertyWidget, DataNameProperty, 10>;
+    
 }
 
 #endif // DATANAMEPROPERTYWIDGET_H__
