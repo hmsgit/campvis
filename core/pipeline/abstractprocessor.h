@@ -150,13 +150,6 @@ namespace campvis {
         virtual ProcessorState getProcessorState() const = 0;
         
         /**
-         * Registers \a prop as property with the default invalidation level of INVALID_RESULT.
-         * \see HasPropertyCollection::addProperty()
-         * \param prop  Property to register
-         */
-        virtual void addProperty(AbstractProperty& prop);
-
-        /**
          * Registers \a prop as property with the provided invalidation level. Registered properties 
          * can be accessed from the outside, e.g. via getProperty(), and will automatically invalidate
          * this processor on change. An already existing property with the same name will be replaced.
@@ -164,7 +157,7 @@ namespace campvis {
          * \param   prop                Property to add
          * \param   invalidationLevel   Invalidation level of this property
          */
-        void addProperty(AbstractProperty& prop, int invalidationLevel);
+        void addProperty(AbstractProperty& prop, int invalidationLevel = INVALID_RESULT);
 
         /**
          * Sets the property invalidation level to the specified value.
@@ -182,6 +175,16 @@ namespace campvis {
          * \param   data                DataContainer to work on.
          **/
         void process(DataContainer& data);
+
+        /**
+         * Forces the execution of this processor according to the given invalidation level and 
+         * independent of its current invalidation level. Sets this processor's invalidation level
+         * to \a invalidationLevel and then calles process().
+         * 
+         * \param   dataContainer       DataContainer to work on
+         * \param   invalidationLevel   Invalidation level to enforce prior to calling process.
+         */
+        void forceProcess(DataContainer& dataContainer, int invalidationLevel);
 
         /**
          * Gets the flag whether this processor is currently enabled.
