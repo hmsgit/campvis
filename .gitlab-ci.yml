@@ -1,23 +1,62 @@
+stages:
+  - build
+  - test
+
 before_script:
   - echo "Starting Gitlab CI-controlled continuous integration..."
 
 build-campvis:
+  stage: build  
   tags:
     - linux
   script:
     - mkdir _build
     - cd _build
-    - cmake -G "Unix Makefiles" -D CMAKE_BUILD_TYPE=Release -DITK_DIR=/var/lib/jenkins/workspace/itk_c++11/_stable -DOpenIGTLink_DIR=/data/jenkins/workspace/open-igt-link/_stable -DCAMPVIS_DEFAULT_ENABLED_MODULES=STABLE_NO_DEPENDENCIES -DCAMPVIS_BUILD_DOXYGEN=false -DCAMPVIS_ENABLE_SCRIPTING=true ../
+    - cmake -G "Unix Makefiles" -D CMAKE_BUILD_TYPE=Release -DCAMPVIS_DEBUG=false -DITK_DIR=/var/lib/jenkins/workspace/itk_c++11/_stable -DOpenIGTLink_DIR=/data/jenkins/workspace/open-igt-link/_stable -DCAMPVIS_DEFAULT_ENABLED_MODULES=STABLE_NO_DEPENDENCIES -DCAMPVIS_BUILD_DOXYGEN=false -DCAMPVIS_ENABLE_SCRIPTING=true -DCAMPVIS_ENABLE_TESTING=true ../
     - make -j32
-
-doxygen:
-  tags:
-    - linux
-  script:
-    - mkdir _build
-    - cd _build
-    - cmake -G "Unix Makefiles" -DCAMPVIS_BUILD_DOXYGEN=true ../
-    - make doc -j16
+    - cd ..
+    # copy over reference images
+    - cp -fr ./test/visregtests/ _build/bin/visregtests/
+    - cd _build/bin
+    # run test-campvis
+    - export DISPLAY=:0
+    - ./test-campvis --gtest_output=xml:visregtests/result.xml
+    # run visual comparison
+    - cd visregtests
+    - python2 script.py
   artifacts:
     paths:
-      - _build/doc/html
+      - _build/bin/visregtests/failed/
+
+#doxygen:
+#  stage: build  
+#  tags:
+#    - linux
+#    - disabled
+#  script:
+#    - mkdir _build
+#    - cd _build
+#    - cmake -G "Unix Makefiles" -DCAMPVIS_BUILD_DOXYGEN=true ../
+#    - make doc -j32
+#  artifacts:
+#    paths:
+#      - _build/doc/
+
+#test-campvis:
+#  stage: test
+#  tags:
+#    - linux
+#  script:
+#    # copy over reference images
+#    - cp -fr ./test/visregtests/ _build/bin/visregtests/
+#    - cd _build/bin
+#    # run test-campvis
+#    - export DISPLAY=:0
+#    - ./test-campvis --gtest_output=xml:visregtests/result.xml
+#    # run visual comparison
+#    - cd visregtests
+#    - python2 script.py
+#  artifacts:
+#    paths:
+#      - _build/bin/visregtests/failed/
+#
