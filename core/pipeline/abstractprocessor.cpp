@@ -155,6 +155,11 @@ namespace campvis {
         }
     }
 
+    void AbstractProcessor::forceProcess(DataContainer& dataContainer, int invalidationLevel) {
+        invalidate(invalidationLevel);
+        process(dataContainer);
+    }
+
     void AbstractProcessor::updateShader() {
         LDEBUG("Called non-overriden updateShader() in " << getName() << ". Did you forget to override your method?");
     }
@@ -163,11 +168,7 @@ namespace campvis {
         LDEBUG("Called non-overriden updateProperties() in " << getName() << ". Did you forget to override your method?");
     }
 
-    void AbstractProcessor::addProperty(AbstractProperty& prop) {
-        this->addProperty(prop, INVALID_RESULT);
-    }
-
-    void AbstractProcessor::addProperty(AbstractProperty& prop, int invalidationLevel) {
+    void AbstractProcessor::addProperty(AbstractProperty& prop, int invalidationLevel /* = INVALID_RESULT*/) {
         HasPropertyCollection::addProperty(prop);
         setPropertyInvalidationLevel(prop, invalidationLevel);
     }

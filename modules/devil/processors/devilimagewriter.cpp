@@ -57,9 +57,16 @@ namespace campvis {
     }
 
     void DevilImageWriter::updateResult(DataContainer& data) {
-        ScopedTypedData<RenderData> image(data, p_inputImage.getValue());
+        // try get Data
+        DataHandle dh = data.getData(p_inputImage.getValue());
+        const RenderData* rd = nullptr;
+        const ImageRepresentationLocal* repLocal = nullptr;
 
-        if (image != 0) {
+        if (dh.getData() != nullptr) {
+            rd = dynamic_cast<const RenderData*>(dh.getData());
+            if (const ImageData* id = dynamic_cast<const ImageData*>(dh.getData()))
+                repLocal = id->getRepresentation<ImageRepresentationLocal>();
+
             std::string filename = p_url.getValue();
             std::string extension = cgt::FileSystem::fileExtension(filename);
             std::string filebase = cgt::FileSystem::fullBaseName(filename);
@@ -68,25 +75,31 @@ namespace campvis {
                 extension = "png";
             }
 
-            for (size_t i = 0; i < image->getNumColorTextures(); ++i) {
-                const ImageRepresentationLocal* id = image->getColorTexture(i)->getRepresentation<ImageRepresentationLocal>(true);
-                if (id == 0) {
-                    LERROR("Could not download color texture " << i << " from RenderData, skipping.");
-                    continue;
-                }
+            if (rd) {
+                for (size_t i = 0; i < rd->getNumColorTextures(); ++i) {
+                    const ImageRepresentationLocal* rep = rd->getColorTexture(i)->getRepresentation<ImageRepresentationLocal>(true);
+                    if (rep == 0) {
+                        LERROR("Could not download color texture " << i << " from RenderData, skipping.");
+                        continue;
+                    }
 
-                WeaklyTypedPointer wtp = id->getWeaklyTypedPointer();
-                writeIlImage(wtp, id->getSize().xy(), filebase + ((image->getNumColorTextures() > 1) ? StringUtils::toString(i) : "") + "." + extension);
+                    WeaklyTypedPointer wtp = rep->getWeaklyTypedPointer();
+                    writeIlImage(wtp, rep->getSize().xy(), filebase + ((rd->getNumColorTextures() > 1) ? StringUtils::toString(i) : "") + "." + extension);
+                }
+                if (p_writeDepthImage.getValue() && rd->hasDepthTexture()) {
+                    const ImageRepresentationLocal* rep = rd->getDepthTexture()->getRepresentation<ImageRepresentationLocal>(true);
+                    if (rep == 0) {
+                        LERROR("Could not download depth texture from RenderData, skipping.");
+                    }
+                    else {
+                        WeaklyTypedPointer wtp = rep->getWeaklyTypedPointer();
+                        writeIlImage(wtp, rep->getSize().xy(), filebase + ".depth." + extension);
+                    }
+                }
             }
-            if (p_writeDepthImage.getValue() && image->hasDepthTexture()) {
-                const ImageRepresentationLocal* id = image->getDepthTexture()->getRepresentation<ImageRepresentationLocal>(true);
-                if (id == 0) {
-                    LERROR("Could not download depth texture from RenderData, skipping.");
-                }
-                else {
-                    WeaklyTypedPointer wtp = id->getWeaklyTypedPointer();
-                    writeIlImage(wtp, id->getSize().xy(), filebase + ".depth." + extension);
-                }
+            else if (repLocal) {
+                WeaklyTypedPointer wtp = repLocal->getWeaklyTypedPointer();
+                writeIlImage(wtp, repLocal->getSize().xy(), filebase + "." + extension);
             }
         }
         else {

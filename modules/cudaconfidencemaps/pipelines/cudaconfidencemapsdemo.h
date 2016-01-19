@@ -37,7 +37,7 @@
 #include "modules/preprocessing/processors/glimagecrop.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/cudaconfidencemaps/processors/cudaconfidencemapssolver.h"
-#include "modules/cudaconfidencemaps/processors/usfanrenderer.h"
+#include "modules/vis/processors/usfanrenderer.h"
 #include "modules/openigtlink/processors/openigtlinkclient.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 

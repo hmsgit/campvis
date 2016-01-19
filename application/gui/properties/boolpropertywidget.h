@@ -27,7 +27,6 @@
 
 #include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/genericproperty.h"
 
 class QCheckBox;
@@ -66,8 +65,6 @@ namespace campvis {
 
     };
 
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<BoolPropertyWidget, BoolProperty>;
 }
 
 #endif // BOOLPROPERTYWIDGET_H__

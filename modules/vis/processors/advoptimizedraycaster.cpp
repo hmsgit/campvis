@@ -85,7 +85,8 @@ namespace campvis {
 
         if (p_enableShading.getValue() == false || light != nullptr) {
             // undo MIPMAP hack from RaycastingProcessor, as mipmapping results in artifacts during ray clipping...
-            const_cast<cgt::Texture*>(image->getTexture())->setFilter(cgt::Texture::LINEAR);
+            if (image->getTexture()->getFilter() != cgt::Texture::LINEAR)
+                const_cast<cgt::Texture*>(image->getTexture())->setFilter(cgt::Texture::LINEAR);
 
             _shader->activate();
 

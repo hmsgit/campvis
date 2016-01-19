@@ -29,6 +29,8 @@
 #include "cgt/shadermanager.h"
 #include "cgt/textureunit.h"
 
+#include "core/classification/geometry1dtransferfunction.h"
+#include "core/classification/tfgeometry1d.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -47,6 +49,7 @@ namespace campvis {
         , p_text("Text", "Text", "Ultrasound Title")
         , p_fontFileName("FontFileName", "Path to the Font File to Use", "", StringProperty::OPEN_FILENAME)
         , p_fontSize("FontSize", "Font Size", 20, 4, 100)
+        , p_tf("TransferFunction", "Transfer Function", new Geometry1DTransferFunction(512, cgt::vec2(-1.f, 1.f)))
         , _shader(0)
         , _grid(nullptr)
     {
@@ -59,6 +62,8 @@ namespace campvis {
         addProperty(p_fontFileName);
         addProperty(p_fontSize);
 
+        addProperty(p_tf);
+
         p_fontFileName.setValue(ShdrMgr.completePath("/modules/fontrendering/fonts/FreeSans.ttf"));
     }
 
@@ -67,12 +72,13 @@ namespace campvis {
 
     void UsFanRenderer::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.load("modules/cudaconfidencemaps/glsl/usfanrenderer.vert", "modules/cudaconfidencemaps/glsl/usfanrenderer.frag", "");
+        _shader = ShdrMgr.load("modules/vis/glsl/usfanrenderer.vert", "modules/vis/glsl/usfanrenderer.frag", "");
         // Creates the grid, with the origin at the center of the top edge, with the +y axis representing depth
         _grid = GeometryDataFactory::createGrid(cgt::vec3(-0.5f, 1.0f, 0.0f), cgt::vec3(0.5f, 0.0f, 0.0f),
                                                 cgt::vec3(0.0f, 1.0f, 0.0f), cgt::vec3(1.0f, 0.0f, 0.0f),
                                                 32, 32);
 
+        static_cast<Geometry1DTransferFunction*>(p_tf.getTF())->addGeometry(TFGeometry1D::createHeatedBodyColorMap());
         // Initialize font rendering
         updateFontAtlas();
     }
@@ -121,10 +127,12 @@ namespace campvis {
             viewportMatrix *= cgt::mat4::createTranslation(-bbCenter);
 
             _shader->activate();
-            cgt::TextureUnit textureUnit;
+            cgt::TextureUnit textureUnit, tfUnit;
             textureUnit.activate();
             if (texture != nullptr)
                 texture->bind(_shader, textureUnit, "_texture", "_textureParams");
+
+            p_tf.getTF()->bind(_shader, tfUnit);
 
             _shader->setUniform("_projectionMatrix", viewportMatrix);
             _shader->setUniform("halfAngle", halfAngle);

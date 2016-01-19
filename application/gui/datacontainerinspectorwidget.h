@@ -130,9 +130,9 @@ namespace campvis {
         void onBtnLoadFileClicked();
 
         /// Slot being called when the color under the mouse has changed
-        void onColorChanged(const cgt::vec4& color);
+        void onColorChanged(const cgt::svec3& texel, const cgt::vec4& color);
         /// Slot being called when the depth under the mouse has changed
-        void onDepthChanged(float depth);
+        void onDepthChanged(const cgt::svec3& texel, float depth);
 
     protected:
         /**

@@ -31,7 +31,6 @@
 #include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 
 namespace campvis {
     class DataContainer;
@@ -68,9 +67,6 @@ namespace campvis {
         PropertyCollectionWidget* _pcw;
 
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<MetaPropertyWidget, MetaProperty>;
 }
 
 #endif // METAPROPERTYWIDGET_H__

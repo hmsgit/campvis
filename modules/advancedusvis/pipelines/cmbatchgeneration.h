@@ -31,11 +31,18 @@
 
 #include "modules/modulesapi.h"
 #include "modules/devil/processors/devilimagereader.h"
+#include "modules/devil/processors/devilimagewriter.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
+#include "modules/advancedusvis/processors/scanlineconverter.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/randomwalk/processors/confidencemapgenerator.h"
 
+namespace cgt {
+    class Shader;
+}
+
 namespace campvis {
+    
     class CAMPVIS_MODULES_API CmBatchGeneration : public AutoEvaluationPipeline {
     public:
         /**
@@ -57,37 +64,38 @@ namespace campvis {
 
         static const std::string getId() { return "CmBatchGeneration"; };
 
-        /**
-         * Execute this pipeline.
-         **/
-        void execute();
-        
+        virtual void paint() override;
+
     protected:
-        /**
-         * Slot getting called when one of the observed processors got invalidated.
-         * Overwrites the default behaviour to do nothing.
-         */
-        virtual void onProcessorInvalidated(AbstractProcessor* processor);
+        void onPropertyChanged(const AbstractProperty* p) override;
+        virtual void onProcessorInvalidated(AbstractProcessor* processor) override;
 
+        void startBatchProcess();
         void executePass(int path);
+        void save(const std::string& dataName, const std::string& fileName);
 
-        void save(int path, const std::string& basePath);
+        DevilImageReader _usReader;                     ///< Reads the original image
+        ScanlineConverter _scanlineConverter;           ///< Performs a scanline conversion
+        ConfidenceMapGenerator _confidenceGenerator;    ///< Computes the CM using the original RandomWalks library
+        GlGaussianFilter _usBlurFilter;                 ///< Performs a Gaussian Blur
+        AdvancedUsFusion _usFusion;                     ///< Applies the Uncertainty Visualization
 
-        DevilImageReader _usReader;
-        ConfidenceMapGenerator _confidenceGenerator;
-        GlGaussianFilter _usBlurFilter;
-        AdvancedUsFusion _usFusion;
+        DevilImageWriter _imageWriter;                  ///< Used to write out images
 
         BoolProperty p_autoExecution;
+        BoolProperty p_showFan;
 
-        StringProperty p_sourcePath;
-        StringProperty p_targetPathCm;
-        StringProperty p_targetPathColorOverlay;
-        StringProperty p_targetPathColor;
-        StringProperty p_targetPathFuzzy;
-        IVec2Property p_range;
+        StringProperty p_sourcePath;                    ///< Path for the input images
+        StringProperty p_targetPathResampled;           ///< Path for the resampled images
+        StringProperty p_targetPathCmCpu;               ///< Path for the CPU-computed Confidence Maps
+        StringProperty p_targetPathColorOverlay;        ///< Path for the color overlay visualization
+        StringProperty p_targetPathColor;               ///< Path for the color modulation visualization
+        StringProperty p_targetPathFuzzy;               ///< Path for the fuzziness visualization
 
-        ButtonProperty p_execute;
+        IVec2Property p_range;                          ///< Range for image iteration
+        ButtonProperty p_execute;                       ///< Button to start the batch process
+
+        cgt::Shader* _shader;
     };
 }
 

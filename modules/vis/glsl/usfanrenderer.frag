@@ -22,21 +22,24 @@
 // 
 // ================================================================================================
 
-#include "core/pipeline/pipelinefactory.h"
-#include "core/pipeline/processorfactory.h"
+#include "tools/texture2d.frag"
+#include "tools/transferfunction.frag"
 
-#include "modules/cudaconfidencemaps/pipelines/cudaconfidencemapsdemo.h"
-#include "modules/cudaconfidencemaps/pipelines/cudaconfidencemapsworkflow.h"
+uniform sampler2D _texture;
+uniform TextureParameters2D _textureParams;
 
-#include "modules/cudaconfidencemaps/processors/cudaconfidencemapssolver.h"
+uniform sampler1D _transferFunction;
+uniform TFParameters1D _transferFunctionParams;
 
-namespace campvis {
+in vec3 ex_TexCoord;
 
-    // explicitly instantiate templates to register the pipelines
-    template class PipelineRegistrar<CudaConfidenceMapsDemo>;
+out vec4 out_Color;
 
-    template class WorkflowRegistrar<CudaConfidenceMapsWorkflow>;
-    
-    template class SmartProcessorRegistrar<CudaConfidenceMapsSolver>;
-
+void main() {
+    vec4 sample = texture(_texture, vec2(ex_TexCoord.x, 1-ex_TexCoord.y));
+    if (_textureParams._numChannels == 1) {  
+        out_Color = out_Color = lookupTF(_transferFunction, _transferFunctionParams, sample.r);
+    } else {
+        out_Color = sample;
+    }
 }

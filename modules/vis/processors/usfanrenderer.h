@@ -80,6 +80,8 @@ namespace campvis {
         StringProperty p_fontFileName;      ///< Path to the font file to use
         IntProperty p_fontSize;             ///< Font size to use
 
+        TransferFunctionProperty p_tf;
+
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);

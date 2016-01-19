@@ -69,11 +69,6 @@ namespace campvis {
         GenericOptionProperty<std::string> p_solver;    ///< Solver to use
         IntProperty p_numSteps;
 
-        BoolProperty p_curvilinear;
-        Vec2Property p_origin;
-        Vec2Property p_angles;
-        Vec2Property p_lengths;
-
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);

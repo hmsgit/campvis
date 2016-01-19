@@ -89,4 +89,23 @@ namespace campvis {
         if (_ignorePropertyUpdates == 0)
             emit s_propertyChanged(property);
     }
+
+    Vec2PropertyWidget::Vec2PropertyWidget(PropertyType* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/) : VecPropertyWidget<2>(property, dataContainer, parent) {
+        for (size_t i = 0; i < size; ++i) {
+            connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+        }
+    }
+
+    Vec3PropertyWidget::Vec3PropertyWidget(PropertyType* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/) : VecPropertyWidget<3>(property, dataContainer, parent) {
+        for (size_t i = 0; i < size; ++i) {
+            connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+        }
+    }
+
+    Vec4PropertyWidget::Vec4PropertyWidget(PropertyType* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/) : VecPropertyWidget<4>(property, dataContainer, parent) {
+        for (size_t i = 0; i < size; ++i) {
+            connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+        }
+    }
+
 }

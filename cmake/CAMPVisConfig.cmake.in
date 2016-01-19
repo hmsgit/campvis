@@ -21,3 +21,4 @@ include("${CAMPVIS_CMAKE_DIR}/CAMPVisTargets.cmake")
 # These are IMPORTED targets created by FooBarTargets.cmake
 SET(CAMPVIS_CORE_LIBRARIES campvis-core)
 SET(CAMPVIS_MODULES_LIBRARIES campvis-modules)
+SET(CAMPVIS_APPLICATION_LIBRARIES campvis-application-lib)

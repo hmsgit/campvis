@@ -27,7 +27,6 @@
 
 #include "application/gui/adjusterwidgets/doubleadjusterwidget.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/floatingpointproperty.h"
 
 namespace campvis {
@@ -77,9 +76,6 @@ namespace campvis {
         DoubleAdjusterWidget* _adjuster;        ///< Widget allowing the user to change the property's value
 
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<FloatPropertyWidget, FloatProperty>;
 
 // ================================================================================================
 
@@ -238,16 +234,10 @@ namespace campvis {
 
 // ================================================================================================
 
-    class Vec2PropertyWidget : public VecPropertyWidget<2> {
+    class CAMPVIS_APPLICATION_API Vec2PropertyWidget : public VecPropertyWidget<2> {
         Q_OBJECT
     public:
-        Vec2PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : VecPropertyWidget<2>(property, dataContainer, parent)
-        {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
-            }
-        }
+        Vec2PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
     private slots:
         void onValueChanged(double value) { onValueChangedImpl(); };
@@ -255,16 +245,10 @@ namespace campvis {
 
 // ================================================================================================
     
-    class Vec3PropertyWidget : public VecPropertyWidget<3> {
+    class CAMPVIS_APPLICATION_API Vec3PropertyWidget : public VecPropertyWidget<3> {
         Q_OBJECT
     public:
-        Vec3PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : VecPropertyWidget<3>(property, dataContainer, parent)
-        {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
-            }
-        }
+        Vec3PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
         private slots:
             void onValueChanged(double value) { onValueChangedImpl(); };
@@ -272,27 +256,14 @@ namespace campvis {
 
 // ================================================================================================
 
-    class Vec4PropertyWidget : public VecPropertyWidget<4> {
+    class CAMPVIS_APPLICATION_API Vec4PropertyWidget : public VecPropertyWidget<4> {
         Q_OBJECT
     public:
-        Vec4PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : VecPropertyWidget<4>(property, dataContainer, parent)
-        {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
-            }
-        }
+        Vec4PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
         private slots:
             void onValueChanged(double value) { onValueChangedImpl(); };
     }; 
-
-// ================================================================================================
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<Vec2PropertyWidget, typename VecPropertyWidgetTraits<2>::PropertyType, 5>;
-    template class PropertyWidgetRegistrar<Vec3PropertyWidget, typename VecPropertyWidgetTraits<3>::PropertyType, 5>;
-    template class PropertyWidgetRegistrar<Vec4PropertyWidget, typename VecPropertyWidgetTraits<4>::PropertyType, 5>;
 
 }
 

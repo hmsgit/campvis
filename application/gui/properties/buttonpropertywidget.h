@@ -27,7 +27,6 @@
 
 #include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/buttonproperty.h"
 
 class QPushButton;
@@ -67,8 +66,6 @@ namespace campvis {
 
     };
 
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<ButtonPropertyWidget, ButtonProperty>;
 }
 
 #endif // BUTTONPROPERTYWIDGET_H__

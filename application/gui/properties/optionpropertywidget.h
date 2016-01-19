@@ -27,7 +27,6 @@
 
 #include "application/applicationapi.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 
 #include "core/properties/optionproperty.h"
 
@@ -69,8 +68,5 @@ namespace campvis {
         QComboBox* _comboBox;
 
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<OptionPropertyWidget, AbstractOptionProperty, 10>;
 }
 #endif // OPTIONPROPERTYWIDGET_H__

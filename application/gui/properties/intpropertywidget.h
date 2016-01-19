@@ -27,7 +27,6 @@
 
 #include "application/gui/adjusterwidgets/intadjusterwidget.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/numericproperty.h"
 
 class QCheckBox;
@@ -83,9 +82,6 @@ namespace campvis {
         QSpinBox* _sbInterval;
 
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<IntPropertyWidget, IntProperty>;
 
 // ================================================================================================
 
@@ -226,13 +222,7 @@ namespace campvis {
     class IVec2PropertyWidget : public IVecPropertyWidget<2> {
         Q_OBJECT
     public:
-        IVec2PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : IVecPropertyWidget<2>(property, dataContainer, parent)
-        {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
-            }
-        }
+        IVec2PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
     private slots:
         void onValueChanged(int value) { onValueChangedImpl(); };
@@ -243,13 +233,7 @@ namespace campvis {
     class IVec3PropertyWidget : public IVecPropertyWidget<3> {
         Q_OBJECT
     public:
-        IVec3PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : IVecPropertyWidget<3>(property, dataContainer, parent)
-        {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
-            }
-        }
+        IVec3PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
         private slots:
             void onValueChanged(int value) { onValueChangedImpl(); };
@@ -260,24 +244,11 @@ namespace campvis {
     class IVec4PropertyWidget : public IVecPropertyWidget<4> {
         Q_OBJECT
     public:
-        IVec4PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : IVecPropertyWidget<4>(property, dataContainer, parent)
-        {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
-            }
-        }
+        IVec4PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
         private slots:
             void onValueChanged(int value) { onValueChangedImpl(); };
     }; 
-
-// ================================================================================================
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<IVec2PropertyWidget, typename IVecPropertyWidgetTraits<2>::PropertyType, 5>;
-    template class PropertyWidgetRegistrar<IVec3PropertyWidget, typename IVecPropertyWidgetTraits<3>::PropertyType, 5>;
-    template class PropertyWidgetRegistrar<IVec4PropertyWidget, typename IVecPropertyWidgetTraits<4>::PropertyType, 5>;
 
 }
 #endif // INTPROPERTYWIDGET_H__

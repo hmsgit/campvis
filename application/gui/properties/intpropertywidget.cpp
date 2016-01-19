@@ -143,4 +143,22 @@ namespace campvis {
         _btnShowHideTimer->setText(_sbInterval->isVisible() ? tr("H") : tr("S"));
     }
 
+    IVec2PropertyWidget::IVec2PropertyWidget(PropertyType* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/) : IVecPropertyWidget<2>(property, dataContainer, parent) {
+        for (size_t i = 0; i < size; ++i) {
+            connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+        }
+    }
+
+    IVec3PropertyWidget::IVec3PropertyWidget(PropertyType* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/) : IVecPropertyWidget<3>(property, dataContainer, parent) {
+        for (size_t i = 0; i < size; ++i) {
+            connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+        }
+    }
+
+    IVec4PropertyWidget::IVec4PropertyWidget(PropertyType* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/) : IVecPropertyWidget<4>(property, dataContainer, parent) {
+        for (size_t i = 0; i < size; ++i) {
+            connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+        }
+    }
+
 }

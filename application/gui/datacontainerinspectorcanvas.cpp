@@ -299,7 +299,7 @@ namespace campvis {
             cgt::svec3 lookupTexel(lookupTexelFloat.x, imageSize.y - lookupTexelFloat.y, 0);
             if (lookupTexel.x >= 0 && lookupTexel.y >= 0 && lookupTexel.x < imageSize.x && lookupTexel.y < imageSize.y) {
                 if (tex->isDepthTexture()) {
-                    emit s_depthChanged(localRep->getElementNormalized(lookupTexel, 0));
+                    emit s_depthChanged(lookupTexel, localRep->getElementNormalized(lookupTexel, 0));
                 }
                 else {
                     if (tex->getDimensions().z != 1) {
@@ -309,7 +309,7 @@ namespace campvis {
                             for (size_t i = 0; i < id->getNumChannels(); ++i) {
                                 texel[i] = localRep->getElementNormalized(lookupTexel, i);
                             }
-                            emit s_colorChanged(texel);
+                            emit s_colorChanged(lookupTexel, texel);
                         }
                     }
                     else if (tex->getDimensions().y != 1) {
@@ -317,7 +317,7 @@ namespace campvis {
                         for (size_t i = 0; i < id->getNumChannels(); ++i) {
                             texel[i] = localRep->getElementNormalized(lookupTexel, i);
                         }
-                        emit s_colorChanged(texel);
+                        emit s_colorChanged(lookupTexel, texel);
                     }
                 }
             }
