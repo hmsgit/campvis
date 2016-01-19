@@ -133,6 +133,10 @@ namespace campvis {
 
     template<class T>
     campvis::GenericGeometryTransferFunction<T>::~GenericGeometryTransferFunction() {
+        for (typename std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+            delete *it;
+        }
+        _geometries.clear();
     }
 
     template<class T>
@@ -163,17 +167,15 @@ namespace campvis {
 
         for (typename std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
             (*it)->s_changed.disconnect(this);
-            delete *it;
         }
-        _geometries.clear();
 
-        if (_fbo != 0) {
+        if (_fbo != nullptr) {
             delete _fbo;
-            _fbo = 0;
+            _fbo = nullptr;
         }
 
         ShdrMgr.dispose(_shader);
-        _shader = 0;
+        _shader = nullptr;
         AbstractTransferFunction::deinit();
     }
 

@@ -460,8 +460,9 @@ namespace campvis {
     void MainWindow::onLuaCommandExecuted(const QString& cmd) {
 #ifdef CAMPVIS_HAS_SCRIPTING
         if (_application->getLuaVmState() != nullptr) {
-            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
-            _application->getLuaVmState()->execString(cmd.toStdString());
+            GLJobProc.enqueueJobBlocking([&]() {
+                _application->getLuaVmState()->execString(cmd.toStdString());
+            });
 
             _application->getLuaVmState()->getGlobalTable()->updateValueMap();
             _scriptingConsoleWidget->_editCommand->setCompleter(new LuaCompleter(_application->getLuaVmState(), _scriptingConsoleWidget->_editCommand));

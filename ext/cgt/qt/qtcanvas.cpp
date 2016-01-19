@@ -29,7 +29,6 @@
 #include "qtcanvas.h"
 
 #include <QThread>
-#include <QOpenGLContext>
 
 namespace cgt {
 
@@ -40,8 +39,8 @@ QtCanvas::QtCanvas(const std::string& title,
                    const ivec2& size,
                    const Buffers buffers,
                    QWidget* parent, bool shared, Qt::WindowFlags f, char* /*name*/)
-    : GLCanvas(title, size, buffers)
-    , QGLWidget(getQGLFormat(buffers), 0, (shared ? shareWidget_ : 0), f)
+    : QGLWidget(getQGLFormat(buffers), 0, (shared ? shareWidget_ : 0), f)
+    , GLCanvas(title, size, buffers)
 {
     resize(size.x, size.y);
     if (shared && shareWidget_ == 0)
@@ -68,8 +67,7 @@ QtCanvas::QtCanvas(const std::string& title,
 }
 
 QtCanvas::QtCanvas(QWidget* parent, bool shared, Qt::WindowFlags f, char* /*name*/)
-    : GLCanvas()
-    , QGLWidget(0, (shared ? shareWidget_ : 0), f)
+    : QGLWidget(0, (shared ? shareWidget_ : 0), f)
 {
     if (shared && shareWidget_ == 0)
         shareWidget_ = this;

@@ -45,7 +45,10 @@ namespace campvis {
     // explicitly instantiate templates to register the pipelines
     template class PipelineRegistrar<MorphologyDemo>;
     template class PipelineRegistrar<ResamplingDemo>;
+
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
     template class PipelineRegistrar<SsimDemo>;
+#endif
 
     template class SmartProcessorRegistrar<GlGaussianFilter>;
     template class SmartProcessorRegistrar<GlGradientVolumeGenerator>;

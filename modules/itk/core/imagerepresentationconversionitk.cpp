@@ -34,8 +34,10 @@ namespace campvis {
             return nullptr;
 
         if (const AbstractImageRepresentationItk* tester = dynamic_cast<const AbstractImageRepresentationItk*>(source)) {
-            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
-            ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
+            ImageRepresentationGL* toReturn = nullptr;
+            GLJobProc.enqueueJobBlocking([&]() {
+                toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
+            });            
             return toReturn;
         }
 

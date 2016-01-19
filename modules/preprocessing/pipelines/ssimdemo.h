@@ -25,6 +25,8 @@
 #ifndef SSIMDEMO_H__
 #define SSIMDEMO_H__
 
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+
 #include "core/tools/glreduction.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
@@ -77,4 +79,5 @@ namespace campvis {
     };
 }
 
+#endif //CAMPVIS_HAS_MODULE_DEVIL
 #endif // SSIMDEMO_H__

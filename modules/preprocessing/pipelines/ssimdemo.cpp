@@ -22,6 +22,8 @@
 // 
 // ================================================================================================
 
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+
 #include "ssimdemo.h"
 
 #include "cgt/glcontextmanager.h"
@@ -162,3 +164,5 @@ namespace campvis {
     }
 
 }
+
+#endif // CAMPVIS_HAS_MODULE_DEVIL

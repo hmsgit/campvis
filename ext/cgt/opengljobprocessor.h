@@ -104,10 +104,18 @@ namespace cgt {
         void enqueueJob(AbstractJob* job);
 
         /**
+         * Enqueues the given job.
+         * 
+         * \note    OpenGLJobProcessor takes ownership of \a job.
+         * \param   jfn         Functor defining job to execute.
+         */
+        void enqueueJob(std::function<void(void)> fn);
+
+        /**
          * Enqueues the given job and blockes the execution until the job has been processed.
          * 
          * \note    OpenGLJobProcessor takes ownership of \a job.
-         * \param   fn         Functor defining job to execute!
+         * \param   fn         Functor defining job to execute.
          */
         void enqueueJobBlocking(std::function<void(void)> fn);
 

@@ -108,6 +108,20 @@ namespace cgt {
         _evaluationCondition.notify_all();
     }
 
+    void OpenGLJobProcessor::enqueueJob(std::function<void(void)> fn) {
+        enqueueJob(cgt::makeJobOnHeap([fn]() { fn(); }));
+    }
+
+    void OpenGLJobProcessor::enqueueJobBlocking(std::function<void(void)> fn) {
+        char signalVariable = 0;
+        enqueueJob(cgt::makeJobOnHeap([&signalVariable, fn]() { fn(); signalVariable = 1; }));
+
+        while (signalVariable == 0) {
+            _evaluationCondition.notify_all();            
+            std::this_thread::yield();
+        }
+    }
+
     void OpenGLJobProcessor::setContext(cgt::GLCanvas* context) {
         cgtAssert(_context == nullptr, "You are trying to change an already set context, thou shalt not do that!");
         _context = context;
@@ -115,14 +129,6 @@ namespace cgt {
 
     cgt::GLCanvas* OpenGLJobProcessor::getContext() {
         return _context;
-    }
-
-    void OpenGLJobProcessor::enqueueJobBlocking(std::function<void(void)> fn) {
-        char signalVariable = 0;
-        enqueueJob(cgt::makeJobOnHeap([&signalVariable, fn]() { fn(); signalVariable = 1; }));
-
-        while (signalVariable == 0)
-            std::this_thread::yield();
     }
 
 }
