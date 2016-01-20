@@ -2,7 +2,6 @@
 # Project file for the cgt library
 ################################################################################
 PROJECT(cgt)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 INCLUDE(../../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring cgt Library")
@@ -79,9 +78,7 @@ ENDIF(CGT_WITH_QT)
 ADD_LIBRARY(cgt ${CGT_SOURCES} ${CGT_HEADERS})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(cgt ${CampvisGlobalExternalLibs})
-
-qt5_use_modules(cgt Widgets OpenGL)
+TARGET_LINK_LIBRARIES(cgt ${CampvisGlobalExternalLibs} Qt5::Widgets Qt5::OpenGL)
 
 # if CGT is built as a shared library, CMake will define the following flag to instruct the code to
 # export DLL symbols

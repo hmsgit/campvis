@@ -1,5 +1,4 @@
 PROJECT(campvis-application)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 INCLUDE(../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring CAMPVis-Application")
@@ -123,8 +122,7 @@ ADD_LIBRARY(campvis-application-lib
 )
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs})
-qt5_use_modules(campvis-application-lib Widgets OpenGL)
+TARGET_LINK_LIBRARIES(campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} Qt5::Widgets Qt5::OpenGL)
 
 # if campvis-core is built as a shared library, CMake will define the following flag to instruct
 # the code to export DLL symbols
@@ -140,9 +138,7 @@ INSTALL(TARGETS campvis-application-lib DESTINATION exports EXPORT campvis-targe
 
 
 ADD_EXECUTABLE(campvis-application "campvis.cpp")
-TARGET_LINK_LIBRARIES(campvis-application campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs})
-qt5_use_modules(campvis-application Widgets OpenGL)
-
+TARGET_LINK_LIBRARIES(campvis-application campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} Qt5::Widgets Qt5::OpenGL)
 
 IF(CAMPVIS_DEPLOY_SHADERS)
     LIST(APPEND CampvisShaderDirectories "application/data")

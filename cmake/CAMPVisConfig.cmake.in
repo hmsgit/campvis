@@ -11,8 +11,9 @@ set(CAMPVIS_INCLUDE_DIRS "@CampvisGlobalIncludeDirs@;@CampvisModulesIncludeDirs@
 
 SET(CAMPVIS_DEFINITIONS @CampvisGlobalDefinitions@)
 
-FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
-INCLUDE(${QT_USE_FILE})
+FIND_PACKAGE(Qt5Widgets REQUIRED)
+FIND_PACKAGE(Qt5OpenGL REQUIRED)
+RESOLVE_QT5_DLL_LOCATIONS("Core;Gui;OpenGL;Widgets")
 SET(CGT_WITH_QT true)
 
 # Our library dependencies (contains definitions for IMPORTED targets)

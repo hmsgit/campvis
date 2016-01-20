@@ -1,6 +1,4 @@
 PROJECT(campvis-scripting)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
-
 MESSAGE(STATUS "Configuring CAMPVis-Scripting")
 
 # SWIG

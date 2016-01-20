@@ -1,5 +1,4 @@
 PROJECT(campvis-core)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 INCLUDE(../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring CAMPVis-Core")
