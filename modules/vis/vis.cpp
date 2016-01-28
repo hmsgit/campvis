@@ -39,6 +39,7 @@
 #include "modules/vis/processors/drrraycaster.h"
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/geometryrenderer.h"
+#include "modules/vis/processors/ipsviraycaster.h"
 #include "modules/vis/processors/mprrenderer.h"
 #include "modules/vis/processors/orientationoverlay.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
@@ -71,6 +72,7 @@ namespace campvis {
     template class SmartProcessorRegistrar<DRRRaycaster>;
     template class SmartProcessorRegistrar<EEPGenerator>;
     template class SmartProcessorRegistrar<GeometryRenderer>;
+    template class SmartProcessorRegistrar<IpsviRaycaster>;
     template class SmartProcessorRegistrar<MprRenderer>;
     template class SmartProcessorRegistrar<OrientationOverlay>;
     template class SmartProcessorRegistrar<ProxyGeometryGenerator>;
