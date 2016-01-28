@@ -57,8 +57,8 @@ uniform TFParameters1D _transferFunctionParams;
 
 
 // Illumination cache
-uniform layout(rgba8) image2D _icImageIn;
-uniform layout(rgba8) image2D _icImageOut;
+uniform layout(rgba32f) image2D _icImageIn;
+uniform layout(rgba32f) image2D _icImageOut;
 uniform vec3 _icOrigin;
 uniform vec3 _icNormal;
 uniform vec3 _icRightVector;
@@ -82,6 +82,23 @@ ivec2 calcIcSamplePosition(vec3 worldPosition) {
     return ivec2(dot(projected, _icRightVector), dot(projected, _icUpVector));
 }
 
+void  composite(vec3 startPosition, vec3 endPosition, inout float opacity) {
+    vec3 direction = endPosition - startPosition;
+    float t = 0.0;
+    float tend = length(direction);
+    direction = normalize(direction);
+
+    while (t < tend) {
+        // lookup intensity and TF
+        vec3 samplePosition = startPosition.rgb + t * direction;
+        float intensity = texture(_volume, samplePosition).r;
+        float tfOpacity = lookupTF(_transferFunction, _transferFunctionParams, intensity).a;
+        opacity = opacity + (1.0 - opacity) * tfOpacity;
+
+        t += _samplingStepSize * 2;
+    }
+}
+
 
 /**
  * Performs the raycasting and returns the final fragment color.
@@ -98,15 +115,20 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
     jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
-    ivec2 icPositionPrev = calcIcSamplePosition(textureToWorld(_volumeTextureParams, vec4(entryPoint, 1.0)).xyz);
+    ivec2 icPositionPrev = calcIcSamplePosition(textureToWorld(_volumeTextureParams, entryPoint));
     vec4 icOut = vec4(0.0);
 
     while (t < tend) {
         // compute sample position
         vec3 samplePosition = entryPoint.rgb + t * direction;
-        vec4 worldPos = textureToWorld(_volumeTextureParams, vec4(samplePosition, 1.0));
-        ivec2 icPosition = calcIcSamplePosition(worldPos.xyz / worldPos.w);
+        vec3 worldPos = textureToWorld(_volumeTextureParams, samplePosition);
+        ivec2 icPosition = calcIcSamplePosition(worldPos);
+
         vec4 icIn = imageLoad(_icImageIn, icPositionPrev);
+        // perform a compositing from samplePosition to the samplePosition of the IC
+        //if (icIn.xyz != vec3(0.0))
+        //    composite(samplePosition, icIn.xyz, icIn.a);
+
 
         // lookup intensity and TF
         float intensity = texture(_volume, samplePosition).r;
@@ -116,18 +138,20 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (color.a > 0.0) {
             // compute gradient (needed for shading and normals)
             vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
-            color.rgb = calculatePhongShading(worldPos.xyz / worldPos.w, _lightSource, _cameraPosition, gradient, color.rgb);
+            color.rgb = calculatePhongShading(worldPos.xyz, _lightSource, _cameraPosition, gradient, color.rgb);
 
             // accomodate for variable sampling rates
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
 
             // perform global illumination
-            // back-to-front compositing from light-direction
-            icOut.rgb = ((1.0 - color.a) * icIn.rgb) + (color.a * color.rgb);
+            // back-to-front compositing from light-direction 
+            // (for now, we ignore the color contribution and store the world position instead)
+            // icOut.rgb = ((1.0 - color.a) * icIn.rgb) + (color.a * color.rgb);
+            icOut.xyz = samplePosition;
             icOut.a   = ((1.0 - color.a) * icIn.a) + color.a;
 
             // apply shadowing
-            color.rgb *= (1.0 - icOut.a * _shadowIntensity); 
+            color.rgb *= (1.0 - icIn.a * _shadowIntensity); 
 
             // front-to-back compositing along view direction
             result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a);

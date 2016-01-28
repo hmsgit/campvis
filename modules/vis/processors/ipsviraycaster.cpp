@@ -40,7 +40,7 @@ namespace campvis {
         : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/ipsviraycaster.frag", true, "450")
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_sweepLineWidth("SweepLineWidth", "Sweep Line Width", 2, 1, 8)
-        , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, 0.f, 1.f)
+        , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .9f, 0.f, 1.f)
     {
         addProperty(p_lightId);
         addProperty(p_sweepLineWidth);
@@ -66,32 +66,37 @@ namespace campvis {
         ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
         if (light != nullptr) {
-            cgt::vec3 lightDirection = -(light->getLightPosition());
+            cgt::vec3 lightDirection = (light->getLightPosition());
 
             // TODO: This should be a world to NDC space conversion, but it does not work... :(
-            cgt::mat4 tmp = camera->getCamera().getViewMatrix() * camera->getCamera().getProjectionMatrix();
-            cgt::vec4 projectedLightDirection = tmp * cgt::vec4(lightDirection, 1.f);
-            projectedLightDirection /= projectedLightDirection.w;
+            const auto V = camera->getCamera().getViewMatrix();
+            const auto P = camera->getCamera().getProjectionMatrix();
 
+            // calculate viewport matrix for NDC -> viewport conversion
+            const cgt::vec2 halfViewport = cgt::vec2(getEffectiveViewportSize()) / 2.f;
+            const cgt::mat4 viewportMatrix = cgt::mat4::createTranslation(cgt::vec3(halfViewport, 0.f)) * cgt::mat4::createScale(cgt::vec3(halfViewport, 1.f));
+
+            const cgt::vec4 projectedLight = viewportMatrix*P*V*cgt::vec4(lightDirection, 1.f);
+            const cgt::vec4 projectedOrigin = viewportMatrix*P*V*cgt::vec4(0.f, 0.f, 0.f, 1.f);
+            cgt::vec2 projectedLightDirection = projectedOrigin.xy()/projectedOrigin.w - projectedLight.xy()/projectedLight.w;
+            
             // compute sweep direction (in viewport space)
             enum SweepDirection { LeftToRight, RightToLeft, TopToBottom, BottomToTop };
             SweepDirection sweepDir;
             if (std::abs(projectedLightDirection.x) > std::abs(projectedLightDirection.y)) {
                 // horizontal sweep
                 if (projectedLightDirection.x > 0)
-                    sweepDir = RightToLeft;
-                else
                     sweepDir = LeftToRight;
+                else
+                    sweepDir = RightToLeft;
             }
             else {
                 // vertical sweep
                 if (projectedLightDirection.y > 0)
-                    sweepDir = TopToBottom;
-                else
                     sweepDir = BottomToTop;
+                else
+                    sweepDir = TopToBottom;
             }
-
-            LINFO(cgt::normalize(projectedLightDirection.xy()) << " => " << sweepDir);
 
             // START: compute illumination cache (IC) plane/texture
             // the plane is defined by the light direction
@@ -124,7 +129,7 @@ namespace campvis {
             }
 
             cgt::vec3 icOrigin = cgt::floor(minPixel).x * icRightVector + cgt::floor(minPixel).y * icUpVector;
-            cgt::ivec3 icSize(512, 512, 1);
+            cgt::ivec3 icSize(384, 384, 1);
             icRightVector *= float(icSize.x - 1) / (std::ceil(maxPixel.x) - std::floor(minPixel.x)) ;
             icUpVector *= float(icSize.y - 1) / (std::ceil(maxPixel.y) - std::floor(minPixel.y));
 
@@ -145,12 +150,12 @@ namespace campvis {
             cgt::TextureUnit icUnit1, icUnit2;
             cgt::Texture* icTextures[2];
             icUnit1.activate();
-            icTextures[0] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_RGBA8, zeroInit->elem, GL_RGBA, GL_UNSIGNED_BYTE);
+            icTextures[0] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_RGBA32F, zeroInit->elem, GL_RGBA, GL_UNSIGNED_BYTE);
             icUnit2.activate();
-            icTextures[1] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_RGBA8, zeroInit->elem, GL_RGBA, GL_UNSIGNED_BYTE);
+            icTextures[1] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_RGBA32F, zeroInit->elem, GL_RGBA, GL_UNSIGNED_BYTE);
 
-            glBindImageTexture(0, icTextures[0]->getId(), 0, false, 0, GL_READ_WRITE, GL_RGBA8);
-            glBindImageTexture(1, icTextures[1]->getId(), 0, false, 0, GL_READ_WRITE, GL_RGBA8);
+            glBindImageTexture(0, icTextures[0]->getId(), 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
+            glBindImageTexture(1, icTextures[1]->getId(), 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
 
             delete [] zeroInit;
 
