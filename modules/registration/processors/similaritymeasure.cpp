@@ -162,11 +162,11 @@ namespace registration {
         cgt::Texture* similarityTex = 0;
         cgt::Texture* similarityTex2 = 0;
         similarityTex = new cgt::Texture(GL_TEXTURE_2D, cgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA32F, cgt::Texture::NEAREST);
-        similarityTex->setWrapping(cgt::Texture::CLAMP);
+        similarityTex->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
         // NCC and SNR need a second texture and a different shader...
         if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR") {
             similarityTex2 = new cgt::Texture(GL_TEXTURE_2D, cgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA32F, cgt::Texture::NEAREST);
-            similarityTex2->setWrapping(cgt::Texture::CLAMP);
+            similarityTex2->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
             leShader = _nccsnrCostFunctionShader;
         }
 

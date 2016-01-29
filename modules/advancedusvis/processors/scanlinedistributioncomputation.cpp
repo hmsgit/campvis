@@ -89,7 +89,7 @@ namespace campvis {
 
             // create texture for result
             cgt::Texture* distanceTexture = new cgt::Texture(GL_TEXTURE_3D, cgt::ivec3(size), GL_RGB16F, cgt::Texture::LINEAR);
-            distanceTexture->setWrapping(cgt::Texture::CLAMP);
+            distanceTexture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
             // activate shader and bind textures
             _shader->activate();

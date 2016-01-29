@@ -112,7 +112,7 @@ namespace campvis {
 
             // create texture for result
             cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_3D, cgt::ivec3(size), GL_R8UI, cgt::Texture::NEAREST);
-            resultTexture->setWrapping(cgt::Texture::CLAMP);
+            resultTexture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
             // activate shader and bind textures
             _shader->activate();

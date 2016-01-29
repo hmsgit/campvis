@@ -164,7 +164,7 @@ namespace campvis {
 
         // create new texture
         _hierarchyTexture = new cgt::Texture(GL_TEXTURE_2D, _dimPackedBricks, GL_RGBA32UI, cgt::Texture::NEAREST);
-        _hierarchyTexture->setWrapping(cgt::Texture::CLAMP);
+        _hierarchyTexture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
         LGL_ERROR;
 
         // attach mipmaps manually (as we want special ones)
@@ -218,7 +218,7 @@ namespace campvis {
         cgt::TextureUnit xorUnit;
         xorUnit.activate();
         _xorBitmaskTexture = new cgt::Texture(GL_TEXTURE_2D, cgt::ivec3(128, 128, 1), GL_RGBA32UI, cgt::Texture::NEAREST);
-        _xorBitmaskTexture->setWrapping(cgt::Texture::CLAMP);
+        _xorBitmaskTexture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
         _xorBitmaskShader->activate();
         _fbo->activate();
