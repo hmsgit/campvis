@@ -74,28 +74,34 @@ uniform float _samplingStepSize;
 
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
+// projects a vector in world coordinates onto the IC
+// returns world coordinates
 ivec2 calcIcSamplePosition(vec3 worldPosition) {
     // project world position onto IC plane
     const vec3 diag = worldPosition - _icOrigin;
     const float distance = abs(dot(diag, _icNormal));
-    const vec3 projected = diag - (-distance * _icNormal);
-    return ivec2(dot(projected, _icRightVector), dot(projected, _icUpVector));
+    const vec3 worldProjected = diag - (-distance * _icNormal);
+
+    // transforms world coordinates (have to be lying on the IC plane) to IC pixel space
+    return ivec2(round(dot(worldProjected, _icRightVector)), round(dot(worldProjected, _icUpVector)));
 }
 
-void  composite(vec3 startPosition, vec3 endPosition, inout float opacity) {
+void composite(vec3 startPosition, vec3 endPosition, inout float opacity) {
     vec3 direction = endPosition - startPosition;
-    float t = 0.0;
-    float tend = length(direction);
+    float t = _samplingStepSize;
+    jitterFloat(t, _samplingStepSize); // jitter startpoint to avoid ringing artifacts (not really effective...)
+
+    float tend = min(length(direction), 4*_samplingStepSize);
     direction = normalize(direction);
 
     while (t < tend) {
         // lookup intensity and TF
-        vec3 samplePosition = startPosition.rgb + t * direction;
+        vec3 samplePosition = startPosition.xyz + t * direction;
         float intensity = texture(_volume, samplePosition).r;
         float tfOpacity = lookupTF(_transferFunction, _transferFunctionParams, intensity).a;
         opacity = opacity + (1.0 - opacity) * tfOpacity;
 
-        t += _samplingStepSize * 2;
+        t += _samplingStepSize;
     }
 }
 
@@ -116,7 +122,9 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     ivec2 icPositionPrev = calcIcSamplePosition(textureToWorld(_volumeTextureParams, entryPoint));
+    vec4 icIn = imageLoad(_icImageIn, icPositionPrev);
     vec4 icOut = vec4(0.0);
+    bool toBeSaved = false;
 
     while (t < tend) {
         // compute sample position
@@ -124,11 +132,26 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec3 worldPos = textureToWorld(_volumeTextureParams, samplePosition);
         ivec2 icPosition = calcIcSamplePosition(worldPos);
 
-        vec4 icIn = imageLoad(_icImageIn, icPositionPrev);
-        // perform a compositing from samplePosition to the samplePosition of the IC
-        //if (icIn.xyz != vec3(0.0))
-        //    composite(samplePosition, icIn.xyz, icIn.a);
+        // optimization: Only store/load when the icPosition has changed
+        // otherwise we can reuse the variables from the previous sample
+        if (icPositionPrev != icPosition) {
+            // if there is no updated illumination information to be saved, 
+            // carry over the old pixel
+            if (! toBeSaved)
+                icOut = imageLoad(_icImageIn, icPositionPrev);
 
+            // write illumination information
+            imageStore(_icImageOut, icPositionPrev, icOut);
+            toBeSaved = false;
+            
+            // load illumination information
+            icIn = imageLoad(_icImageIn, icPosition);
+
+            // perform a compositing from samplePosition to the samplePosition of the IC
+            // Currently disabled since it leads to ringing artifacts...
+            //if (icIn.xyz != vec3(0.0))
+            //    composite(samplePosition, icIn.xyz, icIn.a);
+        }
 
         // lookup intensity and TF
         float intensity = texture(_volume, samplePosition).r;
@@ -138,7 +161,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (color.a > 0.0) {
             // compute gradient (needed for shading and normals)
             vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
-            color.rgb = calculatePhongShading(worldPos.xyz, _lightSource, _cameraPosition, gradient, color.rgb);
+            color.rgb = calculatePhongShading(worldPos, _lightSource, _cameraPosition, gradient, color.rgb);
 
             // accomodate for variable sampling rates
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
@@ -149,6 +172,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             // icOut.rgb = ((1.0 - color.a) * icIn.rgb) + (color.a * color.rgb);
             icOut.xyz = samplePosition;
             icOut.a   = ((1.0 - color.a) * icIn.a) + color.a;
+            toBeSaved = true;
 
             // apply shadowing
             color.rgb *= (1.0 - icIn.a * _shadowIntensity); 
@@ -157,8 +181,6 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a);
             result.a = result.a + (1.0 -result.a) * color.a;
 
-            // update illumination information
-            imageStore(_icImageOut, icPosition, icOut);
             icPositionPrev = icPosition;
         }
 
@@ -177,6 +199,13 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
         // advance to the next evaluation point along the ray
         t += _samplingStepSize;
+    }
+
+    if (toBeSaved) {
+        imageStore(_icImageOut, icPositionPrev, icOut);
+    }
+    else {
+        imageStore(_icImageOut, icPositionPrev, imageLoad(_icImageIn, icPositionPrev));
     }
 
     // calculate depth value from ray parameter

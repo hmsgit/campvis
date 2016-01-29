@@ -67,7 +67,7 @@ namespace campvis {
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.19f, .28f), cgt::col4(89, 89, 89, 155), cgt::col4(89, 89, 89, 155)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.41f, .51f), cgt::col4(170, 170, 128, 64), cgt::col4(192, 192, 128, 64)));
         static_cast<TransferFunctionProperty*>(_vr.getNestedProperty("RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
-        static_cast<FloatProperty*>(_vr.getNestedProperty("RaycasterProps::SamplingRate"))->setValue(4.f);
+        static_cast<FloatProperty*>(_vr.getNestedProperty("RaycasterProps::SamplingRate"))->setValue(2.f);
     }
 
 }

@@ -39,6 +39,9 @@ namespace cgt {
 }
 
 namespace campvis {
+    class CameraData;
+    class LightSourceData;
+
     /**
      * Performs a simple volume ray casting.
      */
@@ -74,11 +77,18 @@ namespace campvis {
 
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
         IntProperty p_sweepLineWidth;
+        IVec2Property p_icTextureSize;
         FloatProperty p_shadowIntensity;
+
+        IntProperty p_numLines;
     
     protected:
         /// \see RaycastingProcessor::processImpl()
         virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);
+
+        void processDirectional(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image, const CameraData& camera, const LightSourceData& light);
+
+        void processPointLight(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image, const CameraData& camera, const LightSourceData& light);
 
         static const std::string loggerCat_;
     };
