@@ -12,6 +12,7 @@
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/dataseries.h"
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/properties/allproperties.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "core/pipeline/abstractworkflow.h"
@@ -375,9 +376,102 @@ namespace campvis {
         ImageData(size_t dimensionality, const cgt::svec3& size, size_t numChannels);
         virtual ~ImageData();
 
-        virtual ImageData* clone() const;
+        virtual AbstractData* clone() const;
+        virtual size_t getLocalMemoryFootprint() const;
+        virtual size_t getVideoMemoryFootprint() const;
+        virtual std::string getTypeAsString() const;
+
+        size_t getDimensionality() const;
+        const cgt::svec3& getSize() const;
+        size_t getNumChannels() const;
+        size_t getNumElements() const;
+
         virtual cgt::Bounds getWorldBounds() const;
+        cgt::Bounds getWorldBounds(const cgt::svec3& llf, const cgt::svec3& urb) const;
+
+        size_t positionToIndex(const cgt::svec3& position) const;
+        cgt::svec3 indexToPosition(size_t index) const;
+
+        template<typename T>
+        const T* getRepresentation(bool performConversion = true) const;
     };
+
+    %template(getRepresentationLocal) ImageData::getRepresentation<campvis::ImageRepresentationLocal>;
+
+    struct WeaklyTypedPointer {
+        enum BaseType {
+            UINT8,      ///< unsigned 8 bit integer
+            INT8,       ///< signed 8 bit integer
+            UINT16,     ///< unsigned 16 bit integer
+            INT16,      ///< signed 16 bit integer
+            UINT32,     ///< unsigned 32 bit integer
+            INT32,      ///< signed 32 bit integer
+            FLOAT      ///< float
+        };
+        static size_t numBytes(BaseType bt, size_t numChannels = 1);
+
+        WeaklyTypedPointer(BaseType pt, size_t numChannels, void* ptr);
+        WeaklyTypedPointer();
+        virtual ~WeaklyTypedPointer();
+
+        bool operator==(const WeaklyTypedPointer& rhs) const;
+
+        size_t getNumBytesPerElement() const;
+        GLint getGlFormat() const;
+        GLenum getGlDataType() const;
+        GLint getGlInternalFormat() const;
+        bool isInteger() const;
+        bool isSigned() const;
+
+        BaseType _baseType;         ///< Base data type of the pointer
+        size_t _numChannels;        ///< Number of channels, must be in [1, 4]!
+        void* _pointer;             ///< Pointer to the data
+    };
+
+    /* AbstractImageRepresentation */
+    %nodefaultctor AbstractImageRepresentation;
+    class AbstractImageRepresentation {
+    public:
+        virtual ~AbstractImageRepresentation();
+
+        const ImageData* getParent() const;
+
+        size_t getDimensionality() const;
+        const cgt::svec3& getSize() const;
+        size_t getNumElements() const;
+
+    private:
+        explicit AbstractImageRepresentation(const AbstractImageRepresentation& rhs);
+        AbstractImageRepresentation& operator=(const AbstractImageRepresentation& rhs);
+    };
+
+
+    /* ImageRepresentationLocal */
+    %nodefaultctor ImageRepresentationLocal;
+    class ImageRepresentationLocal : public AbstractImageRepresentation {
+    public:
+        virtual ~ImageRepresentationLocal();
+
+        static ImageRepresentationLocal* create(const ImageData* parent, WeaklyTypedPointer wtp);
+
+        virtual const WeaklyTypedPointer getWeaklyTypedPointer() const = 0;
+        virtual float getElementNormalized(size_t index, size_t channel) const = 0;
+
+        virtual float getElementNormalized(const cgt::svec3& position, size_t channel) const = 0;
+        virtual float getElementNormalizedLinear(const cgt::vec3& position, size_t channel) const = 0;
+
+        virtual void setElementNormalized(size_t index, size_t channel, float value) = 0;
+        virtual void setElementNormalized(const cgt::svec3& position, size_t channel, float value) = 0;
+        
+    protected:
+        ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType);
+
+    private:
+        explicit ImageRepresentationLocal(const ImageRepresentationLocal& rhs);
+        ImageRepresentationLocal& operator=(const ImageRepresentationLocal& rhs);
+    };
+
+
 
     /* DataContainer */
 

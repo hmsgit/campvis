@@ -48,7 +48,7 @@ namespace campvis {
     {
         addProperty(p_inputImage, VALID);
         addProperty(p_fileName, VALID);
-        addProperty(p_saveFile);
+        addProperty(p_saveFile, INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
     }
 
     MhdImageWriter::~MhdImageWriter() {
@@ -56,6 +56,9 @@ namespace campvis {
     }
 
     void MhdImageWriter::updateResult(DataContainer& dataContainer) {
+        if (! (getInvalidationLevel() & FIRST_FREE_TO_USE_INVALIDATION_LEVEL))
+            return;
+
         ImageRepresentationLocal::ScopedRepresentation image(dataContainer, p_inputImage.getValue());
 
         if (image != 0) {
@@ -139,6 +142,8 @@ namespace campvis {
         else {
             LDEBUG("Could not get Image to write from DataContainer.");
         }
+
+        validate(FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
     }
 
 }
