@@ -1,14 +1,18 @@
 ## CAMPVis: Medical Visualization Framework of CAMP
 
-CAMPVis a software platform for medical imaging and visualization. It is targeted for research purposes and has a similar Rapid-Prototyping approach than MeVisLab, Amira or Voreen.
+CAMPVis a software platform for medical imaging and visualization, originally developed by @christian.szb at the Chair for Computer Aided Medical Procedures.
+It was designed to fuse modern game engine software architecture aspects with a rapid prototyping approach approach as found in Voreen or MeVisLab.
+It is mainly targeted for research purposes but can also be included as library into external stand-alone applications.
 
 ![Screenshot](http://campar.in.tum.de/files/schultezub/campvis/volumeexplorerdemo.jpg)
 
 ### Resources
 
-* Source Code, Wiki, Issue-Tracking: *[Gitlab](https://gitlab.lrz.de/christian.szb/campvis-public)*
-* Doxygen Documentation: *[Doxygen](http://campci.informatik.tu-muenchen.de:8090/userContent/campvis/doc/index.html)* (only accessible within LRZ network)
-* Build Server / Continuous Integration: *[Jenkins](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/)* (only accessible within LRZ network)
+* Source Code: [Gitlab](https://gitlab.lrz.de/CAMP/campvis-public)
+* Wiki: [Gitlab](https://gitlab.lrz.de/CAMP/campvis-public/wikis/home)
+* Issue Tracker: [Gitlab](https://gitlab.lrz.de/CAMP/campvis-public/issues)
+* Doxygen Documentation: [Doxygen](http://campci.informatik.tu-muenchen.de:8090/userContent/campvis/doc/index.html) (only accessible within LRZ network)
+* Build Server / Continuous Integration: [Jenkins](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/) (only accessible within LRZ network)
 
 ### Code & Build Status
 
