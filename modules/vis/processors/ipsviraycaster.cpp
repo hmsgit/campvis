@@ -31,6 +31,8 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/pipeline/processordecoratorgradient.h"
 
+#include "modules/vis/tools/voxelhierarchymapper.h"
+
 #include <tbb/tbb.h>
 
 namespace campvis {
@@ -43,12 +45,19 @@ namespace campvis {
         , p_icTextureSize("IcTextureSize", "Illumination Cache Texture Size", cgt::ivec2(512), cgt::ivec2(32), cgt::ivec2(2048))
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .9f, 0.f, 1.f)
         , p_numLines("NumLines", "Max Number of Lines", 2000, 1, 2000)
+        , _vhm(nullptr)
     {
+        _icTextures[0] = nullptr;
+        _icTextures[1] = nullptr;
+
         addProperty(p_lightId);
         addProperty(p_sweepLineWidth);
-        addProperty(p_icTextureSize);
+        addProperty(p_icTextureSize, INVALID_RESULT | INVALID_IC_TEXTURES);
         addProperty(p_shadowIntensity);
         addProperty(p_numLines);
+
+        setPropertyInvalidationLevel(p_transferFunction, INVALID_BBV | INVALID_RESULT);
+        setPropertyInvalidationLevel(p_sourceImageID, INVALID_BBV | INVALID_RESULT);
 
         addDecorator(new ProcessorDecoratorGradient());
         decoratePropertyCollection(this);
@@ -59,13 +68,47 @@ namespace campvis {
 
     void IpsviRaycaster::init() {
         RaycastingProcessor::init();
+
+        _vhm = new VoxelHierarchyMapper();
+        invalidate(INVALID_BBV | INVALID_IC_TEXTURES);
     }
 
     void IpsviRaycaster::deinit() {
+        delete _vhm;
+        delete _icTextures[0];
+        delete _icTextures[1];
+
         RaycastingProcessor::deinit();
     }
 
     void IpsviRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
+        if (getInvalidationLevel() & INVALID_IC_TEXTURES) {
+            delete _icTextures[0];
+            delete _icTextures[1];
+
+            cgt::ivec3 icSize(p_icTextureSize.getValue(), 1);
+            cgt::TextureUnit icUnit;
+
+            icUnit.activate();
+            _icTextures[0] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_R32F);
+            _icTextures[1] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_R32F);
+
+            validate(INVALID_IC_TEXTURES);
+        }
+
+        if (getInvalidationLevel() & INVALID_BBV) {
+            _shader->deactivate();
+            _vhm->createHierarchy(image, p_transferFunction.getTF());
+            _shader->activate();
+
+            validate(INVALID_BBV);
+        }
+
+        if (_vhm->getHierarchyTexture() == nullptr) {
+            LERROR("Could not retreive voxel hierarchy lookup structure.");
+            return;
+        }
+
         ScopedTypedData<CameraData> camera(data, p_camera.getValue());
         ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
@@ -112,8 +155,6 @@ namespace campvis {
                 sweepDir = TopToBottom;
         }
 
-        //LINFO(projectedOrigin.xy()/projectedOrigin.w << ", " << projectedLight.xy()/projectedLight.w << ", " << projectedLightDirection << " => " << sweepDir);
-
         // START: compute illumination cache (IC) plane/texture
         // the plane is defined by the light direction
         cgt::vec3 icNormal = cgt::normalize(lightDirection);
@@ -123,6 +164,7 @@ namespace campvis {
 
         // project all 8 corners of the volume onto the IC plane
         cgt::Bounds worldBounds = image->getParent()->getWorldBounds();
+        cgt::Bounds viewportBounds;
         cgt::vec3 minPixel(0.f), maxPixel(0.f);
         std::vector<cgt::vec3> corners;
         corners.push_back(cgt::vec3(worldBounds.getLLF().x, worldBounds.getLLF().y, worldBounds.getLLF().z));
@@ -142,6 +184,10 @@ namespace campvis {
 
             minPixel = cgt::min(minPixel, pixel);
             maxPixel = cgt::max(maxPixel, pixel);
+
+            // project onto viewport to calculate viewport extent
+            const cgt::vec4 viewportPixel = viewportMatrix*P*V* cgt::vec4(corners[i], 1.f);
+            viewportBounds.addPoint(viewportPixel.xyz() / viewportPixel.w);
         }
 
         cgt::vec3 icOrigin = cgt::floor(minPixel).x * icRightVector + cgt::floor(minPixel).y * icUpVector;
@@ -149,35 +195,30 @@ namespace campvis {
         icRightVector *= float(icSize.x - 1) / (std::ceil(maxPixel.x) - std::floor(minPixel.x)) ;
         icUpVector *= float(icSize.y - 1) / (std::ceil(maxPixel.y) - std::floor(minPixel.y));
 
-        // just debuggin/asserting correctness
-        for (auto i = 0; i < corners.size(); ++i) {
-            const cgt::vec3 diag = corners[i] - icOrigin;
-            const float distance = std::abs(cgt::dot(diag, icNormal));
-            const cgt::vec3 projected = diag - (-distance * icNormal);
-            const cgt::vec3 pixel(cgt::dot(projected, icRightVector), cgt::dot(projected, icUpVector), 0.f);
+        // bind voxel hierarchy to shader
+        cgt::TextureUnit xorUnit, bbvUnit;
+        {
+            cgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
 
-            if (pixel.x < 0.f || pixel.y < 0.f || pixel.x >= icSize.x || pixel.y >= icSize.y)
-                LWARNING(pixel);
+            xorUnit.activate();
+            _vhm->getXorBitmaskTexture()->bind();
+            _shader->setUniform("_xorBitmask", xorUnit.getUnitNumber());
+
+            bbvUnit.activate();
+            _vhm->getHierarchyTexture()->bind();
+            _shader->setUniform("_voxelHierarchy", bbvUnit.getUnitNumber());
+            _shader->setUniform("_vhMaxMipMapLevel", static_cast<int>(_vhm->getMaxMipmapLevel()));
+        
         }
 
-        //cgt::col4* zeroInit = new cgt::col4[cgt::hmul(icSize)];
-        //memset(zeroInit, 0, sizeof(cgt::col4) * cgt::hmul(icSize));
+        // clear and bind IC textures
         cgt::col4 zeroInit(0, 0, 0, 0);
+        glClearTexImage(_icTextures[0]->getId(), 0, GL_RED, GL_UNSIGNED_BYTE, &zeroInit);
+        glClearTexImage(_icTextures[1]->getId(), 0, GL_RED, GL_UNSIGNED_BYTE, &zeroInit);
+        glBindImageTexture(0, _icTextures[0]->getId(), 0, false, 0, GL_READ_WRITE, GL_R32F);
+        glBindImageTexture(1, _icTextures[1]->getId(), 0, false, 0, GL_READ_WRITE, GL_R32F);
 
-        cgt::TextureUnit icUnit1, icUnit2;
-        cgt::Texture* icTextures[2];
-        icUnit1.activate();
-        icTextures[0] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_R32F);
-        glClearTexImage(icTextures[0]->getId(), 0, GL_RED, GL_UNSIGNED_BYTE, &zeroInit);
-        icUnit2.activate();
-        icTextures[1] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_R32F);
-        glClearTexImage(icTextures[1]->getId(), 0, GL_RED, GL_UNSIGNED_BYTE, &zeroInit);
-
-        glBindImageTexture(0, icTextures[0]->getId(), 0, false, 0, GL_READ_WRITE, GL_R32F);
-        glBindImageTexture(1, icTextures[1]->getId(), 0, false, 0, GL_READ_WRITE, GL_R32F);
-
-        //delete [] zeroInit;
-
+        // setup IC shader uniforms
         _shader->setUniform("_icOrigin", icOrigin);
         _shader->setUniform("_icNormal", icNormal);
         _shader->setUniform("_icRightVector", icRightVector);
@@ -203,37 +244,51 @@ namespace campvis {
         cgt::mat4 projection;
         cgt::mat4 viewScale;
         cgt::vec3 viewTranslationBase;
+        int line = 1 - p_sweepLineWidth.getValue();
         int lineMax;
+        float scale = 1.f;
+        float bias = 0.f;
 
         switch (sweepDir) {
         case LeftToRight:
-            projection = cgt::mat4::createOrtho(0, viewportSize.x, 0, 1, -1, 1);
+            scale = float(viewportSize.y) / viewportBounds.diagonal().y;
+            bias = viewportBounds.getLLF().y / float(viewportSize.y) * scale;
+            projection = cgt::mat4::createOrtho(0, viewportSize.x, scale-bias, -bias, -1, 1);
             viewScale = cgt::mat4::createScale(cgt::vec3(p_sweepLineWidth.getValue(), 1.f, 1.f));
             viewTranslationBase = cgt::vec3(1.f, 0.f, 0.f);
-            lineMax = viewportSize.x;
+            line += std::max(0, int(viewportBounds.getLLF().x));
+            lineMax = std::min(viewportSize.x, int(viewportBounds.getURB().x));
             break;
         case RightToLeft:
-            projection = cgt::mat4::createOrtho(viewportSize.x, 0, 0, 1, -1, 1);
+            scale = float(viewportSize.y) / viewportBounds.diagonal().y;
+            bias = viewportBounds.getLLF().y / float(viewportSize.y) * scale;
+            projection = cgt::mat4::createOrtho(viewportSize.x, 0, scale-bias, -bias, -1, 1);
             viewScale = cgt::mat4::createScale(cgt::vec3(p_sweepLineWidth.getValue(), 1.f, 1.f));
             viewTranslationBase = cgt::vec3(1.f, 0.f, 0.f);
-            lineMax = viewportSize.x;
+            line += std::max(0, viewportSize.x - int(viewportBounds.getURB().x));
+            lineMax = std::min(viewportSize.x, viewportSize.x - int(viewportBounds.getLLF().x));
             break;
         case BottomToTop:
-            projection = cgt::mat4::createOrtho(0, 1, viewportSize.y, 0, -1, 1);
+            scale = float(viewportSize.x) / viewportBounds.diagonal().x;
+            bias = viewportBounds.getLLF().x / float(viewportSize.x) * scale;
+            projection = cgt::mat4::createOrtho(-bias, scale-bias, viewportSize.y, 0, -1, 1);
             viewScale = cgt::mat4::createScale(cgt::vec3(1.f, p_sweepLineWidth.getValue(), 1.f));
             viewTranslationBase = cgt::vec3(0.f, 1.f, 0.f);
-            lineMax = viewportSize.y;
+            line += std::max(0, int(viewportBounds.getLLF().y));
+            lineMax = std::min(viewportSize.y, int(viewportBounds.getURB().y));
             break;
         case TopToBottom:
-            projection = cgt::mat4::createOrtho(0, 1, 0, viewportSize.y, -1, 1);
+            scale = float(viewportSize.x) / viewportBounds.diagonal().x;
+            bias = viewportBounds.getLLF().x / float(viewportSize.x) * scale;
+            projection = cgt::mat4::createOrtho(-bias, scale-bias, 0, viewportSize.y, -1, 1);
             viewScale = cgt::mat4::createScale(cgt::vec3(1.f, p_sweepLineWidth.getValue(), 1.f));
             viewTranslationBase = cgt::vec3(0.f, 1.f, 0.f);
-            lineMax = viewportSize.y;
+            line += std::max(0, viewportSize.y - int(viewportBounds.getURB().y));
+            lineMax = std::min(viewportSize.y, viewportSize.y - int(viewportBounds.getLLF().y));
             break;
         }
 
 
-        int line = 1 - p_sweepLineWidth.getValue();
         int evenOdd = 0;
 
         _shader->setUniform("_projectionMatrix", projection);
@@ -271,15 +326,6 @@ namespace campvis {
         LGL_ERROR;
 
         data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
-
-        RenderData* ic = new RenderData();
-        ImageData* id1 = new ImageData(2, icSize, 1);
-        ImageRepresentationGL::create(id1, icTextures[0]);
-        ic->addColorTexture(id1);
-        ImageData* id2 = new ImageData(2, icSize, 1);
-        ImageRepresentationGL::create(id2, icTextures[1]);
-        ic->addColorTexture(id2);
-        data.addData(p_targetImageID.getValue() + ".IC", ic);
     }
 
     void IpsviRaycaster::processPointLight(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image, const CameraData& camera, const LightSourceData& light) {

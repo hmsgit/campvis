@@ -33,6 +33,8 @@ layout(location = 2) out vec4 out_FHN;       ///< outgoing fragment first hit no
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
 
+#include "modules/vis/glsl/voxelhierarchy.frag"
+
 uniform vec2 _viewportSizeRCP;
 uniform float _jitterStepSizeMultiplier;
 
@@ -63,15 +65,17 @@ uniform vec3 _icOrigin;
 uniform vec3 _icNormal;
 uniform vec3 _icRightVector;
 uniform vec3 _icUpVector;
-
 uniform float _shadowIntensity = 0.5;
+
+// Voxel Hierarchy Lookup volume
+uniform usampler2D _voxelHierarchy;
+uniform int _vhMaxMipMapLevel;
+
 
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
 uniform float _samplingStepSize;
-
-
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
 // projects a vector in world coordinates onto the IC
@@ -115,13 +119,19 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
     // calculate ray parameters
     vec3 direction = exitPoint.rgb - entryPoint.rgb;
-    float t = 0.0;
-    float tend = length(direction);
-    direction = normalize(direction);
+    float len = length(direction);
+    
+    // Adjust direction a bit to prevent division by zero
+    direction.x = (abs(direction.x) < 0.0001) ? 0.0001 : direction.x;
+    direction.y = (abs(direction.y) < 0.0001) ? 0.0001 : direction.y;
+    direction.z = (abs(direction.z) < 0.0001) ? 0.0001 : direction.z;    
+    OFFSET = (0.25 / (1 << _vhMaxMipMapLevel)); //< offset value used to avoid self-intersection or previous voxel intersection.
 
+    float t = clipFirstHitpoint(_voxelHierarchy, _vhMaxMipMapLevel, entryPoint, direction, 0.0, 1.0);
+    float tend = 1.0 - clipFirstHitpoint(_voxelHierarchy, _vhMaxMipMapLevel, exitPoint, -direction, 0.0, 1.0);
     jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
-    ivec2 icPositionPrev = calcIcSamplePosition(textureToWorld(_volumeTextureParams, entryPoint));
+    ivec2 icPositionPrev = calcIcSamplePosition(textureToWorld(_volumeTextureParams, entryPoint.rgb + t * direction));
     float icIn = imageLoad(_icImageIn, icPositionPrev).r;
     float icOut = (0.0);
     bool toBeSaved = false;
@@ -199,7 +209,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         //}
 
         // advance to the next evaluation point along the ray
-        t += _samplingStepSize;
+        t += _samplingStepSize / len;
     }
 
     //if (! toBeSaved)
@@ -214,6 +224,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         float depthExit = texture(_exitPointsDepth, texCoords).z;
         gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
     }
+
     return result;
 }
 

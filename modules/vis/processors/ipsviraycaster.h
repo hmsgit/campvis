@@ -36,17 +36,24 @@
 
 namespace cgt {
     class Shader;
+    class Texture;
 }
 
 namespace campvis {
     class CameraData;
     class LightSourceData;
+    class VoxelHierarchyMapper;
 
     /**
      * Performs a simple volume ray casting.
      */
     class CAMPVIS_MODULES_API IpsviRaycaster : public RaycastingProcessor {
     public:
+        enum AdditionalInvalidationLevels {
+            INVALID_BBV = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL,
+            INVALID_IC_TEXTURES = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
+        };
+
         /**
          * Constructs a new IpsviRaycaster Processor
          **/
@@ -89,6 +96,9 @@ namespace campvis {
         void processDirectional(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image, const CameraData& camera, const LightSourceData& light);
 
         void processPointLight(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image, const CameraData& camera, const LightSourceData& light);
+
+        VoxelHierarchyMapper* _vhm;
+        cgt::Texture* _icTextures[2];
 
         static const std::string loggerCat_;
     };
