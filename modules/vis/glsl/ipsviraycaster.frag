@@ -57,8 +57,8 @@ uniform TFParameters1D _transferFunctionParams;
 
 
 // Illumination cache
-uniform layout(rgba32f) image2D _icImageIn;
-uniform layout(rgba32f) image2D _icImageOut;
+uniform layout(r32f) image2D _icImageIn;
+uniform layout(r32f) image2D _icImageOut;
 uniform vec3 _icOrigin;
 uniform vec3 _icNormal;
 uniform vec3 _icRightVector;
@@ -122,8 +122,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     ivec2 icPositionPrev = calcIcSamplePosition(textureToWorld(_volumeTextureParams, entryPoint));
-    vec4 icIn = imageLoad(_icImageIn, icPositionPrev);
-    vec4 icOut = vec4(0.0);
+    float icIn = imageLoad(_icImageIn, icPositionPrev).r;
+    float icOut = (0.0);
     bool toBeSaved = false;
 
     while (t < tend) {
@@ -137,15 +137,16 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (icPositionPrev != icPosition) {
             // if there is no updated illumination information to be saved, 
             // carry over the old pixel
-            if (! toBeSaved)
-                icOut = imageLoad(_icImageIn, icPositionPrev);
+            //if (! toBeSaved)
+            //    icOut = imageLoad(_icImageIn, icPositionPrev);
 
             // write illumination information
-            imageStore(_icImageOut, icPositionPrev, icOut);
+            if (toBeSaved)
+                imageStore(_icImageOut, icPositionPrev, vec4(icOut));
             toBeSaved = false;
             
             // load illumination information
-            icIn = imageLoad(_icImageIn, icPosition);
+            icIn = imageLoad(_icImageIn, icPosition).r;
 
             // perform a compositing from samplePosition to the samplePosition of the IC
             // Currently disabled since it leads to ringing artifacts...
@@ -170,12 +171,12 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             // back-to-front compositing from light-direction 
             // (for now, we ignore the color contribution and store the world position instead)
             // icOut.rgb = ((1.0 - color.a) * icIn.rgb) + (color.a * color.rgb);
-            icOut.xyz = samplePosition;
-            icOut.a   = ((1.0 - color.a) * icIn.a) + color.a;
+            //icOut.xyz = samplePosition;
+            icOut   = ((1.0 - color.a) * icIn) + color.a;
             toBeSaved = true;
 
             // apply shadowing
-            color.rgb *= (1.0 - icIn.a * _shadowIntensity); 
+            color.rgb *= (1.0 - icIn * _shadowIntensity); 
 
             // front-to-back compositing along view direction
             result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a);
@@ -201,12 +202,10 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         t += _samplingStepSize;
     }
 
-    if (toBeSaved) {
-        imageStore(_icImageOut, icPositionPrev, icOut);
-    }
-    else {
-        imageStore(_icImageOut, icPositionPrev, imageLoad(_icImageIn, icPositionPrev));
-    }
+    //if (! toBeSaved)
+    //    icOut = imageLoad(_icImageIn, icPositionPrev);
+    if (toBeSaved)
+        imageStore(_icImageOut, icPositionPrev, vec4(icOut));
 
     // calculate depth value from ray parameter
     gl_FragDepth = 1.0;

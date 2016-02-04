@@ -167,14 +167,14 @@ namespace campvis {
         cgt::TextureUnit icUnit1, icUnit2;
         cgt::Texture* icTextures[2];
         icUnit1.activate();
-        icTextures[0] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_RGBA32F);
-        glClearTexImage(icTextures[0]->getId(), 0, GL_RGBA, GL_UNSIGNED_BYTE, &zeroInit);
+        icTextures[0] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_R32F);
+        glClearTexImage(icTextures[0]->getId(), 0, GL_RED, GL_UNSIGNED_BYTE, &zeroInit);
         icUnit2.activate();
-        icTextures[1] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_RGBA32F);
-        glClearTexImage(icTextures[1]->getId(), 0, GL_RGBA, GL_UNSIGNED_BYTE, &zeroInit);
+        icTextures[1] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_R32F);
+        glClearTexImage(icTextures[1]->getId(), 0, GL_RED, GL_UNSIGNED_BYTE, &zeroInit);
 
-        glBindImageTexture(0, icTextures[0]->getId(), 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
-        glBindImageTexture(1, icTextures[1]->getId(), 0, false, 0, GL_READ_WRITE, GL_RGBA32F);
+        glBindImageTexture(0, icTextures[0]->getId(), 0, false, 0, GL_READ_WRITE, GL_R32F);
+        glBindImageTexture(1, icTextures[1]->getId(), 0, false, 0, GL_READ_WRITE, GL_R32F);
 
         //delete [] zeroInit;
 
@@ -266,17 +266,17 @@ namespace campvis {
         // restore state
         glDrawBuffers(1, buffers);
         glDisable(GL_DEPTH_TEST);
-        glBindImageTexture(0, 0, 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
-        glBindImageTexture(1, 0, 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(0, 0, 0, false, 0, GL_READ_ONLY, GL_R32F);
+        glBindImageTexture(1, 0, 0, false, 0, GL_READ_ONLY, GL_R32F);
         LGL_ERROR;
 
         data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
 
         RenderData* ic = new RenderData();
-        ImageData* id1 = new ImageData(2, icSize, 4);
+        ImageData* id1 = new ImageData(2, icSize, 1);
         ImageRepresentationGL::create(id1, icTextures[0]);
         ic->addColorTexture(id1);
-        ImageData* id2 = new ImageData(2, icSize, 4);
+        ImageData* id2 = new ImageData(2, icSize, 1);
         ImageRepresentationGL::create(id2, icTextures[1]);
         ic->addColorTexture(id2);
         data.addData(p_targetImageID.getValue() + ".IC", ic);
