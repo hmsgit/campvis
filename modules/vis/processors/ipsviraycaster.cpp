@@ -43,8 +43,7 @@ namespace campvis {
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_sweepLineWidth("SweepLineWidth", "Sweep Line Width", 2, 1, 32)
         , p_icTextureSize("IcTextureSize", "Illumination Cache Texture Size", cgt::ivec2(512), cgt::ivec2(32), cgt::ivec2(2048))
-        , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .9f, 0.f, 1.f)
-        , p_numLines("NumLines", "Max Number of Lines", 2000, 1, 2000)
+        , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .75f, 0.f, 1.f)
         , _vhm(nullptr)
     {
         _icTextures[0] = nullptr;
@@ -54,7 +53,6 @@ namespace campvis {
         addProperty(p_sweepLineWidth);
         addProperty(p_icTextureSize, INVALID_RESULT | INVALID_IC_TEXTURES);
         addProperty(p_shadowIntensity);
-        addProperty(p_numLines);
 
         setPropertyInvalidationLevel(p_transferFunction, INVALID_BBV | INVALID_RESULT);
         setPropertyInvalidationLevel(p_sourceImageID, INVALID_BBV | INVALID_RESULT);
@@ -82,13 +80,13 @@ namespace campvis {
     }
 
     void IpsviRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
+        // (re)create Illumination Cache (IC) textures if needed
         if (getInvalidationLevel() & INVALID_IC_TEXTURES) {
             delete _icTextures[0];
             delete _icTextures[1];
 
             cgt::ivec3 icSize(p_icTextureSize.getValue(), 1);
             cgt::TextureUnit icUnit;
-
             icUnit.activate();
             _icTextures[0] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_R32F);
             _icTextures[1] = new cgt::Texture(GL_TEXTURE_2D, icSize, GL_R32F);
@@ -96,6 +94,7 @@ namespace campvis {
             validate(INVALID_IC_TEXTURES);
         }
 
+        // update VoxelHierarchyMapper's hierarchy
         if (getInvalidationLevel() & INVALID_BBV) {
             _shader->deactivate();
             _vhm->createHierarchy(image, p_transferFunction.getTF());
@@ -116,23 +115,22 @@ namespace campvis {
             processDirectional(data, image, *camera, *light);
         }
         else {
-            LDEBUG("Could not load light source from DataContainer.");
+            LWARNING("Could not load all the needed data from the DataContainer.");
         }
     }
 
     void IpsviRaycaster::processDirectional(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image, const CameraData& camera, const LightSourceData& light) {
         const cgt::vec3& lightSink = camera.getCamera().getFocus();
-        const cgt::vec3 lightSource = camera.getCamera().getFocus() + light.getLightPosition();
-        const cgt::vec3& lightDirection = light.getLightPosition();
+        const cgt::vec3 lightSource = camera.getCamera().getFocus() - light.getLightPosition();
+        const cgt::vec3& lightDirection = -light.getLightPosition();
 
-        // TODO: This should be a world to NDC space conversion, but it does not work... :(
+        // transformation matrices for world -> NDC -> viewport
         const auto V = camera.getCamera().getViewMatrix();
         const auto P = camera.getCamera().getProjectionMatrix();
-
-        // calculate viewport matrix for NDC -> viewport conversion
         const cgt::vec2 halfViewport = cgt::vec2(getEffectiveViewportSize()) / 2.f;
         const cgt::mat4 viewportMatrix = cgt::mat4::createTranslation(cgt::vec3(halfViewport, 0.f)) * cgt::mat4::createScale(cgt::vec3(halfViewport, 1.f));
 
+        // project light source and direction into pixel space
         const cgt::vec4 projectedLight = viewportMatrix*P*V* cgt::vec4(lightSource, 1.f);
         const cgt::vec4 projectedOrigin = viewportMatrix*P*V* cgt::vec4(lightSink, 1.f);
         cgt::vec2 projectedLightDirection = projectedOrigin.xy()/projectedOrigin.w - projectedLight.xy()/projectedLight.w;
@@ -155,26 +153,26 @@ namespace campvis {
                 sweepDir = TopToBottom;
         }
 
-        // START: compute illumination cache (IC) plane/texture
+        // compute illumination cache (IC) plane
         // the plane is defined by the light direction
         cgt::vec3 icNormal = cgt::normalize(lightDirection);
         cgt::vec3 icUpVector = (std::abs(cgt::dot(icNormal, cgt::vec3(0.f, 0.f, 1.f))) < 0.99) ? cgt::vec3(0.f, 0.f, 1.f) : cgt::vec3(0.f, 1.f, 0.f);
         cgt::vec3 icRightVector = cgt::normalize(cgt::cross(icNormal, icUpVector));
         icUpVector = cgt::normalize(cgt::cross(icRightVector, icNormal));
 
-        // project all 8 corners of the volume onto the IC plane
+        // project all 8 corners of the volume onto the IC plane to get the volume bounds in viewport space
         cgt::Bounds worldBounds = image->getParent()->getWorldBounds();
         cgt::Bounds viewportBounds;
         cgt::vec3 minPixel(0.f), maxPixel(0.f);
-        std::vector<cgt::vec3> corners;
-        corners.push_back(cgt::vec3(worldBounds.getLLF().x, worldBounds.getLLF().y, worldBounds.getLLF().z));
-        corners.push_back(cgt::vec3(worldBounds.getLLF().x, worldBounds.getLLF().y, worldBounds.getURB().z));
-        corners.push_back(cgt::vec3(worldBounds.getLLF().x, worldBounds.getURB().y, worldBounds.getLLF().z));
-        corners.push_back(cgt::vec3(worldBounds.getLLF().x, worldBounds.getURB().y, worldBounds.getURB().z));
-        corners.push_back(cgt::vec3(worldBounds.getURB().x, worldBounds.getLLF().y, worldBounds.getLLF().z));
-        corners.push_back(cgt::vec3(worldBounds.getURB().x, worldBounds.getLLF().y, worldBounds.getURB().z));
-        corners.push_back(cgt::vec3(worldBounds.getURB().x, worldBounds.getURB().y, worldBounds.getLLF().z));
-        corners.push_back(cgt::vec3(worldBounds.getURB().x, worldBounds.getURB().y, worldBounds.getURB().z));
+        std::vector<cgt::vec3> corners(8, cgt::vec3(0.f));
+        corners[0] = cgt::vec3(worldBounds.getLLF().x, worldBounds.getLLF().y, worldBounds.getLLF().z);
+        corners[1] = cgt::vec3(worldBounds.getLLF().x, worldBounds.getLLF().y, worldBounds.getURB().z);
+        corners[2] = cgt::vec3(worldBounds.getLLF().x, worldBounds.getURB().y, worldBounds.getLLF().z);
+        corners[3] = cgt::vec3(worldBounds.getLLF().x, worldBounds.getURB().y, worldBounds.getURB().z);
+        corners[4] = cgt::vec3(worldBounds.getURB().x, worldBounds.getLLF().y, worldBounds.getLLF().z);
+        corners[5] = cgt::vec3(worldBounds.getURB().x, worldBounds.getLLF().y, worldBounds.getURB().z);
+        corners[6] = cgt::vec3(worldBounds.getURB().x, worldBounds.getURB().y, worldBounds.getLLF().z);
+        corners[7] = cgt::vec3(worldBounds.getURB().x, worldBounds.getURB().y, worldBounds.getURB().z);
 
         for (auto i = 0; i < corners.size(); ++i) {
             const cgt::vec3 diag = corners[i];
@@ -194,6 +192,9 @@ namespace campvis {
         cgt::ivec3 icSize(p_icTextureSize.getValue(), 1);
         icRightVector *= float(icSize.x - 1) / (std::ceil(maxPixel.x) - std::floor(minPixel.x)) ;
         icUpVector *= float(icSize.y - 1) / (std::ceil(maxPixel.y) - std::floor(minPixel.y));
+
+
+        // * all preparations done, let's to the rendering *
 
         // bind voxel hierarchy to shader
         cgt::TextureUnit xorUnit, bbvUnit;
@@ -239,8 +240,10 @@ namespace campvis {
 
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        auto viewportSize = getEffectiveViewportSize();
+        const auto viewportSize = getEffectiveViewportSize();
 
+        // setup the helper variables for rendering the sweep lines (according to the sweep direction)
+        // as additionall optimization, restrict the rendered lines to the volume extent in viewport space
         cgt::mat4 projection;
         cgt::mat4 viewScale;
         cgt::vec3 viewTranslationBase;
@@ -248,54 +251,54 @@ namespace campvis {
         int lineMax;
         float scale = 1.f;
         float bias = 0.f;
-
         switch (sweepDir) {
-        case LeftToRight:
-            scale = float(viewportSize.y) / viewportBounds.diagonal().y;
-            bias = viewportBounds.getLLF().y / float(viewportSize.y) * scale;
-            projection = cgt::mat4::createOrtho(0, viewportSize.x, scale-bias, -bias, -1, 1);
-            viewScale = cgt::mat4::createScale(cgt::vec3(p_sweepLineWidth.getValue(), 1.f, 1.f));
-            viewTranslationBase = cgt::vec3(1.f, 0.f, 0.f);
-            line += std::max(0, int(viewportBounds.getLLF().x));
-            lineMax = std::min(viewportSize.x, int(viewportBounds.getURB().x));
-            break;
-        case RightToLeft:
-            scale = float(viewportSize.y) / viewportBounds.diagonal().y;
-            bias = viewportBounds.getLLF().y / float(viewportSize.y) * scale;
-            projection = cgt::mat4::createOrtho(viewportSize.x, 0, scale-bias, -bias, -1, 1);
-            viewScale = cgt::mat4::createScale(cgt::vec3(p_sweepLineWidth.getValue(), 1.f, 1.f));
-            viewTranslationBase = cgt::vec3(1.f, 0.f, 0.f);
-            line += std::max(0, viewportSize.x - int(viewportBounds.getURB().x));
-            lineMax = std::min(viewportSize.x, viewportSize.x - int(viewportBounds.getLLF().x));
-            break;
-        case BottomToTop:
-            scale = float(viewportSize.x) / viewportBounds.diagonal().x;
-            bias = viewportBounds.getLLF().x / float(viewportSize.x) * scale;
-            projection = cgt::mat4::createOrtho(-bias, scale-bias, viewportSize.y, 0, -1, 1);
-            viewScale = cgt::mat4::createScale(cgt::vec3(1.f, p_sweepLineWidth.getValue(), 1.f));
-            viewTranslationBase = cgt::vec3(0.f, 1.f, 0.f);
-            line += std::max(0, int(viewportBounds.getLLF().y));
-            lineMax = std::min(viewportSize.y, int(viewportBounds.getURB().y));
-            break;
-        case TopToBottom:
-            scale = float(viewportSize.x) / viewportBounds.diagonal().x;
-            bias = viewportBounds.getLLF().x / float(viewportSize.x) * scale;
-            projection = cgt::mat4::createOrtho(-bias, scale-bias, 0, viewportSize.y, -1, 1);
-            viewScale = cgt::mat4::createScale(cgt::vec3(1.f, p_sweepLineWidth.getValue(), 1.f));
-            viewTranslationBase = cgt::vec3(0.f, 1.f, 0.f);
-            line += std::max(0, viewportSize.y - int(viewportBounds.getURB().y));
-            lineMax = std::min(viewportSize.y, viewportSize.y - int(viewportBounds.getLLF().y));
-            break;
+            case LeftToRight:
+                scale = float(viewportSize.y) / viewportBounds.diagonal().y;
+                bias = viewportBounds.getLLF().y / float(viewportSize.y) * scale;
+                projection = cgt::mat4::createOrtho(0, float(viewportSize.x), scale-bias, -bias, -1, 1);
+                viewScale = cgt::mat4::createScale(cgt::vec3(float(p_sweepLineWidth.getValue()), 1.f, 1.f));
+                viewTranslationBase = cgt::vec3(1.f, 0.f, 0.f);
+                line += std::max(0, int(viewportBounds.getLLF().x));
+                lineMax = std::min(viewportSize.x, int(viewportBounds.getURB().x));
+                break;
+            case RightToLeft:
+                scale = float(viewportSize.y) / viewportBounds.diagonal().y;
+                bias = viewportBounds.getLLF().y / float(viewportSize.y) * scale;
+                projection = cgt::mat4::createOrtho(float(viewportSize.x), 0, scale-bias, -bias, -1, 1);
+                viewScale = cgt::mat4::createScale(cgt::vec3(float(p_sweepLineWidth.getValue()), 1.f, 1.f));
+                viewTranslationBase = cgt::vec3(1.f, 0.f, 0.f);
+                line += std::max(0, viewportSize.x - int(viewportBounds.getURB().x));
+                lineMax = std::min(viewportSize.x, viewportSize.x - int(viewportBounds.getLLF().x));
+                break;
+            case BottomToTop:
+                scale = float(viewportSize.x) / viewportBounds.diagonal().x;
+                bias = viewportBounds.getLLF().x / float(viewportSize.x) * scale;
+                projection = cgt::mat4::createOrtho(-bias, scale-bias, float(viewportSize.y), 0, -1, 1);
+                viewScale = cgt::mat4::createScale(cgt::vec3(1.f, float(p_sweepLineWidth.getValue()), 1.f));
+                viewTranslationBase = cgt::vec3(0.f, 1.f, 0.f);
+                line += std::max(0, int(viewportBounds.getLLF().y));
+                lineMax = std::min(viewportSize.y, int(viewportBounds.getURB().y));
+                break;
+            case TopToBottom:
+                scale = float(viewportSize.x) / viewportBounds.diagonal().x;
+                bias = viewportBounds.getLLF().x / float(viewportSize.x) * scale;
+                projection = cgt::mat4::createOrtho(-bias, scale-bias, 0, float(viewportSize.y), -1, 1);
+                viewScale = cgt::mat4::createScale(cgt::vec3(1.f, float(p_sweepLineWidth.getValue()), 1.f));
+                viewTranslationBase = cgt::vec3(0.f, 1.f, 0.f);
+                line += std::max(0, viewportSize.y - int(viewportBounds.getURB().y));
+                lineMax = std::min(viewportSize.y, viewportSize.y - int(viewportBounds.getLLF().y));
+                break;
         }
 
 
-        int evenOdd = 0;
-
+        // some more shader setup
         _shader->setUniform("_projectionMatrix", projection);
         GLint uIcImageIn = _shader->getUniformLocation("_icImageIn");
         GLint uIcImageOut = _shader->getUniformLocation("_icImageOut");
         GLint uViewMatrix = _shader->getUniformLocation("_viewMatrix");            
 
+        // finally we can start rendering :)
+        int evenOdd = 0;
         while (line < lineMax) {
             // ping-pong buffering to avoid concurrent read-writes
             if (evenOdd % 2 == 0) {
@@ -313,9 +316,6 @@ namespace campvis {
             line += p_sweepLineWidth.getValue();
             ++evenOdd;
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-            if (evenOdd > p_numLines.getValue())
-                break;
         }
 
         // restore state
@@ -339,6 +339,11 @@ namespace campvis {
         cgt::vec4 projectedLight = viewportMatrix * P * V * cgt::vec4(light.getLightPosition(), 1.f);
         projectedLight /= projectedLight.w;
 
+        // The processing of point light sources is not yet implemented.
+        // It mostly works light four passes with directional lights. However, the projection
+        // of the illumination cache is no longer orthogonal. That complicates the it's definition.
+        // So far, I was too lazy to do so - ambient occlusion might be cooler anyway.
+        cgtAssert(false, "Processing of point light sources not yet implemented.");
     }
 
 }

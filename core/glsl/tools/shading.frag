@@ -115,7 +115,7 @@ vec3 calculatePhongShading(in vec3 position, in LightSource light, in vec3 camer
  * \param   normal          Normal
  * \param   materialColor   Material color (used for all shading coefficients)
  */
-vec3 calculatePhongShading(in vec3 position, in LightSource light, in vec3 camera, in vec3 normal, in vec3 materialColor) {
+vec3 calculatePhongShading(in vec3 position, in vec3 ambientColorOverride, LightSource light, in vec3 camera, in vec3 normal, in vec3 materialColor) {
     vec3 N = normalize(normal);
     vec3 V = normalize(camera - position);
 
@@ -124,13 +124,26 @@ vec3 calculatePhongShading(in vec3 position, in LightSource light, in vec3 camer
     float d = length(L);
     L /= d;
 
-    vec3 toReturn = materialColor * light._ambientColor;   // ambient term
+    vec3 toReturn = materialColor * ambientColorOverride;   // ambient term
     toReturn += materialColor * getDiffuseTerm(light._diffuseColor, N, L);
     toReturn += materialColor * getSpecularTerm(light._specularColor, N, L, V, light._shininess);
     #ifdef PHONG_APPLY_ATTENUATION
         toReturn *= computeAttenuation(light._attenuation, d);
     #endif
     return toReturn;
+}
+
+/**
+ * Computes the phong shading according to the given parameters.
+ * 
+ * \param   position        sample position
+ * \param   light           LightSource
+ * \param   camera          Camera position
+ * \param   normal          Normal
+ * \param   materialColor   Material color (used for all shading coefficients)
+ */
+vec3 calculatePhongShading(in vec3 position, in LightSource light, in vec3 camera, in vec3 normal, in vec3 materialColor) {
+    return calculatePhongShading(position, light._ambientColor, light, camera, normal, materialColor);
 }
 
 

@@ -45,7 +45,11 @@ namespace campvis {
     class VoxelHierarchyMapper;
 
     /**
-     * Performs a simple volume ray casting.
+     * Raycaster that implements the Image Plane Sweep Volume Illumation algorithm of Sundén et al.
+     * This raycasting processor supports real-time directional light shadowing and additionally
+     * uses the VoxelHierarchyMapper for optimized entry-exit points.
+     * 
+     * Requires OpenGL 4.4!
      */
     class CAMPVIS_MODULES_API IpsviRaycaster : public RaycastingProcessor {
     public:
@@ -71,7 +75,7 @@ namespace campvis {
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
+        virtual const std::string getDescription() const { return "Raycaster that implements the Image Plane Sweep Volume Illumation algorithm of Sundén et al."; };
         /// \see AbstractProcessor::getAuthor()
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
@@ -83,22 +87,19 @@ namespace campvis {
         virtual void deinit();
 
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
-        IntProperty p_sweepLineWidth;
-        IVec2Property p_icTextureSize;
-        FloatProperty p_shadowIntensity;
-
-        IntProperty p_numLines;
+        IntProperty p_sweepLineWidth;               ///< Width of the sweep line in pixels
+        IVec2Property p_icTextureSize;              ///< Size of the Illumination Cache texture
+        FloatProperty p_shadowIntensity;            ///< Intensity of the shadowing effect
     
     protected:
         /// \see RaycastingProcessor::processImpl()
         virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);
 
         void processDirectional(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image, const CameraData& camera, const LightSourceData& light);
-
         void processPointLight(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image, const CameraData& camera, const LightSourceData& light);
 
-        VoxelHierarchyMapper* _vhm;
-        cgt::Texture* _icTextures[2];
+        VoxelHierarchyMapper* _vhm;     ///< for optimizing entry/exit points
+        cgt::Texture* _icTextures[2];   ///< Illumination cache textures
 
         static const std::string loggerCat_;
     };

@@ -90,6 +90,9 @@ ivec2 calcIcSamplePosition(vec3 worldPosition) {
     return ivec2(round(dot(worldProjected, _icRightVector)), round(dot(worldProjected, _icUpVector)));
 }
 
+// the composite function can be used for additional shadow ray integration
+// from the current sample to the position of the IC.
+// However, it's currently not used for performance reasons
 void composite(vec3 startPosition, vec3 endPosition, inout float opacity) {
     vec3 direction = endPosition - startPosition;
     float t = _samplingStepSize;
@@ -145,11 +148,6 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // optimization: Only store/load when the icPosition has changed
         // otherwise we can reuse the variables from the previous sample
         if (icPositionPrev != icPosition) {
-            // if there is no updated illumination information to be saved, 
-            // carry over the old pixel
-            //if (! toBeSaved)
-            //    icOut = imageLoad(_icImageIn, icPositionPrev);
-
             // write illumination information
             if (toBeSaved)
                 imageStore(_icImageOut, icPositionPrev, vec4(icOut));
@@ -171,8 +169,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // perform compositing
         if (color.a > 0.0) {
             // compute gradient (needed for shading and normals)
-            vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
-            color.rgb = calculatePhongShading(worldPos, _lightSource, _cameraPosition, gradient, color.rgb);
+            vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);            
 
             // accomodate for variable sampling rates
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
@@ -186,7 +183,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             toBeSaved = true;
 
             // apply shadowing
-            color.rgb *= (1.0 - icIn * _shadowIntensity); 
+            const vec3 ambientColorOverride = _lightSource._ambientColor * (1.0 - icIn * _shadowIntensity);
+            color.rgb = calculatePhongShading(worldPos, ambientColorOverride, _lightSource, _cameraPosition, gradient, color.rgb);
 
             // front-to-back compositing along view direction
             result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a);
@@ -212,8 +210,6 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         t += _samplingStepSize / len;
     }
 
-    //if (! toBeSaved)
-    //    icOut = imageLoad(_icImageIn, icPositionPrev);
     if (toBeSaved)
         imageStore(_icImageOut, icPositionPrev, vec4(icOut));
 
