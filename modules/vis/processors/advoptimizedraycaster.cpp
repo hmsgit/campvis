@@ -55,8 +55,6 @@ namespace campvis {
     }
 
     void AdvOptimizedRaycaster::init() {
-
-
         RaycastingProcessor::init();
 
         _vhm = new VoxelHierarchyMapper();
@@ -84,10 +82,6 @@ namespace campvis {
         ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
         if (p_enableShading.getValue() == false || light != nullptr) {
-            // undo MIPMAP hack from RaycastingProcessor, as mipmapping results in artifacts during ray clipping...
-            if (image->getTexture()->getFilter() != cgt::Texture::LINEAR)
-                const_cast<cgt::Texture*>(image->getTexture())->setFilter(cgt::Texture::LINEAR);
-
             _shader->activate();
 
             cgt::TextureUnit xorUnit, bbvUnit;
