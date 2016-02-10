@@ -57,6 +57,8 @@ MACRO(DECLARE_LUA_MODULE InterfaceFile)
 
     IF(WIN32)
         ADD_DEFINITIONS("/wd4244 /wd4267")
+    ELSEIF(UNIX)
+        ADD_DEFINITIONS("-Wno-error=maybe-uninitialized")
     ENDIF()
     
     SET_SOURCE_FILES_PROPERTIES(${InterfaceFile} PROPERTIES CPLUSPLUS ON)

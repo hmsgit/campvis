@@ -30,12 +30,9 @@ namespace campvis {
 
     QuadRenderer::QuadRenderer()
         : cgt::Singleton<QuadRenderer>()
-        , _quad11(nullptr)
-        , _quad01(nullptr)
-    {
-        _quad11 = GeometryDataFactory::createQuad(cgt::vec3(-1.f, -1.f, 0.f), cgt::vec3(1.f), cgt::vec3(0.f), cgt::vec3(1.f));
-        _quad01 = GeometryDataFactory::createQuad(cgt::vec3(0.f), cgt::vec3(1.f), cgt::vec3(0.f), cgt::vec3(1.f));
-    }
+        , _quad11(GeometryDataFactory::createQuad(cgt::vec3(-1.f, -1.f, 0.f), cgt::vec3(1.f), cgt::vec3(0.f), cgt::vec3(1.f)))
+        , _quad01(GeometryDataFactory::createQuad(cgt::vec3(0.f), cgt::vec3(1.f), cgt::vec3(0.f), cgt::vec3(1.f)))
+    {}
 
     QuadRenderer::~QuadRenderer() {
     }

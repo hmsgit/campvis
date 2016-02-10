@@ -144,10 +144,11 @@ namespace campvis {
 // ================================================================================================
 
     template<typename T>
+    // cppcheck-suppress uninitMemberVar
     AbstractAdjusterWidget<T>::AbstractAdjusterWidget(QWidget* parent /*= 0*/)
         : QWidget(parent)
-        , _slider(0)
-        , _spinBox(0)
+        , _slider(nullptr)
+        , _spinBox(nullptr)
     {
         _spinBox = new typename AdjusterWidgetTraits<T>::SpinBoxType;
         _spinBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);

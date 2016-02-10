@@ -398,7 +398,7 @@ namespace campvis {
 
     %template(getRepresentationLocal) ImageData::getRepresentation<campvis::ImageRepresentationLocal>;
 
-    struct WeaklyTypedPointer {
+    /*struct WeaklyTypedPointer {
         enum BaseType {
             UINT8,      ///< unsigned 8 bit integer
             INT8,       ///< signed 8 bit integer
@@ -426,7 +426,7 @@ namespace campvis {
         BaseType _baseType;         ///< Base data type of the pointer
         size_t _numChannels;        ///< Number of channels, must be in [1, 4]!
         void* _pointer;             ///< Pointer to the data
-    };
+    };*/
 
     /* AbstractImageRepresentation */
     %nodefaultctor AbstractImageRepresentation;
@@ -452,9 +452,9 @@ namespace campvis {
     public:
         virtual ~ImageRepresentationLocal();
 
-        static ImageRepresentationLocal* create(const ImageData* parent, WeaklyTypedPointer wtp);
+        //static ImageRepresentationLocal* create(const ImageData* parent, WeaklyTypedPointer wtp);
 
-        virtual const WeaklyTypedPointer getWeaklyTypedPointer() const = 0;
+        //virtual const WeaklyTypedPointer getWeaklyTypedPointer() const = 0;
         virtual float getElementNormalized(size_t index, size_t channel) const = 0;
 
         virtual float getElementNormalized(const cgt::svec3& position, size_t channel) const = 0;
@@ -464,7 +464,7 @@ namespace campvis {
         virtual void setElementNormalized(const cgt::svec3& position, size_t channel, float value) = 0;
         
     protected:
-        ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType);
+        //ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType);
 
     private:
         explicit ImageRepresentationLocal(const ImageRepresentationLocal& rhs);

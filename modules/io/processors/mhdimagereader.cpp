@@ -189,7 +189,7 @@ namespace campvis {
 
                 while (!file->eof()) {
                     std::string line = StringUtils::trim(file->getLine());
-                    if (line.find("ElementDataFile") == 0) {
+                    if (line.compare("ElementDataFile") == 0) {
                         offset = file->tell();
                     }
                 file->close();
