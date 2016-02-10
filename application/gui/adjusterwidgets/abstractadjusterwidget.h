@@ -144,6 +144,7 @@ namespace campvis {
 // ================================================================================================
 
     template<typename T>
+    // cppcheck-suppress uninitMemberVar
     AbstractAdjusterWidget<T>::AbstractAdjusterWidget(QWidget* parent /*= 0*/)
         : QWidget(parent)
         , _slider(nullptr)
