@@ -95,17 +95,6 @@ namespace campvis {
 
         if (img != nullptr && entryPoints != nullptr && exitPoints != nullptr && camera != nullptr) {
             if (img->getDimensionality() == 3) {
-                // little hack to support LOD texture lookup for the gradients:
-                // if texture does not yet have mipmaps, create them.
-                const cgt::Texture* tex = img->getTexture();
-                if (tex->getFilter() != cgt::Texture::MIPMAP) {
-                    const_cast<cgt::Texture*>(tex)->setFilter(cgt::Texture::MIPMAP);
-                    glGenerateMipmap(GL_TEXTURE_3D);
-                    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-                    LGL_ERROR;
-                }
-
                 _shader->activate();
                 _shader->setIgnoreUniformLocationError(true);
 

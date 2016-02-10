@@ -114,6 +114,9 @@ public:
         static const GlVersion CGT_GL_VERSION_4_0;
         static const GlVersion CGT_GL_VERSION_4_1;
         static const GlVersion CGT_GL_VERSION_4_2;
+        static const GlVersion CGT_GL_VERSION_4_3;
+        static const GlVersion CGT_GL_VERSION_4_4;
+        static const GlVersion CGT_GL_VERSION_4_5;
 
         static const GlVersion SHADER_VERSION_110; ///< GLSL version 1.10
         static const GlVersion SHADER_VERSION_120; ///< GLSL version 1.20
@@ -124,6 +127,9 @@ public:
         static const GlVersion SHADER_VERSION_400; ///< GLSL version 4.00
         static const GlVersion SHADER_VERSION_410; ///< GLSL version 4.10
         static const GlVersion SHADER_VERSION_420; ///< GLSL version 4.20
+        static const GlVersion SHADER_VERSION_430; ///< GLSL version 4.30
+        static const GlVersion SHADER_VERSION_440; ///< GLSL version 4.40
+        static const GlVersion SHADER_VERSION_450; ///< GLSL version 4.50
     };
 
 

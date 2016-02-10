@@ -59,16 +59,10 @@ namespace campvis {
     protected:
         /// \see AbstractProcessorDecorator::addProperties()
         void addProperties(AbstractProcessor* propCollection);
-        /// \see AbstractProcessorDecorator::renderProlog()
-        virtual void renderProlog(const DataContainer& dataContainer, cgt::Shader* shader);
         /// \see AbstractProcessorDecorator::generateHeader()
         std::string generateHeader() const;
 
-        /// Callback method when p_gradientMethod has changed
-        void onGradientMethodChanged(const AbstractProperty* prop);
-
         GenericOptionProperty<GradientMethod> p_gradientMethod;  ///< Method for calculating the gradients
-        FloatProperty p_lod;        ///< LOD to use for texture lookup during gradient computation
 
     };
 

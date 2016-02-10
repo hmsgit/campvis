@@ -46,7 +46,11 @@ vec3 computeGradientForwardDifferencesLod(in sampler3D tex, in TextureParameters
  * \param   texCoords   Lookup position in texture coordinates
  */
 vec3 computeGradientForwardDifferences(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
-    return computeGradientForwardDifferencesLod(tex, texParams, texCoords, 0.0);
+    float v = texture(tex, texCoords).r;
+    float dx = textureOffset(tex, texCoords, ivec3(1, 0, 0)).r;
+    float dy = textureOffset(tex, texCoords, ivec3(0, 1, 0)).r;
+    float dz = textureOffset(tex, texCoords, ivec3(0, 0, 1)).r;
+    return vec3(dx - v, dy - v, dz - v) * texParams._voxelSize;
 }
 
 /**
@@ -73,7 +77,13 @@ vec3 computeGradientCentralDifferencesLod(in sampler3D tex, in TextureParameters
  * \param   texCoords   Lookup position in texture coordinates
  */
 vec3 computeGradientCentralDifferences(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
-    return computeGradientCentralDifferencesLod(tex, texParams, texCoords, 0.0);
+    float dx = textureOffset(tex, texCoords, ivec3(1, 0, 0)).r;
+    float dy = textureOffset(tex, texCoords, ivec3(0, 1, 0)).r;
+    float dz = textureOffset(tex, texCoords, ivec3(0, 0, 1)).r;
+    float mdx = textureOffset(tex, texCoords, ivec3(-1, 0, 0)).r;
+    float mdy = textureOffset(tex, texCoords, ivec3(0, -1, 0)).r;
+    float mdz = textureOffset(tex, texCoords, ivec3(0, 0, -1)).r;
+    return vec3(dx - mdx, dy - mdy, dz - mdz) * texParams._voxelSize * 0.5;
 }
 
 

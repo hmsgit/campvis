@@ -472,6 +472,9 @@ const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_3_3(
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_4_0(4,0,0);
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_4_1(4,1,0);
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_4_2(4,2,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_4_3(4,3,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_4_4(4,4,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_4_5(4,5,0);
 
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_110(1,10); ///< GLSL version 1.10
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_120(1,20); ///< GLSL version 1.20
@@ -482,6 +485,9 @@ const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_330(
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_400(4, 0); ///< GLSL version 4.00
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_410(4,10); ///< GLSL version 4.10
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_420(4,20); ///< GLSL version 4.20
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_430(4,30); ///< GLSL version 4.30
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_440(4,40); ///< GLSL version 4.40
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_450(4,50); ///< GLSL version 4.50
 
 GpuCapabilities::GlVersion::GlVersion(int major, int minor, int release)
   : major_(major), minor_(minor), release_(release)

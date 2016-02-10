@@ -73,6 +73,7 @@ const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords) {
     vec4 result = vec4(0.0);
     vec3 direction = exitPoint - entryPoint;
+    float len = length(direction);
     
     // Adjust direction a bit to prevent division by zero
     direction.x = (abs(direction.x) < 0.0000001) ? 0.0000001 : direction.x;
@@ -129,7 +130,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 
         // advance to the next evaluation point along the ray
-        tNear += _samplingStepSize;
+        tNear += _samplingStepSize / len;
     }
 
          
