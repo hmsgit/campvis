@@ -92,6 +92,8 @@ namespace campvis {
         FloatProperty p_shadowIntensity;            ///< Intensity of the shadowing effect
     
     protected:
+        /// \see RaycastingProcessor::updateResult()
+        virtual void updateResult(DataContainer& data) override;
         /// \see RaycastingProcessor::processImpl()
         virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);
 
@@ -100,6 +102,7 @@ namespace campvis {
 
         VoxelHierarchyMapper* _vhm;     ///< for optimizing entry/exit points
         cgt::Texture* _icTextures[2];   ///< Illumination cache textures
+        bool _gl44Supported;            ///< Flag whether OpenGL 4.4 is supported.
 
         static const std::string loggerCat_;
     };

@@ -45,6 +45,7 @@ namespace campvis {
         , p_icTextureSize("IcTextureSize", "Illumination Cache Texture Size", cgt::ivec2(512), cgt::ivec2(32), cgt::ivec2(2048))
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .75f, 0.f, 1.f)
         , _vhm(nullptr)
+        , _gl44Supported(false)
     {
         _icTextures[0] = nullptr;
         _icTextures[1] = nullptr;
@@ -65,18 +66,37 @@ namespace campvis {
     }
 
     void IpsviRaycaster::init() {
-        RaycastingProcessor::init();
+        // get supported OpenGL version
+        // if OpenGL 4.4 is not supported, abort the initialization, since compiling the shader will fail.
+        _gl44Supported = (GpuCaps.getGlVersion() >= cgt::GpuCapabilities::GlVersion::CGT_GL_VERSION_4_4);
+        _gl44Supported &= (GpuCaps.getShaderVersion() >= cgt::GpuCapabilities::GlVersion::SHADER_VERSION_440);
+        if (! _gl44Supported) {
+            LERROR("This system does not support OpenGL 4.4, which is required for the IpsviRaycaster. Raycaster deactivated.");
+            return;
+        }
 
+        RaycastingProcessor::init();
         _vhm = new VoxelHierarchyMapper();
         invalidate(INVALID_BBV | INVALID_IC_TEXTURES);
     }
 
     void IpsviRaycaster::deinit() {
+        // nothing to deinitialize, if this processor has never been initialized.
+        if (!_gl44Supported)
+            return;
+
         delete _vhm;
         delete _icTextures[0];
         delete _icTextures[1];
 
         RaycastingProcessor::deinit();
+    }
+
+    void IpsviRaycaster::updateResult(DataContainer& data) {
+        if (!_gl44Supported)
+            return;
+
+        RaycastingProcessor::updateResult(data);
     }
 
     void IpsviRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
@@ -174,7 +194,7 @@ namespace campvis {
         corners[6] = cgt::vec3(worldBounds.getURB().x, worldBounds.getURB().y, worldBounds.getLLF().z);
         corners[7] = cgt::vec3(worldBounds.getURB().x, worldBounds.getURB().y, worldBounds.getURB().z);
 
-        for (auto i = 0; i < corners.size(); ++i) {
+        for (size_t i = 0; i < corners.size(); ++i) {
             const cgt::vec3 diag = corners[i];
             const float distance = std::abs(cgt::dot(diag, icNormal));
             const cgt::vec3 projected = diag - (-distance * icNormal);
