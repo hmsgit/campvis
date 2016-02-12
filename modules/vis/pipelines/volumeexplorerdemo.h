@@ -60,6 +60,8 @@ namespace campvis {
         /// \see AbstractPipeline::getId()
         static const std::string getId() { return "VolumeExplorerDemo"; };
 
+        void onProcessorValidated(AbstractProcessor* p);
+
     protected:
         LightSourceProvider _lsp;
         GenericImageReader _imageReader;

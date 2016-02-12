@@ -26,6 +26,8 @@
 
 #include "cgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
+#include "core/tools/flathierarchymapper.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
@@ -57,12 +59,12 @@ namespace campvis {
         _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
-        
+        _imageReader.s_validated.connect(this, &VolumeExplorerDemo::onProcessorValidated);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(512, cgt::vec2(0.f, .05f));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.12f, .15f), cgt::col4(85, 0, 0, 128), cgt::col4(255, 0, 0, 128)));
+        //dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.12f, .15f), cgt::col4(85, 0, 0, 128), cgt::col4(255, 0, 0, 128)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.19f, .28f), cgt::col4(89, 89, 89, 155), cgt::col4(89, 89, 89, 155)));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.41f, .51f), cgt::col4(170, 170, 128, 64), cgt::col4(192, 192, 128, 64)));
+        //dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.41f, .51f), cgt::col4(170, 170, 128, 64), cgt::col4(192, 192, 128, 64)));
         static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
         static_cast<FloatProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::SamplingRate"))->setValue(4.f);
     }
@@ -71,5 +73,11 @@ namespace campvis {
         AutoEvaluationPipeline::deinit();
     }
 
+
+    void VolumeExplorerDemo::onProcessorValidated(AbstractProcessor* p) {
+        GenericImageRepresentationLocal<uint16_t, 1>::ScopedRepresentation rep(getDataContainer(), "reader.output");
+        FlatHierarchyMapper<uint16_t> fhm(rep->getParent());
+        fhm.selectLod(static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->getTF(), 1024 * 100);
+    }
 
 }
