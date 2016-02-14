@@ -24,6 +24,8 @@
 
 #include "volumeexplorerdemo.h"
 
+#include "cgt/job.h"
+#include "cgt/opengljobprocessor.h"
 #include "cgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
@@ -39,10 +41,13 @@ namespace campvis {
         , _lsp()
         , _imageReader()
         , _ve(&_canvasSize)
+        , p_numBlocks("NumBlock", "Number of Blocks", cgt::ivec3(4, 4, 2), cgt::ivec3(1), cgt::ivec3(32))
     {
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_ve);
+
+        addProperty(p_numBlocks);
 
         addEventListenerToBack(&_ve);
     }
@@ -75,9 +80,13 @@ namespace campvis {
 
 
     void VolumeExplorerDemo::onProcessorValidated(AbstractProcessor* p) {
-        GenericImageRepresentationLocal<uint16_t, 1>::ScopedRepresentation rep(getDataContainer(), "reader.output");
-        FlatHierarchyMapper<uint16_t> fhm(rep->getParent());
-        fhm.selectLod(static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->getTF(), 1024 * 100);
+        GLJobProc.enqueueJob(cgt::makeJobOnHeap([&] () {
+            GenericImageRepresentationLocal<uint16_t, 1>::ScopedRepresentation rep(getDataContainer(), "reader.output");
+            FlatHierarchyMapper<uint16_t> fhm(rep->getParent(), cgt::svec3(p_numBlocks.getValue()));
+            fhm.selectLod(static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->getTF());
+
+            getDataContainer().addDataHandle("Flat Hierarchy", fhm._flatHierarchyDH);
+        }));
     }
 
 }

@@ -25,6 +25,8 @@
 #ifndef FLATHIERARCHYMAPPER_H__
 #define FLATHIERARCHYMAPPER_H__
 
+#define DIV_CEIL(x,y) ((x) > 0) ? (1 + ((x) - 1)/(y)) : ((x) / (y))
+
 #define FOR_EACH_VOXEL(INDEX, POS, SIZE) \
     for (cgt::svec3 (INDEX) = (POS); (INDEX).z < (SIZE).z; ++(INDEX).z) \
         for ((INDEX).y = (POS).y; (INDEX).y < (SIZE).y; ++(INDEX).y) \
@@ -32,27 +34,32 @@
 
 #include "cgt/cgt_math.h"
 #include "cgt/opengljobprocessor.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
 #include "cgt/vector.h"
 
 #include "core/coreapi.h"
-
 #include "core/classification/abstracttransferfunction.h"
-
+#include "core/datastructures/datahandle.h"
+#include "core/datastructures/imagerepresentationgl.h"
 #include "core/tools/concurrenthistogram.h"
-#include "core/tools/hierarchicalclustering.h"
 #include "core/tools/typetraits.h"
 
 #include <algorithm>
 #include <queue>
 
 namespace {
+    /// RGB to CIE XYZ colorconversion matrix
     static const cgt::mat3 rgbToXyz(0.412453f, 0.357580f, 0.180423f,
                                     0.212671f, 0.715160f, 0.072169f,
                                     0.019334f, 0.119193f, 0.950227f);
+    /// reference white point for Lab color space
     static const cgt::vec3 labRef(95.047f, 100.f, 108.883f);
-    static const cgt::vec3 whitePoint = rgbToXyz * cgt::vec3(1.f, 1.f, 1.f);
-    static const float ref_U = (4.f * whitePoint.x) / (whitePoint.x + 15.f*whitePoint.y + 3.f*whitePoint.z);
-    static const float ref_V = (4.f * whitePoint.y) / (whitePoint.x + 15.f*whitePoint.y + 3.f*whitePoint.z);
+
+    /// total number of LOD levels
+    static const size_t numLevels = 5;
+    /// sizes of each LOD level in terms of pixels per dimension
+    static const size_t levelSizes[5] = { 16, 8, 4, 2, 1 };
 }
 
 namespace campvis {
@@ -71,17 +78,29 @@ namespace campvis {
     public:
         /// Type of one single image element
         typedef BASETYPE ElementType;
-        /// Type of the histogram over voxel values
-        typedef ConcurrentGenericHistogramND<BASETYPE, 1> HistogramType;
 
     private:
-
-        struct HistogramElement {
-            ElementType _min;
-            ElementType _max;
-            int _count;
+        /// Element type for the priority queue used during LOD selection process representing a single block.
+        struct PqElement { 
+            size_t index;           ///< index of the represented block
+            float significance;     ///< significance of this block with respect to its current level (color deviation/memory costs)
         };
-        typedef std::vector<HistogramElement> SimplifiedHistogramType;
+        /// Comparison functor for objects of PqElement type.
+        /// Comparison is performed based on their significance.
+        struct PqElementComparer {
+            bool operator() (const PqElement& lhs, const PqElement& rhs) const {
+                return lhs.significance < rhs.significance;
+            }
+        };
+
+        /// Element type of a single bin for the simplified histogram used for the LOD selection.
+        struct HistogramBin {
+            ElementType _min;   ///< Minimum data value of this histogram bin.
+            ElementType _max;   ///< Maximum data value of this histogram bin.
+            int _count;         ///< Number of elements in this bin.
+        };
+        /// Typedef for the simplified histograms used for the LOD selection.
+        typedef std::vector<HistogramBin> SimplifiedHistogramType;
 
         /**
          * Represents a single block within an arbitrary level. 
@@ -153,11 +172,35 @@ namespace campvis {
         };
 
     public:
-        FlatHierarchyMapper(const ImageData* originalVolume);
+        FlatHierarchyMapper(const ImageData* originalVolume, const cgt::svec3& targetTextureSize);
         ~FlatHierarchyMapper();
 
 
-        void selectLod(AbstractTransferFunction* tf, size_t memoryBudget);
+        /**
+         * 
+         * \note    Requires a valid acquired OpenGL context!
+         * \param	AbstractTransferFunction * tf
+         * \param	size_t memoryBudget
+         */
+        void selectLod(AbstractTransferFunction* tf);
+
+        /**
+         * Returns the texture storing the resulting flat block hierarchy.
+         * \return	_flatHierarchyTexture
+         */
+        cgt::Texture* getFlatHierarchyTexture() {
+            return _flatHierarchyTexture;
+        };
+
+        /**
+         * Returns the index texture storing the lookup information for accessing blocks within _flatHierarchyTexture.
+         * \return	_indexTexture
+         */
+        cgt::Texture* getIndexTexture() {
+            return _indexTexture;
+        };
+
+        DataHandle _flatHierarchyDH;
 
     private:
         /**
@@ -167,48 +210,113 @@ namespace campvis {
          */
         void createBlockHierarchy();
 
+        /**
+         * Little helper function mimicking the standard TF lookup as it is done in the GLSL shader.
+         * Not the most beautiful software design, but it works for now.
+         * \param	tf      Transfer function to use.
+         * \param	data    Color data of the TF (since it is not directly accessible from \a tf, unfortunately).
+         * \param	value   Intensity value to look up.
+         * \return  Color after applying the TF to \a value.
+         */
         cgt::vec4 lookupTf(AbstractTransferFunction* tf, cgt::vec4* data, float value);
+
+        /**
+         * Converts the given RGB color to CIE L*a*b* space.
+         * \param	rgb Incoming color to convert.
+         * \return	\a rgb converted to CIE L*a*b* space.
+         */
         cgt::vec3 rgb2Lab(cgt::vec3 rgb) const;
 
         const ImageData* _originalVolume;       ///< Original version of the volume
-        Level* _levels[5];                      ///< The hierarchy of levels. 5 Levels in total; level 0 has 16^3, level 4 is 1^3 voxels per block
+        Level* _levels[numLevels];              ///< The hierarchy of levels. 5 Levels in total; level 0 has 16^3, level 4 is 1^3 voxels per block
+        
+        cgt::Texture* _flatHierarchyTexture;    ///< Texture storing the resulting flat block hierarchy
+        cgt::Texture* _indexTexture;            ///< Index texture storing the lookup information for accessing blocks within _flatHierarchyTexture
+        cgt::svec3 _targetTextureSize;          ///< Size of target texture in number of blocks (i.e. #pixels = _targetTextureSize * 16 for each dimension)
+
+
+        static std::string loggerCat_;
     };
+
+    template<typename BASETYPE>
+    std::string campvis::FlatHierarchyMapper<BASETYPE>::loggerCat_ = "CAMPVis.core.FlatHierarchyMapper";
 
     // ================================================================================================
 
     template<typename BASETYPE>
-    FlatHierarchyMapper<BASETYPE>::FlatHierarchyMapper(const ImageData* originalVolume) 
+    FlatHierarchyMapper<BASETYPE>::FlatHierarchyMapper(const ImageData* originalVolume, const cgt::svec3& targetTextureSize)
         : _originalVolume(originalVolume)
+        , _flatHierarchyTexture(nullptr)
+        , _indexTexture(nullptr)
+        , _targetTextureSize(targetTextureSize * levelSizes[0])
     {
         cgtAssert(originalVolume->getNumChannels() == 1, "FlatHierarchyMapper supports only single channel volumes!");
 
-        //_levels = {nullptr, nullptr, nullptr, nullptr, nullptr};
+        cgt::TextureUnit tu;
+        tu.activate();
+
         createBlockHierarchy();
+
+        _indexTexture = new cgt::Texture(GL_TEXTURE_3D, _levels[0]->_size, GL_RGBA16, cgt::Texture::NEAREST);
     }
 
     template<typename BASETYPE>
     FlatHierarchyMapper<BASETYPE>::~FlatHierarchyMapper() {
         for (size_t i = 0; i < 5; ++i)
             delete _levels[i];
+
+        //delete _flatHierarchyTexture;
+        delete _indexTexture;
+    }
+
+
+    void advance(cgt::svec3& voxel, size_t level) {
+        if (level == 0) {
+            voxel.x += levelSizes[0];
+            return;
+        }
+
+        if (voxel.x % levelSizes[level - 1] == 0) {
+            voxel.x += levelSizes[level];
+        }
+        else {
+            if (voxel.y % levelSizes[level - 1] == 0) {
+                voxel.x -= levelSizes[level];
+                voxel.y += levelSizes[level];
+            }
+            else {
+                if (voxel.z % levelSizes[level - 1] == 0) {
+                    voxel.x -= levelSizes[level];
+                    voxel.y -= levelSizes[level];
+                    voxel.z += levelSizes[level];
+                }
+                else {
+                    // this is the complex case: the 2x2x2 block of this level is full
+                    voxel -= levelSizes[level];
+
+                    // not entirely non-recusive (as I will claim down there), but tail-recursive.
+                    // Thus, a smart compiler should be able to produce really fast code out of this.
+                    advance(voxel, level - 1);
+                }
+            }
+        }
     }
 
 
     template<typename BASETYPE>
-    void FlatHierarchyMapper<BASETYPE>::selectLod(AbstractTransferFunction* tf, size_t memoryBudget) {
+    void FlatHierarchyMapper<BASETYPE>::selectLod(AbstractTransferFunction* tf) {
+        const size_t memoryBudget = cgt::hmul(_targetTextureSize) * sizeof(ElementType);
+
         // first, let's get the transfer function data in a really complicated manner... :D
         // (sorry, there is no easier way with the current CAMPVis TF API)
-        GLubyte* tfRawData = nullptr;
-        cgt::vec4* tfData = nullptr;
+        cgt::TextureUnit tfUnit;
+        tfUnit.activate();
         size_t tfSize;
-        {
-            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution glJob;
-            tfRawData = tf->getTexture()->downloadTextureToBuffer(GL_RGBA, GL_FLOAT);
-            tfSize = cgt::hmul(tf->getTexture()->getDimensions());
+        tfSize = cgt::hmul(tf->getTexture()->getDimensions());
+        GLubyte* tfRawData = tf->getTexture()->downloadTextureToBuffer(GL_RGBA, GL_FLOAT);
 
-            // I really hope this is safe and doesn't break any strict aliasing rules...
-            tfData = reinterpret_cast<cgt::vec4*>(tfRawData);
-        }
-
+        // I really hope this is safe and doesn't break any strict aliasing rules...
+        cgt::vec4* tfData = reinterpret_cast<cgt::vec4*>(tfRawData);
 
         // now walk through the blocks and determine their significance with respect to the current TF
         Level& firstLevel = *_levels[0];
@@ -234,6 +342,7 @@ namespace campvis {
 
             blockSignificances.push_back(significance);
         }
+        LINFO("Block significances computed.");
 
         // now start the optimization with our priority queue:
         float memoryCosts[5];
@@ -244,40 +353,126 @@ namespace campvis {
         memoryCosts[0] = float(sizeof(ElementType) * 16 * 16 * 16);
 
         std::vector<size_t> currentLevels(firstLevel._numBlocks, 4);
-        struct PqElement { size_t index; float costs; };
-        struct PqElementComparer {
-            bool operator() (const PqElement& lhs, const PqElement& rhs) const {
-                return lhs.costs < rhs.costs;
-            }
-        };
-
         std::priority_queue<PqElement, std::vector<PqElement>, PqElementComparer> pq;
 
         // populate the priority queue with all blocks at minimum level
         for (size_t i = 0; i < firstLevel._numBlocks; ++i) {
-            PqElement pqe = { i, blockSignificances[i] / (memoryCosts[3] - memoryCosts[4]) };
-            pq.push(pqe);
+            if (blockSignificances[i] > 100) {
+                PqElement pqe = { i, blockSignificances[i] / (memoryCosts[3] - memoryCosts[4]) };
+                pq.push(pqe);
+            }
         }
 
-        int bytesLeft = int(memoryBudget);
-        while (bytesLeft > 0) {
+        int bytesLeft = int(memoryBudget) - int(currentLevels.size() * memoryCosts[4]);
+        while (bytesLeft > 0 && !pq.empty()) {
             // get top element
             PqElement e = pq.top();
             pq.pop();
-
-            // update block level
-            --(currentLevels[e.index]);
             size_t levelNow = currentLevels[e.index];
+            int bytesNeeded = int(memoryCosts[levelNow - 1] - memoryCosts[levelNow]);
 
-            // update memory budget
-            bytesLeft += int(memoryCosts[levelNow + 1] - memoryCosts[levelNow]);
 
-            // reinsert block into PQ, if not reached top level yet
-            if (levelNow > 0) {
-                e.costs = blockSignificances[e.index] / (memoryCosts[levelNow - 1] - memoryCosts[levelNow]);
-                pq.push(e);
+            // check whether this block still fits:
+            if (bytesLeft >= bytesNeeded) {
+                // update block level
+                --(currentLevels[e.index]);
+
+                // update memory budget
+                bytesLeft -= bytesNeeded;
+
+                // reinsert block into PQ, if not reached top level yet
+                if (levelNow > 1) {
+                    e.significance = blockSignificances[e.index] / (memoryCosts[levelNow - 1] - memoryCosts[levelNow]);
+                    pq.push(e);
+                }
             }
         }
+
+        const int& kbUsed = DIV_CEIL(memoryBudget, 1024);
+        const int kbOriginal = DIV_CEIL(cgt::hmul(_originalVolume->getSize()) * sizeof(ElementType), 1024);
+        LINFO("Block optimization complete, reduced " << kbOriginal << "KB into " << kbUsed << " KB (" << 100.0 * double(kbUsed) / double(kbOriginal) << "%).");
+
+        std::vector<size_t> blockStatistics(5, 0);
+        for (size_t i = 0; i < currentLevels.size(); ++i)
+            ++(blockStatistics[currentLevels[i]]);
+
+        LINFO("Block usage statistics:");
+        for (size_t i = 0; i < blockStatistics.size(); ++i)
+            LINFO("Level " << i << " (" << levelSizes[i] << "): " << blockStatistics[i]);
+
+        // now start packing the blocks into one texture
+        typedef cgt::Vector4<uint16_t> IndexType;
+        std::vector<IndexType> blockLookupData(firstLevel._numBlocks, IndexType(uint16_t(0)));
+
+        // Start packing with the largest blocks:
+        // 
+        // This is a variant of the bin packing problem. Furtunately, we have a well defined bin 
+        // and block size, thus the problem itself is not NP hard. Nevertheless the following code 
+        // is quite complex in order to allow densely packing the hierarchy in a direct 
+        // non-recursive fashion:
+        // - Start with packing all of the largest blocks (16^3), then all of the second-largest (8^3), etc...
+        // - When packing blocks of level N, arrange them in a 2x2x2 fashion to build a block of level N-1 size
+        // - This is continued recursively until we have 2x2x2 of these level N-1 blocks building a level N-2 block, etc...
+        // - To avoid recursion, we have the currentVoxel variable keeping track of where we currently are.
+        // - The modulo operation allows to infer the block level we're currently packing.
+        cgt::TextureUnit fhUnit, indexUnit;
+        fhUnit.activate();
+        // TODO: the instantiation of _flatHierarchyTexture here is just a temporary standin
+        //       Later, it just needs to created once in ctor and here will just be the pixel update
+        //       (same as with the index texture)
+        _flatHierarchyTexture = new cgt::Texture(GL_TEXTURE_3D, _targetTextureSize, TypeTraits<BASETYPE, 1>::glInternalFormat, cgt::Texture::LINEAR);
+        _flatHierarchyTexture->bind();
+        cgt::svec3 currentVoxel(0, 0, 0);
+
+        for (size_t level = 0; level < numLevels; ++level) {
+            for (size_t i = 0; i < currentLevels.size(); ++i) {
+                if (currentLevels[i] == level) {
+                    cgtAssert(cgt::hand(cgt::lessThan(currentVoxel, _targetTextureSize)), "The target texture for our flat block hierarchy is full. Something went wrong... :(");
+
+                    // pack block and upload into texture
+                    glTexSubImage3D(
+                        GL_TEXTURE_3D, 0, 
+                        GLint(currentVoxel.x), GLint(currentVoxel.y), GLint(currentVoxel.z),
+                        GLsizei(levelSizes[level]), GLsizei(levelSizes[level]), GLsizei(levelSizes[level]),
+                        GL_RED, TypeTraits<BASETYPE, 1>::glDataType, _levels[level]->_blocks[i]._baseElement);
+
+                    LGL_ERROR;
+
+                    // store the packing information in the index structure
+                    blockLookupData[i] = IndexType(uint16_t(currentVoxel.x), uint16_t(currentVoxel.y), uint16_t(currentVoxel.z), uint16_t(level));
+
+                    // mark as packed
+                    currentLevels[i] = 1337;
+
+                    // advance currentVoxel
+                    advance(currentVoxel, level);
+
+                    // the above scheme completely fills a linear array of level 0 blocks. However,
+                    // we have to make sure to stay within texture bounds. Thus,
+                    if (currentVoxel.x >= _targetTextureSize.x) {
+                        currentVoxel.x = 0;
+                        currentVoxel.y += levelSizes[0];
+
+                        if (currentVoxel.y >= _targetTextureSize.y) {
+                            currentVoxel.y = 0;
+                            currentVoxel.z += levelSizes[0];
+                        }
+                    }
+                }
+            }
+        }
+
+        LINFO("Flat block hierarchy texture packing finished.");
+
+        // putting the flat hierarchy texture into an ImageData/DataHandle just for convenience, so that it's easier to debug :)
+        ImageData* id = new ImageData(3, _targetTextureSize, 1);
+        ImageRepresentationGL::create(id, _flatHierarchyTexture);
+        _flatHierarchyDH = DataHandle(id);
+
+        // upload the index texture to the GPU
+        indexUnit.activate();
+        _indexTexture->bind();
+        _indexTexture->uploadTexture(reinterpret_cast<GLubyte*>(&blockLookupData.front()), GL_RGBA, GL_UNSIGNED_SHORT);
     }
 
     template<typename BASETYPE>
@@ -314,6 +509,7 @@ namespace campvis {
             const cgt::svec3 indexVoxel = voxelPosition - (indexBlock * size_t(16));
             firstLevel.getBlock(indexBlock).getElement(indexVoxel) = rep->getElement(indexBlock * firstLevel._blockSize + indexVoxel);
         }
+        LINFO("First level initialized.");
 
         // compute min/max/avg for each block in first level
         FOR_EACH_VOXEL(indexBlock, cgt::svec3(0, 0, 0), firstLevel._size) {
@@ -326,6 +522,7 @@ namespace campvis {
             }
             b._averageValue = ElementType(sum / b._numElements);
         }
+        LINFO("Min/max/avg computed.");
 
         // perform average downsampling accross levels
         for (size_t level = 1; level < 5; ++level) {
@@ -355,6 +552,7 @@ namespace campvis {
                 }
             }
         }
+        LINFO("Downsampling completed.");
 
 
         // compute simplified histogram for each L16 block
@@ -369,8 +567,8 @@ namespace campvis {
             SimplifiedHistogramType& histogram = b._histogram;
             histogram.reserve(numBuckets);
             for (ElementType i = 0; i < numBuckets; ++i) {
-                HistogramElement he = { b._minimumValue + i*initialBucketSize, b._minimumValue + (i+1)*initialBucketSize - 1, 0 };
-                histogram.push_back(he);
+                HistogramBin hb = { b._minimumValue + i*initialBucketSize, b._minimumValue + (i+1)*initialBucketSize - 1, 0 };
+                histogram.push_back(hb);
             }
             histogram.back()._max = b._maximumValue;
 
@@ -402,9 +600,8 @@ namespace campvis {
                 std::move(histogram.begin()+minDistancePairIndex+2, histogram.end(), histogram.begin()+minDistancePairIndex+1);
                 histogram.pop_back();
             }
-
-            int bcccc = 1;
         }
+        LINFO("Simplified histograms computed.");
 
         int a = 1;
     }
@@ -444,20 +641,6 @@ namespace campvis {
 
         // final conversion
         return cgt::vec3((116.f * rgb.y) - 16.f, 500.f * (rgb.x - rgb.y), 200.f * (rgb.y - rgb.z));
-
-        //const cgt::vec3 xyz = rgbToXyz * rgb;
-        //
-        //if (xyz.y/whitePoint.y > 0.008856f)
-        //    rgb.x = 116.f * (std::pow(xyz.y/whitePoint.y, 1.f/3.f)) - 16.f;
-        //else
-        //    rgb.x = 903.3f * xyz.y/whitePoint.y;
-        //
-        //rgb.y = (4.f * xyz.x) / (xyz.x + 15.f*xyz.y + 3.f*xyz.z);
-        //rgb.z = (9.f * xyz.y) / (xyz.x + 15.f*xyz.y + 3.f*xyz.z);
-        //
-        //rgb.y = 13.f * rgb.x * (rgb.y - ref_U);
-        //rgb.z = 13.f * rgb.x * (rgb.z - ref_V);
-        //return rgb;
     }
 
 }

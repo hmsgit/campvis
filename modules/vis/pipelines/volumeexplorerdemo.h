@@ -66,6 +66,8 @@ namespace campvis {
         LightSourceProvider _lsp;
         GenericImageReader _imageReader;
         VolumeExplorer _ve;
+
+        IVec3Property p_numBlocks;
     };
 }
 
