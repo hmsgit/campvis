@@ -45,6 +45,9 @@
 #include "core/tools/concurrenthistogram.h"
 #include "core/tools/typetraits.h"
 
+#include <tbb/parallel_for.h>
+#include <tbb/tick_count.h>
+
 #include <algorithm>
 #include <queue>
 
@@ -60,6 +63,52 @@ namespace {
     static const size_t numLevels = 5;
     /// sizes of each LOD level in terms of pixels per dimension
     static const size_t levelSizes[5] = { 16, 8, 4, 2, 1 };
+
+
+    /**
+     * This method is used by the tight bin packing algorithm during LOD selection.
+     * Advances the current placement cursor \a voxel by one block with respect to the given level.
+     * \param	voxel   Current block placement cursor, will be altered by this function.
+     * \param	level   Current block placement level.
+     */
+    void advance(cgt::svec3& voxel, size_t level) {
+        // if we are at the top-most level, everything is simple => simply advance by one block
+        if (level == 0) {
+            voxel.x += levelSizes[0];
+        }
+        // otherwise, we're filling a 2x2x2 block, check what we've achieved so far:
+        else if (voxel.x % levelSizes[level - 1] == 0) {
+            // we're at this level's first block in X direction => go one block to the right
+            voxel.x += levelSizes[level];
+        }
+        else {
+            if (voxel.y % levelSizes[level - 1] == 0) {
+                // we're at this level's first block in Y direction => go one block to the left and one up
+                voxel.x -= levelSizes[level];
+                voxel.y += levelSizes[level];
+            }
+            else {
+                if (voxel.z % levelSizes[level - 1] == 0) {
+                    // we're at this level's first block in Z direction => go one block to the left and down and one to the back
+                    voxel.x -= levelSizes[level];
+                    voxel.y -= levelSizes[level];
+                    voxel.z += levelSizes[level];
+                }
+                else {
+                    // this is the complex case: the 2x2x2 block of this level is full
+                    // thus, go one block to the left, down and front and then do the same for level N-1.
+                    voxel -= levelSizes[level];
+
+                    // For the sake of clearer code, this is not written entirely non-recusive
+                    // (as I will claim down there), but it's tail-recursive and no ctors/dtors 
+                    // are called.
+                    // Thus, a smart compiler should be able to produce really fast code out of this.
+                    advance(voxel, level - 1);
+                }
+            }
+        }
+    }
+
 }
 
 namespace campvis {
@@ -269,40 +318,6 @@ namespace campvis {
         delete _indexTexture;
     }
 
-
-    void advance(cgt::svec3& voxel, size_t level) {
-        if (level == 0) {
-            voxel.x += levelSizes[0];
-            return;
-        }
-
-        if (voxel.x % levelSizes[level - 1] == 0) {
-            voxel.x += levelSizes[level];
-        }
-        else {
-            if (voxel.y % levelSizes[level - 1] == 0) {
-                voxel.x -= levelSizes[level];
-                voxel.y += levelSizes[level];
-            }
-            else {
-                if (voxel.z % levelSizes[level - 1] == 0) {
-                    voxel.x -= levelSizes[level];
-                    voxel.y -= levelSizes[level];
-                    voxel.z += levelSizes[level];
-                }
-                else {
-                    // this is the complex case: the 2x2x2 block of this level is full
-                    voxel -= levelSizes[level];
-
-                    // not entirely non-recusive (as I will claim down there), but tail-recursive.
-                    // Thus, a smart compiler should be able to produce really fast code out of this.
-                    advance(voxel, level - 1);
-                }
-            }
-        }
-    }
-
-
     template<typename BASETYPE>
     void FlatHierarchyMapper<BASETYPE>::selectLod(AbstractTransferFunction* tf) {
         const size_t memoryBudget = cgt::hmul(_targetTextureSize) * sizeof(ElementType);
@@ -318,30 +333,34 @@ namespace campvis {
         // I really hope this is safe and doesn't break any strict aliasing rules...
         cgt::vec4* tfData = reinterpret_cast<cgt::vec4*>(tfRawData);
 
+        tbb::tick_count startTime;
+        startTime = tbb::tick_count::now();
+
         // now walk through the blocks and determine their significance with respect to the current TF
         Level& firstLevel = *_levels[0];
-        std::vector<float> blockSignificances;
-        blockSignificances.reserve(firstLevel._numBlocks);
-        for (size_t i = 0; i < firstLevel._numBlocks; ++i) {
-            const Block& thisBlock = firstLevel._blocks[i];
-            const SimplifiedHistogramType& histogram = thisBlock._histogram;
-            const cgt::vec4 approximationColor = lookupTf(tf, tfData, TypeNormalizer::normalizeToFloat<BASETYPE>(thisBlock._averageValue));
-            const cgt::vec3 approximationLuv = rgb2Lab(approximationColor.xyz() * approximationColor.a);
+        std::vector<float> blockSignificances(firstLevel._numBlocks, 0.f);
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, firstLevel._numBlocks), [&](const tbb::blocked_range<size_t>& range) {
+            for (size_t i = range.begin(); i < range.end(); ++i) {
+                const Block& thisBlock = firstLevel._blocks[i];
+                const SimplifiedHistogramType& histogram = thisBlock._histogram;
+                const cgt::vec4 approximationColor = lookupTf(tf, tfData, TypeNormalizer::normalizeToFloat<BASETYPE>(thisBlock._averageValue));
+                const cgt::vec3 approximationLuv = rgb2Lab(approximationColor.xyz() * approximationColor.a);
 
-            float significance = 0;
+                float significance = 0;
 
-            // compute DeltaE for every entry in the simplified histogram
-            for (size_t j = 0; j < histogram.size(); ++j) {
-                const cgt::vec4 originalColor = lookupTf(tf, tfData, 
-                    (TypeNormalizer::normalizeToFloat<BASETYPE>(histogram[j]._max) - TypeNormalizer::normalizeToFloat<BASETYPE>(histogram[j]._min)) / 2.f
-                    + TypeNormalizer::normalizeToFloat<BASETYPE>(histogram[j]._min));
-                const cgt::vec3 originalLuv = rgb2Lab(originalColor.xyz() * originalColor.a);
+                // compute DeltaE for every entry in the simplified histogram
+                for (size_t j = 0; j < histogram.size(); ++j) {
+                    const cgt::vec4 originalColor = lookupTf(tf, tfData,
+                        (TypeNormalizer::normalizeToFloat<BASETYPE>(histogram[j]._max) - TypeNormalizer::normalizeToFloat<BASETYPE>(histogram[j]._min)) / 2.f
+                        + TypeNormalizer::normalizeToFloat<BASETYPE>(histogram[j]._min));
+                    const cgt::vec3 originalLuv = rgb2Lab(originalColor.xyz() * originalColor.a);
 
-                significance += cgt::length(approximationLuv - originalLuv) * histogram[j]._count * (histogram[j]._max - histogram[j]._min);
+                    significance += cgt::length(approximationLuv - originalLuv) * histogram[j]._count * (histogram[j]._max - histogram[j]._min);
+                }
+
+                blockSignificances[i] = significance;
             }
-
-            blockSignificances.push_back(significance);
-        }
+        });
         LINFO("Block significances computed.");
 
         // now start the optimization with our priority queue:
@@ -388,8 +407,8 @@ namespace campvis {
             }
         }
 
-        const int& kbUsed = DIV_CEIL(memoryBudget, 1024);
-        const int kbOriginal = DIV_CEIL(cgt::hmul(_originalVolume->getSize()) * sizeof(ElementType), 1024);
+        const size_t kbUsed = DIV_CEIL(memoryBudget, 1024);
+        const size_t kbOriginal = DIV_CEIL(cgt::hmul(_originalVolume->getSize()) * sizeof(ElementType), 1024);
         LINFO("Block optimization complete, reduced " << kbOriginal << "KB into " << kbUsed << " KB (" << 100.0 * double(kbUsed) / double(kbOriginal) << "%).");
 
         std::vector<size_t> blockStatistics(5, 0);
@@ -473,6 +492,9 @@ namespace campvis {
         indexUnit.activate();
         _indexTexture->bind();
         _indexTexture->uploadTexture(reinterpret_cast<GLubyte*>(&blockLookupData.front()), GL_RGBA, GL_UNSIGNED_SHORT);
+
+        tbb::tick_count endTime = tbb::tick_count::now();
+        LINFO("Duration for LOD section: " << (endTime - startTime).seconds());
     }
 
     template<typename BASETYPE>
@@ -496,7 +518,7 @@ namespace campvis {
                 ++numBlocks[i];
         }
 
-        // instantiate each leven and allocate storage
+        // instantiate each level and allocate storage
         for (size_t level = 0; level < 5; ++level) {
             _levels[level] = new Level(numBlocks, blockSize);
             blockSize /= 2;
@@ -556,51 +578,53 @@ namespace campvis {
 
 
         // compute simplified histogram for each L16 block
-        FOR_EACH_VOXEL(indexBlock, cgt::svec3(0, 0, 0), firstLevel._size) {
-            Block& b = firstLevel.getBlock(indexBlock);
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, firstLevel._numBlocks), [&](const tbb::blocked_range<size_t>& range) {
+            for (size_t indexBlock = range.begin(); indexBlock < range.end(); ++indexBlock) {
+                Block& b = firstLevel._blocks[indexBlock];
 
-            // first compute the real histogram
-            size_t numBuckets = std::min(size_t(128), size_t(b._maximumValue - b._minimumValue + 1));
-            const ElementType initialBucketSize = (b._maximumValue - b._minimumValue + 1) / ElementType(numBuckets);
+                // first compute the real histogram
+                size_t numBuckets = std::min(size_t(128), size_t(b._maximumValue - b._minimumValue + 1));
+                const ElementType initialBucketSize = (b._maximumValue - b._minimumValue + 1) / ElementType(numBuckets);
 
-            // initialize histogram
-            SimplifiedHistogramType& histogram = b._histogram;
-            histogram.reserve(numBuckets);
-            for (ElementType i = 0; i < numBuckets; ++i) {
-                HistogramBin hb = { b._minimumValue + i*initialBucketSize, b._minimumValue + (i+1)*initialBucketSize - 1, 0 };
-                histogram.push_back(hb);
-            }
-            histogram.back()._max = b._maximumValue;
+                // initialize histogram
+                SimplifiedHistogramType& histogram = b._histogram;
+                histogram.reserve(numBuckets);
+                for (ElementType i = 0; i < numBuckets; ++i) {
+                    HistogramBin hb = { b._minimumValue + i*initialBucketSize, b._minimumValue + (i + 1)*initialBucketSize - 1, 0 };
+                    histogram.push_back(hb);
+                }
+                histogram.back()._max = b._maximumValue;
 
-            // fill histogram with samples
-            for (size_t i = 0; i < b._numElements; ++i) {
-                ElementType e = b._baseElement[i];
-                cgtAssert(e >= b._minimumValue && e <= b._maximumValue, "Voxel intensity out of range. Something went wrong!");
-                size_t bucket = std::min(size_t(e - b._minimumValue) / initialBucketSize, numBuckets - 1);
-                ++(histogram[bucket]._count);
-            }
-
-            // now cluster as long as possible until we have only 12 buckets left
-            while (histogram.size() > 12) {
-                // find minimum distance
-                size_t minDistancePairIndex = 0;
-                size_t minDistancePairDistance = std::abs(histogram[0]._count - histogram[1]._count);
-
-                for (size_t i = 1; i < histogram.size() - 1; ++i) {
-                    size_t pairDistance = std::abs(histogram[i]._count - histogram[i+1]._count);
-                    if (pairDistance < minDistancePairDistance) {
-                        minDistancePairIndex = i;
-                        minDistancePairDistance = pairDistance;
-                    }
+                // fill histogram with samples
+                for (size_t i = 0; i < b._numElements; ++i) {
+                    ElementType e = b._baseElement[i];
+                    cgtAssert(e >= b._minimumValue && e <= b._maximumValue, "Voxel intensity out of range. Something went wrong!");
+                    size_t bucket = std::min(size_t(e - b._minimumValue) / initialBucketSize, numBuckets - 1);
+                    ++(histogram[bucket]._count);
                 }
 
-                // merge pair into one element
-                histogram[minDistancePairIndex]._max = histogram[minDistancePairIndex+1]._max;
-                histogram[minDistancePairIndex]._count += histogram[minDistancePairIndex+1]._count;
-                std::move(histogram.begin()+minDistancePairIndex+2, histogram.end(), histogram.begin()+minDistancePairIndex+1);
-                histogram.pop_back();
+                // now cluster as long as possible until we have only 12 buckets left
+                while (histogram.size() > 12) {
+                    // find minimum distance
+                    size_t minDistancePairIndex = 0;
+                    size_t minDistancePairDistance = std::abs(histogram[0]._count - histogram[1]._count);
+
+                    for (size_t i = 1; i < histogram.size() - 1; ++i) {
+                        size_t pairDistance = std::abs(histogram[i]._count - histogram[i + 1]._count);
+                        if (pairDistance < minDistancePairDistance) {
+                            minDistancePairIndex = i;
+                            minDistancePairDistance = pairDistance;
+                        }
+                    }
+
+                    // merge pair into one element
+                    histogram[minDistancePairIndex]._max = histogram[minDistancePairIndex + 1]._max;
+                    histogram[minDistancePairIndex]._count += histogram[minDistancePairIndex + 1]._count;
+                    std::move(histogram.begin() + minDistancePairIndex + 2, histogram.end(), histogram.begin() + minDistancePairIndex + 1);
+                    histogram.pop_back();
+                }
             }
-        }
+        });
         LINFO("Simplified histograms computed.");
 
         int a = 1;
