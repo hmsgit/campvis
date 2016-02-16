@@ -83,7 +83,7 @@ namespace campvis {
 
         if (getInvalidationLevel() & INVALID_HIERARCHY) {
             delete _fhm;
-            _fhm = AbstractFlatHierarchyMapper::create(img);
+            _fhm = AbstractFlatHierarchyMapper::create(img, true);
             validate(INVALID_HIERARCHY);
         }
 
@@ -96,6 +96,7 @@ namespace campvis {
             _fhm->selectLod(p_transferFunction.getTF(), cgt::svec3(p_numBlocks.getValue()));
             data.addDataHandle("FHM.LOD", _fhm->_flatHierarchyDH);
             data.addDataHandle("FHM.index", _fhm->_indexDH);
+            data.addDataHandle("FHM.gradients", _fhm->_gradientDH);
             validate(INVALID_LOD);
         }
 
@@ -123,7 +124,7 @@ namespace campvis {
             _shader->setUniform("const_to_z_w_2", 0.5f*((f+n)/(f-n))+0.5f);
 
             // bind input textures
-            cgt::TextureUnit indexUnit, lodUnit, tfUnit;
+            cgt::TextureUnit indexUnit, lodUnit, gradientUnit, tfUnit;
             indexUnit.activate();
             _fhm->getIndexTexture()->bind();
             _shader->setUniform("_indexTexture", indexUnit.getUnitNumber());
@@ -143,6 +144,10 @@ namespace campvis {
             lodUnit.activate();
             _fhm->getFlatHierarchyTexture()->bind();
             _shader->setUniform("_lodTexture", lodUnit.getUnitNumber());
+
+            gradientUnit.activate();
+            _fhm->getGradientTexture()->bind();
+            _shader->setUniform("_gradientTexture", gradientUnit.getUnitNumber());
 
             p_transferFunction.getTF()->bind(_shader, tfUnit);
 

@@ -29,10 +29,12 @@
 
 namespace campvis {
 
-    AbstractFlatHierarchyMapper::AbstractFlatHierarchyMapper(const ImageData* originalVolume)
+    AbstractFlatHierarchyMapper::AbstractFlatHierarchyMapper(const ImageData* originalVolume, bool computeGradients)
         : _originalVolume(originalVolume)
         , _flatHierarchyTexture(nullptr)
         , _indexTexture(nullptr)
+        , _computeGradientTexture(computeGradients)
+        , _gradientTexture(nullptr)
     {
         cgtAssert(originalVolume->getNumChannels() == 1, "FlatHierarchyMapper supports only single channel volumes!");
 
@@ -45,7 +47,7 @@ namespace campvis {
         //delete _indexTexture;
     }
 
-    AbstractFlatHierarchyMapper* AbstractFlatHierarchyMapper::create(const ImageData* originalVolume) {
+    AbstractFlatHierarchyMapper* AbstractFlatHierarchyMapper::create(const ImageData* originalVolume, bool computeGradients) {
         if (originalVolume->getNumChannels() != 1) {
             LDEBUG("Cannot create a FlatHierarchyMapper for an image with more than 1 channel.");
             return nullptr;
@@ -53,19 +55,19 @@ namespace campvis {
 
         const ImageRepresentationLocal* repLocal = originalVolume->getRepresentation<ImageRepresentationLocal>();
         if (dynamic_cast<const GenericImageRepresentationLocal<uint8_t, 1>*>(repLocal))
-            return new FlatHierarchyMapper<uint8_t>(originalVolume);
+            return new FlatHierarchyMapper<uint8_t>(originalVolume, computeGradients);
         if (dynamic_cast<const GenericImageRepresentationLocal<int8_t, 1>*>(repLocal))
-            return new FlatHierarchyMapper<int8_t>(originalVolume);
+            return new FlatHierarchyMapper<int8_t>(originalVolume, computeGradients);
         if (dynamic_cast<const GenericImageRepresentationLocal<uint16_t, 1>*>(repLocal))
-            return new FlatHierarchyMapper<uint16_t>(originalVolume);
+            return new FlatHierarchyMapper<uint16_t>(originalVolume, computeGradients);
         if (dynamic_cast<const GenericImageRepresentationLocal<int16_t, 1>*>(repLocal))
-            return new FlatHierarchyMapper<int16_t>(originalVolume);
+            return new FlatHierarchyMapper<int16_t>(originalVolume, computeGradients);
         if (dynamic_cast<const GenericImageRepresentationLocal<uint32_t, 1>*>(repLocal))
-            return new FlatHierarchyMapper<uint32_t>(originalVolume);
+            return new FlatHierarchyMapper<uint32_t>(originalVolume, computeGradients);
         if (dynamic_cast<const GenericImageRepresentationLocal<int32_t, 1>*>(repLocal))
-            return new FlatHierarchyMapper<int32_t>(originalVolume);
+            return new FlatHierarchyMapper<int32_t>(originalVolume, computeGradients);
         if (dynamic_cast<const GenericImageRepresentationLocal<float, 1>*>(repLocal))
-            return new FlatHierarchyMapper<float>(originalVolume);
+            return new FlatHierarchyMapper<float>(originalVolume, computeGradients);
 
         cgtAssert(false, "Should not reach this. If this assertion traps, something is wrong with the above code... :(");
         return nullptr;
@@ -77,6 +79,10 @@ namespace campvis {
 
     cgt::Texture* AbstractFlatHierarchyMapper::getIndexTexture() {
         return _indexTexture;
+    }
+
+    cgt::Texture* AbstractFlatHierarchyMapper::getGradientTexture() {
+        return _gradientTexture;
     }
 
     std::string AbstractFlatHierarchyMapper::loggerCat_ = "CAMPVis.core.FlatHierarchyMapper";

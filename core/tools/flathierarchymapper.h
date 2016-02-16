@@ -122,10 +122,10 @@ namespace campvis {
 
     class CAMPVIS_CORE_API AbstractFlatHierarchyMapper {
     public:
-        AbstractFlatHierarchyMapper(const ImageData* originalVolume);
+        AbstractFlatHierarchyMapper(const ImageData* originalVolume, bool computeGradients);
         virtual ~AbstractFlatHierarchyMapper();
 
-        static AbstractFlatHierarchyMapper* create(const ImageData* originalVolume);
+        static AbstractFlatHierarchyMapper* create(const ImageData* originalVolume, bool computeGradients);
 
         /**
          * 
@@ -145,13 +145,23 @@ namespace campvis {
          */
         cgt::Texture* getIndexTexture();
 
+        /**
+         * Returns the index texture storing the lookup information for accessing blocks within _flatHierarchyTexture.
+         * \return	_indexTexture
+         */
+        cgt::Texture* getGradientTexture();
+
         DataHandle _indexDH;
         DataHandle _flatHierarchyDH;
+        DataHandle _gradientDH;
 
     protected:
         const ImageData* _originalVolume;       ///< Original version of the volume
         cgt::Texture* _flatHierarchyTexture;    ///< Texture storing the resulting flat block hierarchy
         cgt::Texture* _indexTexture;            ///< Index texture storing the lookup information for accessing blocks within _flatHierarchyTexture
+
+        bool _computeGradientTexture;
+        cgt::Texture* _gradientTexture;
 
         static std::string loggerCat_;
     };
@@ -202,8 +212,9 @@ namespace campvis {
          * the block's voxels.
          */
         struct Block {
-            Block(ElementType* baseElement, cgt::svec3& size) 
+            Block(ElementType* baseElement, cgt::col4* baseGradient, cgt::svec3& size) 
                 : _baseElement(baseElement)
+                , _baseGradient(baseGradient)
                 , _size(size)
                 , _numElements(cgt::hmul(size))
                 , _minimumValue(ElementType(std::numeric_limits<BASETYPE>::max()))
@@ -217,7 +228,13 @@ namespace campvis {
                 return *(_baseElement + (position.x + (position.y * _size.x) + (position.z * _size.x * _size.y)));
             }
 
+            cgt::col4& getGradient(const cgt::svec3& position) {
+                cgtAssert(position.x + (position.y * _size.x) + (position.z * _size.x * _size.y) < _numElements, "Element access out of bounds!");
+                return *(_baseGradient + (position.x + (position.y * _size.x) + (position.z * _size.x * _size.y)));
+            }
+
             ElementType* _baseElement;          ///< pointer to the base element (i.e. at (0,0,0)) of this block
+            cgt::col4* _baseGradient;           ///< pointer to the base gradient element (i.e. at (0,0,0)) of this block
             cgt::svec3 _size;                   ///< number of voxels in each dimension
             size_t _numElements;                ///< total number of elements in _data (i.e. sizeof(_data))
 
@@ -233,7 +250,7 @@ namespace campvis {
          * A level contains the blocks with the voxel data.
          */
         struct Level {
-            Level (const cgt::svec3& size, size_t blockSize)
+            Level (const cgt::svec3& size, size_t blockSize, bool storeGradients)
                 : _size(size)
                 , _numBlocks(cgt::hmul(_size))
                 , _blockSize(blockSize)
@@ -242,12 +259,19 @@ namespace campvis {
                 size_t numElementsPerBlock = blockSize*blockSize*blockSize;
                 _rawData.resize(_numBlocks * numElementsPerBlock, ElementType(BASETYPE(0)));
 
+                // if this level is to store gradients, initialize their storage area
+                if (storeGradients)
+                    _rawGradients.resize(_numBlocks * numElementsPerBlock, cgt::col4(0, 0, 0, 0));
+
                 // instantiate and initialize Blocks
                 _blocks.reserve(_numBlocks);
                 ElementType* baseElementPointer = &_rawData.front();
+                cgt::col4* baseGradientPointer = (storeGradients) ? &_rawGradients.front() : nullptr;
                 FOR_EACH_SVEC3(i, cgt::svec3(0, 0, 0), _size) {
-                    _blocks.push_back(Block(baseElementPointer, cgt::svec3(_blockSize)));
+                    _blocks.push_back(Block(baseElementPointer, baseGradientPointer, cgt::svec3(_blockSize)));
                     baseElementPointer += numElementsPerBlock;
+                    if (storeGradients)
+                        baseGradientPointer += numElementsPerBlock;
                 }
 
             }
@@ -268,12 +292,13 @@ namespace campvis {
             size_t _numBlocks;                  ///< total number of blocks (i.e. sizeof(_blocks))
             size_t _blockSize;                  ///< Size of the block (number of elements in each direction)
 
-            std::vector<Block> _blocks;         ///< Linearized array of the blocks containing the meta information on how to access the raw voxel data.
-            std::vector<ElementType> _rawData;  ///< Linearized array of the blocks' raw voxel data.
+            std::vector<Block> _blocks;             ///< Linearized array of the blocks containing the meta information on how to access the raw voxel data.
+            std::vector<ElementType> _rawData;      ///< Linearized array of the blocks' raw voxel data.
+            std::vector<cgt::col4> _rawGradients;   ///< Linearized array of the blocks' gradient data
         };
 
     public:
-        FlatHierarchyMapper(const ImageData* originalVolume);
+        FlatHierarchyMapper(const ImageData* originalVolume, bool computeGradients);
         virtual ~FlatHierarchyMapper();
 
 
@@ -315,8 +340,8 @@ namespace campvis {
     // ================================================================================================
 
     template<typename BASETYPE>
-    FlatHierarchyMapper<BASETYPE>::FlatHierarchyMapper(const ImageData* originalVolume)
-        : AbstractFlatHierarchyMapper(originalVolume)
+    FlatHierarchyMapper<BASETYPE>::FlatHierarchyMapper(const ImageData* originalVolume, bool computeGradients)
+        : AbstractFlatHierarchyMapper(originalVolume, computeGradients)
     {
 
 
@@ -450,7 +475,7 @@ namespace campvis {
         // - This is continued recursively until we have 2x2x2 of these level N-1 blocks building a level N-2 block, etc...
         // - To avoid recursion, we have the currentVoxel variable keeping track of where we currently are.
         // - The modulo operation allows to infer the block level we're currently packing.
-        cgt::TextureUnit fhUnit, indexUnit;
+        cgt::TextureUnit fhUnit, gradientUnit, indexUnit;
         indexUnit.activate();
         _indexTexture = new cgt::Texture(GL_TEXTURE_3D, _levels[0]->_size, GL_RGBA16UI, cgt::Texture::NEAREST);
 
@@ -500,6 +525,21 @@ namespace campvis {
             }
         }
 
+        int LAKSDJ[17] = { 0, 4, 3, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        if (_computeGradientTexture) {
+            gradientUnit.activate();
+            _gradientTexture = new cgt::Texture(GL_TEXTURE_3D, targetTextureSize, GL_RGBA8, cgt::Texture::LINEAR);
+
+            for (size_t i = 0; i < blockLookupData.size(); ++i) {
+                glTexSubImage3D(
+                    GL_TEXTURE_3D, 0, 
+                    GLint(blockLookupData[i].x), GLint(blockLookupData[i].y), GLint(blockLookupData[i].z),
+                    GLsizei(blockLookupData[i].w), GLsizei(blockLookupData[i].w), GLsizei(blockLookupData[i].w),
+                    GL_RGBA, GL_UNSIGNED_BYTE, _levels[LAKSDJ[blockLookupData[i].w]]->_blocks[i]._baseGradient);
+            }
+        }
+
         LINFO("Flat block hierarchy texture packing finished.");
 
         // upload the index texture to the GPU
@@ -514,6 +554,10 @@ namespace campvis {
         ImageData* id = new ImageData(3, targetTextureSize, 1);
         ImageRepresentationGL::create(id, _flatHierarchyTexture);
         _flatHierarchyDH = DataHandle(id);
+
+        ImageData* idg = new ImageData(3, targetTextureSize, 4);
+        ImageRepresentationGL::create(idg, _gradientTexture);
+        _gradientDH = DataHandle(idg);
 
         ImageData* id2 = new ImageData(3, firstLevel._size, 4);
         ImageRepresentationGL::create(id2, _indexTexture);
@@ -546,16 +590,34 @@ namespace campvis {
 
         // instantiate each level and allocate storage
         for (size_t level = 0; level < 5; ++level) {
-            _levels[level] = new Level(numBlocks, blockSize);
+            _levels[level] = new Level(numBlocks, blockSize, _computeGradientTexture);
             blockSize /= 2;
         }
 
         // initialize first level
         Level& firstLevel = *_levels[0];
+        const Interval<float>& intensityRange = rep->getNormalizedIntensityRange();
+        const float NARF = 255.f / intensityRange.size();
         FOR_EACH_SVEC3(voxelPosition, cgt::svec3(0, 0, 0), totalVolumeSize) {
             const cgt::svec3 indexBlock = voxelPosition / size_t(16);
             const cgt::svec3 indexVoxel = voxelPosition - (indexBlock * size_t(16));
-            firstLevel.getBlock(indexBlock).getElement(indexVoxel) = rep->getElement(indexBlock * firstLevel._blockSize + indexVoxel);
+            firstLevel.getBlock(indexBlock).getElement(indexVoxel) = rep->getElement(voxelPosition);
+
+            if (_computeGradientTexture) {
+                // for now just central difference gradients for simplicity
+                const float dx = (voxelPosition.x > 0) ? rep->getElementNormalized(voxelPosition - cgt::svec3(1, 0, 0), 0) : rep->getElementNormalized(voxelPosition, 0);
+                const float dy = (voxelPosition.y > 0) ? rep->getElementNormalized(voxelPosition - cgt::svec3(0, 1, 0), 0) : rep->getElementNormalized(voxelPosition, 0);
+                const float dz = (voxelPosition.z > 0) ? rep->getElementNormalized(voxelPosition - cgt::svec3(0, 0, 1), 0) : rep->getElementNormalized(voxelPosition, 0);
+
+                const float mdx = (voxelPosition.x < totalVolumeSize.x - 1) ? rep->getElementNormalized(voxelPosition + cgt::svec3(1, 0, 0), 0) : rep->getElementNormalized(voxelPosition, 0);
+                const float mdy = (voxelPosition.y < totalVolumeSize.y - 1) ? rep->getElementNormalized(voxelPosition + cgt::svec3(0, 1, 0), 0) : rep->getElementNormalized(voxelPosition, 0);
+                const float mdz = (voxelPosition.z < totalVolumeSize.z - 1) ? rep->getElementNormalized(voxelPosition + cgt::svec3(0, 0, 1), 0) : rep->getElementNormalized(voxelPosition, 0);
+
+                const cgt::vec3 gradient = cgt::vec3(dx - mdx, dy - mdy, dz - mdz) * 0.5f;
+                const float l = cgt::length(gradient);
+                const cgt::col4 foo(cgt::col4((gradient * 127.f / l) + 128.f, uint8_t(cgt::clamp(l*NARF, 0.f, 255.f))));
+                firstLevel.getBlock(indexBlock).getGradient(indexVoxel) = foo;
+            }
         }
         LINFO("First level initialized.");
 
@@ -602,6 +664,22 @@ namespace campvis {
                     sum += double(inputBlock.getElement((indexVoxel * size_t(2)) + cgt::svec3(1, 1, 1)));
 
                     outputBlock.getElement(indexVoxel) = ElementType(sum / 8.0);
+
+                    // do the same for the gradients...
+                    if (_computeGradientTexture) {
+                        cgt::dvec4 sum(0.0);
+
+                        sum += cgt::dvec4(inputBlock.getGradient((indexVoxel * size_t(2)) + cgt::svec3(0, 0, 0)));
+                        sum += cgt::dvec4(inputBlock.getGradient((indexVoxel * size_t(2)) + cgt::svec3(1, 0, 0)));
+                        sum += cgt::dvec4(inputBlock.getGradient((indexVoxel * size_t(2)) + cgt::svec3(0, 1, 0)));
+                        sum += cgt::dvec4(inputBlock.getGradient((indexVoxel * size_t(2)) + cgt::svec3(1, 1, 0)));
+                        sum += cgt::dvec4(inputBlock.getGradient((indexVoxel * size_t(2)) + cgt::svec3(0, 0, 1)));
+                        sum += cgt::dvec4(inputBlock.getGradient((indexVoxel * size_t(2)) + cgt::svec3(1, 0, 1)));
+                        sum += cgt::dvec4(inputBlock.getGradient((indexVoxel * size_t(2)) + cgt::svec3(0, 1, 1)));
+                        sum += cgt::dvec4(inputBlock.getGradient((indexVoxel * size_t(2)) + cgt::svec3(1, 1, 1)));
+
+                        outputBlock.getGradient(indexVoxel) = cgt::col4(sum / 8.0);
+                    }
                 }
             }
         }

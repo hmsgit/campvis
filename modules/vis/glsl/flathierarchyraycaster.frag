@@ -49,6 +49,7 @@ uniform TextureParameters2D _exitParams;
 
 uniform usampler3D _indexTexture;
 uniform sampler3D _lodTexture;
+uniform sampler3D _gradientTexture;
 uniform TextureParameters3D _volumeTextureParams;
 
 uniform vec3 _indexTextureSize;
@@ -71,26 +72,22 @@ uniform float _shadowIntensity;
 
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
-struct vec5 {
-    vec4 first;
-    float delta;
+struct vec8 {
+    vec4 intensity;
+    vec4 gradient;
 };
 
-vec5 performIntrablockSampling(in ivec3 indexTexel, in vec3 intrablockTexCoords) {
-    vec4 blockInfo = vec4(texelFetch(_indexTexture, indexTexel, 0));
+vec8 performIntrablockSampling(in vec4 blockInfo, in vec3 intrablockTexCoords) {
     vec3 lodTexCoord = (blockInfo.xyz + clamp(blockInfo.w * intrablockTexCoords, 0.5, blockInfo.w - 0.5)) / _lodTextureSize;
-    vec5 toReturn;
-    toReturn.first = texture(_lodTexture, lodTexCoord);
-    toReturn.delta = 1.0 / (2 * blockInfo.w);
-    return toReturn;
+    vec8 result;
+    result.intensity = texture(_lodTexture, lodTexCoord);
+#ifdef ENABLE_SHADING
+    result.gradient = texture(_gradientTexture, lodTexCoord);
+#endif
+    return result;
 }
 
-vec4 performIntrablockSampling(in vec4 blockInfo, in vec3 intrablockTexCoords) {
-    vec3 lodTexCoord = (blockInfo.xyz + clamp(blockInfo.w * intrablockTexCoords, 0.5, blockInfo.w - 0.5)) / _lodTextureSize;
-    return texture(_lodTexture, lodTexCoord);
-}
-
-vec4 loookupIntensity(in vec3 samplePosition) {
+vec8 loookupIntensity(in vec3 samplePosition) {
     // convert volume texture coordinates to index texture texel coordinates
     vec3 indexLookupPosition = (samplePosition * _indexTextureSize) / _nonNpotVolumeCompensationMultiplier;
 
@@ -119,7 +116,7 @@ vec4 loookupIntensity(in vec3 samplePosition) {
     blockInfos[7] = texelFetch(_indexTexture, rst0 + ivec3(1, 1, 1), 0);
 
     // Step 2: Fetch samples from each of the blocks using intrablock sampling
-    vec4 phis[8];
+    vec8 phis[8];
     phis[0] = performIntrablockSampling(blockInfos[0], rst + vec3(1, 1, 1));
     phis[1] = performIntrablockSampling(blockInfos[1], rst + vec3(0, 1, 1));
     phis[2] = performIntrablockSampling(blockInfos[2], rst + vec3(1, 0, 1));
@@ -161,14 +158,21 @@ vec4 loookupIntensity(in vec3 samplePosition) {
     omegas[7] = (    e67) * (    e57) * (    e37);
 
     // Step 5: Compute normalized weighted sum:
-    vec4 oben = vec4(0.0);
+    vec4 intensities = vec4(0.0);
+    vec4 gradients = vec4(0.0);
     float unten = 0.0;
     for (int i = 0; i < 8; ++i) {
-        oben += phis[i] * omegas[i];
+        intensities += phis[i].intensity * omegas[i];
+        gradients += phis[i].gradient * omegas[i];
         unten += omegas[i];
     }
 
-    return oben/unten;
+    vec8 result;
+    result.intensity = intensities/unten;
+    result.gradient = gradients/unten;
+
+    return result;
+
     //// Get the block from the index texture:
     ////  - The first three components define the texel within the lodTexture
     ////  - The fourth component defines the corresponding block size
@@ -178,8 +182,8 @@ vec4 loookupIntensity(in vec3 samplePosition) {
     //
     //return texture(_lodTexture, lodTexCoord).r;
 
-    vec4 blockInfo = texelFetch(_indexTexture, indexTexel, 0);
-    return performIntrablockSampling(blockInfo, blockSamplePosition);
+    //vec4 blockInfo = texelFetch(_indexTexture, indexTexel, 0);
+    //return performIntrablockSampling(blockInfo, blockSamplePosition);
 };
 
 /**
@@ -202,14 +206,14 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
         // lookup intensity and TF
-        float intensity = loookupIntensity(samplePosition).r;
-        vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
+        vec8 intensityGradient = loookupIntensity(samplePosition);
+        vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensityGradient.intensity.r);
 
         // perform compositing
         if (color.a > 0.0) {
-#ifdef ENABLE_SHADING_NOTNOW
+#ifdef ENABLE_SHADING
             // compute gradient (needed for shading and normals)
-            vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
+            vec3 gradient = (intensityGradient.gradient.xyz - 0.5) * intensityGradient.gradient.w * -255;
             vec4 worldPos = _volumeTextureParams._textureToWorldMatrix * vec4(samplePosition, 1.0); // calling textureToWorld here crashes Intel HD driver and nVidia driver in debug mode, hence, let's calc it manually...
             color.rgb = calculatePhongShading(worldPos.xyz / worldPos.w, _lightSource, _cameraPosition, gradient, color.rgb);
 #endif
