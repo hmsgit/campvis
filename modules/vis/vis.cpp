@@ -38,6 +38,7 @@
 #include "modules/vis/processors/depthdarkening.h"
 #include "modules/vis/processors/drrraycaster.h"
 #include "modules/vis/processors/eepgenerator.h"
+#include "modules/vis/processors/flathierarchyraycaster.h"
 #include "modules/vis/processors/geometryrenderer.h"
 #include "modules/vis/processors/ipsviraycaster.h"
 #include "modules/vis/processors/mprrenderer.h"
@@ -71,6 +72,7 @@ namespace campvis {
     template class SmartProcessorRegistrar<DepthDarkening>;
     template class SmartProcessorRegistrar<DRRRaycaster>;
     template class SmartProcessorRegistrar<EEPGenerator>;
+    template class SmartProcessorRegistrar<FlatHierarchyRaycaster>;
     template class SmartProcessorRegistrar<GeometryRenderer>;
     template class SmartProcessorRegistrar<IpsviRaycaster>;
     template class SmartProcessorRegistrar<MprRenderer>;

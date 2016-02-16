@@ -27,8 +27,13 @@
 
 #define DIV_CEIL(x,y) ((x) > 0) ? (1 + ((x) - 1)/(y)) : ((x) / (y))
 
-#define FOR_EACH_VOXEL(INDEX, POS, SIZE) \
+#define FOR_EACH_SVEC3(INDEX, POS, SIZE) \
     for (cgt::svec3 (INDEX) = (POS); (INDEX).z < (SIZE).z; ++(INDEX).z) \
+        for ((INDEX).y = (POS).y; (INDEX).y < (SIZE).y; ++(INDEX).y) \
+            for ((INDEX).x = (POS).x; (INDEX).x < (SIZE).x; ++(INDEX).x)
+
+#define FOR_EACH_IVEC3(INDEX, POS, SIZE) \
+    for (cgt::ivec3 (INDEX) = (POS); (INDEX).z < (SIZE).z; ++(INDEX).z) \
         for ((INDEX).y = (POS).y; (INDEX).y < (SIZE).y; ++(INDEX).y) \
             for ((INDEX).x = (POS).x; (INDEX).x < (SIZE).x; ++(INDEX).x)
 
@@ -115,6 +120,46 @@ namespace campvis {
 
     class ImageData;
 
+    class CAMPVIS_CORE_API AbstractFlatHierarchyMapper {
+    public:
+        AbstractFlatHierarchyMapper(const ImageData* originalVolume);
+        virtual ~AbstractFlatHierarchyMapper();
+
+        static AbstractFlatHierarchyMapper* create(const ImageData* originalVolume);
+
+        /**
+         * 
+         * \note    Requires a valid acquired OpenGL context!
+         */
+        virtual void selectLod(AbstractTransferFunction* tf, const cgt::svec3& hierarchyNumBlocks) = 0;
+
+        /**
+         * Returns the texture storing the resulting flat block hierarchy.
+         * \return	_flatHierarchyTexture
+         */
+        cgt::Texture* getFlatHierarchyTexture();
+
+        /**
+         * Returns the index texture storing the lookup information for accessing blocks within _flatHierarchyTexture.
+         * \return	_indexTexture
+         */
+        cgt::Texture* getIndexTexture();
+
+        DataHandle _indexDH;
+        DataHandle _flatHierarchyDH;
+
+    protected:
+        const ImageData* _originalVolume;       ///< Original version of the volume
+        cgt::Texture* _flatHierarchyTexture;    ///< Texture storing the resulting flat block hierarchy
+        cgt::Texture* _indexTexture;            ///< Index texture storing the lookup information for accessing blocks within _flatHierarchyTexture
+
+        static std::string loggerCat_;
+    };
+
+
+    // ================================================================================================
+
+
     /**
      * Helper class to construct and manage a flat block hierarchy for volumes.
      * 
@@ -123,7 +168,7 @@ namespace campvis {
      * The current implementation is working completely in RAM, thus no real out-of-core mapper.
      */
     template<typename BASETYPE>
-    class FlatHierarchyMapper {
+    class FlatHierarchyMapper : public AbstractFlatHierarchyMapper {
     public:
         /// Type of one single image element
         typedef BASETYPE ElementType;
@@ -200,7 +245,7 @@ namespace campvis {
                 // instantiate and initialize Blocks
                 _blocks.reserve(_numBlocks);
                 ElementType* baseElementPointer = &_rawData.front();
-                FOR_EACH_VOXEL(i, cgt::svec3(0, 0, 0), _size) {
+                FOR_EACH_SVEC3(i, cgt::svec3(0, 0, 0), _size) {
                     _blocks.push_back(Block(baseElementPointer, cgt::svec3(_blockSize)));
                     baseElementPointer += numElementsPerBlock;
                 }
@@ -212,6 +257,13 @@ namespace campvis {
                 return _blocks[position.x + (position.y * _size.x) + (position.z * _size.x * _size.y)];
             }
 
+            cgt::svec3 indexToBlock(size_t index) {
+                size_t z = index / (_size.x * _size.y);
+                size_t y = (index % (_size.x * _size.y)) / _size.x;
+                size_t x = index % _size.x;
+                return cgt::svec3(x, y, z);
+            }
+
             cgt::svec3 _size;                   ///< Total number of elements in this level (i.e. in _blocks)
             size_t _numBlocks;                  ///< total number of blocks (i.e. sizeof(_blocks))
             size_t _blockSize;                  ///< Size of the block (number of elements in each direction)
@@ -221,35 +273,15 @@ namespace campvis {
         };
 
     public:
-        FlatHierarchyMapper(const ImageData* originalVolume, const cgt::svec3& targetTextureSize);
-        ~FlatHierarchyMapper();
+        FlatHierarchyMapper(const ImageData* originalVolume);
+        virtual ~FlatHierarchyMapper();
 
 
         /**
          * 
          * \note    Requires a valid acquired OpenGL context!
-         * \param	AbstractTransferFunction * tf
-         * \param	size_t memoryBudget
          */
-        void selectLod(AbstractTransferFunction* tf);
-
-        /**
-         * Returns the texture storing the resulting flat block hierarchy.
-         * \return	_flatHierarchyTexture
-         */
-        cgt::Texture* getFlatHierarchyTexture() {
-            return _flatHierarchyTexture;
-        };
-
-        /**
-         * Returns the index texture storing the lookup information for accessing blocks within _flatHierarchyTexture.
-         * \return	_indexTexture
-         */
-        cgt::Texture* getIndexTexture() {
-            return _indexTexture;
-        };
-
-        DataHandle _flatHierarchyDH;
+        virtual void selectLod(AbstractTransferFunction* tf, const cgt::svec3& hierarchyNumBlocks);
 
     private:
         /**
@@ -276,51 +308,32 @@ namespace campvis {
          */
         cgt::vec3 rgb2Lab(cgt::vec3 rgb) const;
 
-        const ImageData* _originalVolume;       ///< Original version of the volume
         Level* _levels[numLevels];              ///< The hierarchy of levels. 5 Levels in total; level 0 has 16^3, level 4 is 1^3 voxels per block
-        
-        cgt::Texture* _flatHierarchyTexture;    ///< Texture storing the resulting flat block hierarchy
-        cgt::Texture* _indexTexture;            ///< Index texture storing the lookup information for accessing blocks within _flatHierarchyTexture
-        cgt::svec3 _targetTextureSize;          ///< Size of target texture in number of blocks (i.e. #pixels = _targetTextureSize * 16 for each dimension)
 
-
-        static std::string loggerCat_;
     };
-
-    template<typename BASETYPE>
-    std::string campvis::FlatHierarchyMapper<BASETYPE>::loggerCat_ = "CAMPVis.core.FlatHierarchyMapper";
 
     // ================================================================================================
 
     template<typename BASETYPE>
-    FlatHierarchyMapper<BASETYPE>::FlatHierarchyMapper(const ImageData* originalVolume, const cgt::svec3& targetTextureSize)
-        : _originalVolume(originalVolume)
-        , _flatHierarchyTexture(nullptr)
-        , _indexTexture(nullptr)
-        , _targetTextureSize(targetTextureSize * levelSizes[0])
+    FlatHierarchyMapper<BASETYPE>::FlatHierarchyMapper(const ImageData* originalVolume)
+        : AbstractFlatHierarchyMapper(originalVolume)
     {
-        cgtAssert(originalVolume->getNumChannels() == 1, "FlatHierarchyMapper supports only single channel volumes!");
 
-        cgt::TextureUnit tu;
-        tu.activate();
 
         createBlockHierarchy();
 
-        _indexTexture = new cgt::Texture(GL_TEXTURE_3D, _levels[0]->_size, GL_RGBA16, cgt::Texture::NEAREST);
     }
 
     template<typename BASETYPE>
     FlatHierarchyMapper<BASETYPE>::~FlatHierarchyMapper() {
         for (size_t i = 0; i < 5; ++i)
             delete _levels[i];
-
-        //delete _flatHierarchyTexture;
-        delete _indexTexture;
     }
 
     template<typename BASETYPE>
-    void FlatHierarchyMapper<BASETYPE>::selectLod(AbstractTransferFunction* tf) {
-        const size_t memoryBudget = cgt::hmul(_targetTextureSize) * sizeof(ElementType);
+    void FlatHierarchyMapper<BASETYPE>::selectLod(AbstractTransferFunction* tf, const cgt::svec3& hierarchyNumBlocks) {
+        const cgt::svec3 targetTextureSize = hierarchyNumBlocks * levelSizes[0];
+        const size_t memoryBudget = cgt::hmul(targetTextureSize) * sizeof(ElementType);
 
         // first, let's get the transfer function data in a really complicated manner... :D
         // (sorry, there is no easier way with the current CAMPVis TF API)
@@ -358,6 +371,9 @@ namespace campvis {
                     significance += cgt::length(approximationLuv - originalLuv) * histogram[j]._count * (histogram[j]._max - histogram[j]._min);
                 }
 
+                // alternative: use uniform sampling over the simplified histogram
+                //for (si)
+
                 blockSignificances[i] = significance;
             }
         });
@@ -376,7 +392,7 @@ namespace campvis {
 
         // populate the priority queue with all blocks at minimum level
         for (size_t i = 0; i < firstLevel._numBlocks; ++i) {
-            if (blockSignificances[i] > 100) {
+            if (blockSignificances[i] > 32) {
                 PqElement pqe = { i, blockSignificances[i] / (memoryCosts[3] - memoryCosts[4]) };
                 pq.push(pqe);
             }
@@ -435,18 +451,21 @@ namespace campvis {
         // - To avoid recursion, we have the currentVoxel variable keeping track of where we currently are.
         // - The modulo operation allows to infer the block level we're currently packing.
         cgt::TextureUnit fhUnit, indexUnit;
+        indexUnit.activate();
+        _indexTexture = new cgt::Texture(GL_TEXTURE_3D, _levels[0]->_size, GL_RGBA16UI, cgt::Texture::NEAREST);
+
         fhUnit.activate();
         // TODO: the instantiation of _flatHierarchyTexture here is just a temporary standin
         //       Later, it just needs to created once in ctor and here will just be the pixel update
         //       (same as with the index texture)
-        _flatHierarchyTexture = new cgt::Texture(GL_TEXTURE_3D, _targetTextureSize, TypeTraits<BASETYPE, 1>::glInternalFormat, cgt::Texture::LINEAR);
+        _flatHierarchyTexture = new cgt::Texture(GL_TEXTURE_3D, targetTextureSize, TypeTraits<BASETYPE, 1>::glInternalFormat, cgt::Texture::LINEAR);
         _flatHierarchyTexture->bind();
         cgt::svec3 currentVoxel(0, 0, 0);
 
         for (size_t level = 0; level < numLevels; ++level) {
             for (size_t i = 0; i < currentLevels.size(); ++i) {
                 if (currentLevels[i] == level) {
-                    cgtAssert(cgt::hand(cgt::lessThan(currentVoxel, _targetTextureSize)), "The target texture for our flat block hierarchy is full. Something went wrong... :(");
+                    cgtAssert(cgt::hand(cgt::lessThan(currentVoxel, targetTextureSize)), "The target texture for our flat block hierarchy is full. Something went wrong... :(");
 
                     // pack block and upload into texture
                     glTexSubImage3D(
@@ -458,7 +477,7 @@ namespace campvis {
                     LGL_ERROR;
 
                     // store the packing information in the index structure
-                    blockLookupData[i] = IndexType(uint16_t(currentVoxel.x), uint16_t(currentVoxel.y), uint16_t(currentVoxel.z), uint16_t(level));
+                    blockLookupData[i] = IndexType(uint16_t(currentVoxel.x), uint16_t(currentVoxel.y), uint16_t(currentVoxel.z), uint16_t(levelSizes[level]));
 
                     // mark as packed
                     currentLevels[i] = 1337;
@@ -468,11 +487,11 @@ namespace campvis {
 
                     // the above scheme completely fills a linear array of level 0 blocks. However,
                     // we have to make sure to stay within texture bounds. Thus,
-                    if (currentVoxel.x >= _targetTextureSize.x) {
+                    if (currentVoxel.x >= targetTextureSize.x) {
                         currentVoxel.x = 0;
                         currentVoxel.y += levelSizes[0];
 
-                        if (currentVoxel.y >= _targetTextureSize.y) {
+                        if (currentVoxel.y >= targetTextureSize.y) {
                             currentVoxel.y = 0;
                             currentVoxel.z += levelSizes[0];
                         }
@@ -483,18 +502,25 @@ namespace campvis {
 
         LINFO("Flat block hierarchy texture packing finished.");
 
-        // putting the flat hierarchy texture into an ImageData/DataHandle just for convenience, so that it's easier to debug :)
-        ImageData* id = new ImageData(3, _targetTextureSize, 1);
-        ImageRepresentationGL::create(id, _flatHierarchyTexture);
-        _flatHierarchyDH = DataHandle(id);
-
         // upload the index texture to the GPU
         indexUnit.activate();
         _indexTexture->bind();
-        _indexTexture->uploadTexture(reinterpret_cast<GLubyte*>(&blockLookupData.front()), GL_RGBA, GL_UNSIGNED_SHORT);
+        _indexTexture->uploadTexture(reinterpret_cast<GLubyte*>(&blockLookupData.front()), GL_RGBA_INTEGER, GL_UNSIGNED_SHORT);
 
         tbb::tick_count endTime = tbb::tick_count::now();
         LINFO("Duration for LOD section: " << (endTime - startTime).seconds());
+
+        // putting the flat hierarchy texture into an ImageData/DataHandle just for convenience, so that it's easier to debug :)
+        ImageData* id = new ImageData(3, targetTextureSize, 1);
+        ImageRepresentationGL::create(id, _flatHierarchyTexture);
+        _flatHierarchyDH = DataHandle(id);
+
+        ImageData* id2 = new ImageData(3, firstLevel._size, 4);
+        ImageRepresentationGL::create(id2, _indexTexture);
+        IndexType* foo = new IndexType[blockLookupData.size()];
+        memcpy(foo, &blockLookupData.front(), blockLookupData.size() * sizeof(IndexType));
+        GenericImageRepresentationLocal<uint16_t, 4>::create(id2, foo);
+        _indexDH = DataHandle(id2);
     }
 
     template<typename BASETYPE>
@@ -526,7 +552,7 @@ namespace campvis {
 
         // initialize first level
         Level& firstLevel = *_levels[0];
-        FOR_EACH_VOXEL(voxelPosition, cgt::svec3(0, 0, 0), totalVolumeSize) {
+        FOR_EACH_SVEC3(voxelPosition, cgt::svec3(0, 0, 0), totalVolumeSize) {
             const cgt::svec3 indexBlock = voxelPosition / size_t(16);
             const cgt::svec3 indexVoxel = voxelPosition - (indexBlock * size_t(16));
             firstLevel.getBlock(indexBlock).getElement(indexVoxel) = rep->getElement(indexBlock * firstLevel._blockSize + indexVoxel);
@@ -534,13 +560,18 @@ namespace campvis {
         LINFO("First level initialized.");
 
         // compute min/max/avg for each block in first level
-        FOR_EACH_VOXEL(indexBlock, cgt::svec3(0, 0, 0), firstLevel._size) {
+        // In order to avoid artifacts, we also have to consider a 1 voxel border around this block.
+        FOR_EACH_SVEC3(indexBlock, cgt::svec3(0, 0, 0), firstLevel._size) {
             Block& b = firstLevel.getBlock(indexBlock);
             double sum = 0.0;
-            for (size_t i = 0; i < b._numElements; ++i) {
-                b._minimumValue = std::min(b._minimumValue, b._baseElement[i]);
-                b._maximumValue = std::max(b._maximumValue, b._baseElement[i]);
-                sum += double(b._baseElement[i]);
+
+            const cgt::ivec3 voxelStart = cgt::clamp(cgt::ivec3(indexBlock) * int(levelSizes[0]) - int(1), cgt::ivec3(0), cgt::ivec3(_originalVolume->getSize()));
+            const cgt::ivec3 voxelEnd = cgt::clamp(cgt::ivec3(indexBlock) * int(levelSizes[0]) + int(levelSizes[0] + 1), cgt::ivec3(0), cgt::ivec3(_originalVolume->getSize()));
+            FOR_EACH_IVEC3(voxel, voxelStart, voxelEnd) {
+                ElementType e = rep->getElement(voxel);
+                b._minimumValue = std::min(b._minimumValue, e);
+                b._maximumValue = std::max(b._maximumValue, e);
+                sum += double(e);
             }
             b._averageValue = ElementType(sum / b._numElements);
         }
@@ -552,12 +583,12 @@ namespace campvis {
             Level& outputLevel = *_levels[level];
 
             // traverse all blocks
-            FOR_EACH_VOXEL(indexBlock, cgt::svec3(0, 0, 0), outputLevel._size) {
+            FOR_EACH_SVEC3(indexBlock, cgt::svec3(0, 0, 0), outputLevel._size) {
                 Block& inputBlock = inputLevel.getBlock(indexBlock);
                 Block& outputBlock = outputLevel.getBlock(indexBlock);
 
                 // traverse all voxels of the target block
-                FOR_EACH_VOXEL(indexVoxel, cgt::svec3(0, 0, 0), cgt::svec3(outputLevel._blockSize)) {
+                FOR_EACH_SVEC3(indexVoxel, cgt::svec3(0, 0, 0), cgt::svec3(outputLevel._blockSize)) {
                     // for each voxel perform an averaging of the 8 corresponding voxels in the inputBlock.
                     double sum = 0.0;
                         
@@ -584,7 +615,7 @@ namespace campvis {
 
                 // first compute the real histogram
                 size_t numBuckets = std::min(size_t(128), size_t(b._maximumValue - b._minimumValue + 1));
-                const ElementType initialBucketSize = (b._maximumValue - b._minimumValue + 1) / ElementType(numBuckets);
+                const BASETYPE initialBucketSize = (b._maximumValue - b._minimumValue + 1) / BASETYPE(numBuckets);
 
                 // initialize histogram
                 SimplifiedHistogramType& histogram = b._histogram;
@@ -596,15 +627,18 @@ namespace campvis {
                 histogram.back()._max = b._maximumValue;
 
                 // fill histogram with samples
-                for (size_t i = 0; i < b._numElements; ++i) {
-                    ElementType e = b._baseElement[i];
+                // In order to avoid artifacts, we also have to consider a 1 voxel border around this block.
+                const cgt::ivec3 voxelStart = cgt::clamp(cgt::ivec3(firstLevel.indexToBlock(indexBlock)) * int(levelSizes[0]) - int(1), cgt::ivec3(0), cgt::ivec3(_originalVolume->getSize()));
+                const cgt::ivec3 voxelEnd = cgt::clamp(cgt::ivec3(firstLevel.indexToBlock(indexBlock)) * int(levelSizes[0]) + int(levelSizes[0] + 1), cgt::ivec3(0), cgt::ivec3(_originalVolume->getSize()));
+                FOR_EACH_IVEC3(voxel, voxelStart, voxelEnd) {
+                    ElementType e = rep->getElement(voxel);
                     cgtAssert(e >= b._minimumValue && e <= b._maximumValue, "Voxel intensity out of range. Something went wrong!");
-                    size_t bucket = std::min(size_t(e - b._minimumValue) / initialBucketSize, numBuckets - 1);
+                    size_t bucket = std::min(size_t(e - b._minimumValue) / size_t(initialBucketSize), numBuckets - 1);
                     ++(histogram[bucket]._count);
                 }
 
                 // now cluster as long as possible until we have only 12 buckets left
-                while (histogram.size() > 12) {
+                while (histogram.size() > 16) {
                     // find minimum distance
                     size_t minDistancePairIndex = 0;
                     size_t minDistancePairDistance = std::abs(histogram[0]._count - histogram[1]._count);

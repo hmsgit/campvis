@@ -25,8 +25,61 @@
 #include "flathierarchymapper.h"
 
 #include "cgt/assert.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
 
 namespace campvis {
+
+    AbstractFlatHierarchyMapper::AbstractFlatHierarchyMapper(const ImageData* originalVolume)
+        : _originalVolume(originalVolume)
+        , _flatHierarchyTexture(nullptr)
+        , _indexTexture(nullptr)
+    {
+        cgtAssert(originalVolume->getNumChannels() == 1, "FlatHierarchyMapper supports only single channel volumes!");
+
+    }
+
+    AbstractFlatHierarchyMapper::~AbstractFlatHierarchyMapper() {
+        // currently disabled since we have the DataHandle hack:
+        //delete _flatHierarchyTexture;
+        
+        //delete _indexTexture;
+    }
+
+    AbstractFlatHierarchyMapper* AbstractFlatHierarchyMapper::create(const ImageData* originalVolume) {
+        if (originalVolume->getNumChannels() != 1) {
+            LDEBUG("Cannot create a FlatHierarchyMapper for an image with more than 1 channel.");
+            return nullptr;
+        }
+
+        const ImageRepresentationLocal* repLocal = originalVolume->getRepresentation<ImageRepresentationLocal>();
+        if (dynamic_cast<const GenericImageRepresentationLocal<uint8_t, 1>*>(repLocal))
+            return new FlatHierarchyMapper<uint8_t>(originalVolume);
+        if (dynamic_cast<const GenericImageRepresentationLocal<int8_t, 1>*>(repLocal))
+            return new FlatHierarchyMapper<int8_t>(originalVolume);
+        if (dynamic_cast<const GenericImageRepresentationLocal<uint16_t, 1>*>(repLocal))
+            return new FlatHierarchyMapper<uint16_t>(originalVolume);
+        if (dynamic_cast<const GenericImageRepresentationLocal<int16_t, 1>*>(repLocal))
+            return new FlatHierarchyMapper<int16_t>(originalVolume);
+        if (dynamic_cast<const GenericImageRepresentationLocal<uint32_t, 1>*>(repLocal))
+            return new FlatHierarchyMapper<uint32_t>(originalVolume);
+        if (dynamic_cast<const GenericImageRepresentationLocal<int32_t, 1>*>(repLocal))
+            return new FlatHierarchyMapper<int32_t>(originalVolume);
+        if (dynamic_cast<const GenericImageRepresentationLocal<float, 1>*>(repLocal))
+            return new FlatHierarchyMapper<float>(originalVolume);
+
+        cgtAssert(false, "Should not reach this. If this assertion traps, something is wrong with the above code... :(");
+        return nullptr;
+    }
+
+    cgt::Texture* AbstractFlatHierarchyMapper::getFlatHierarchyTexture() {
+        return _flatHierarchyTexture;
+    }
+
+    cgt::Texture* AbstractFlatHierarchyMapper::getIndexTexture() {
+        return _indexTexture;
+    }
+
+    std::string AbstractFlatHierarchyMapper::loggerCat_ = "CAMPVis.core.FlatHierarchyMapper";
 
 }
 

@@ -34,20 +34,19 @@
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 
+#include "modules/vis/processors/flathierarchyraycaster.h"
+
 namespace campvis {
 
     VolumeExplorerDemo::VolumeExplorerDemo(DataContainer& dc)
         : AutoEvaluationPipeline(dc, getId())
         , _lsp()
         , _imageReader()
-        , _ve(&_canvasSize)
-        , p_numBlocks("NumBlock", "Number of Blocks", cgt::ivec3(4, 4, 2), cgt::ivec3(1), cgt::ivec3(32))
+        , _ve(&_canvasSize, new SliceExtractor(nullptr), new FlatHierarchyRaycaster(nullptr))
     {
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_ve);
-
-        addProperty(p_numBlocks);
 
         addEventListenerToBack(&_ve);
     }
@@ -64,7 +63,6 @@ namespace campvis {
         _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
-        _imageReader.s_validated.connect(this, &VolumeExplorerDemo::onProcessorValidated);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(512, cgt::vec2(0.f, .05f));
         //dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.12f, .15f), cgt::col4(85, 0, 0, 128), cgt::col4(255, 0, 0, 128)));
@@ -76,17 +74,6 @@ namespace campvis {
 
     void VolumeExplorerDemo::deinit() {
         AutoEvaluationPipeline::deinit();
-    }
-
-
-    void VolumeExplorerDemo::onProcessorValidated(AbstractProcessor* p) {
-        GLJobProc.enqueueJob(cgt::makeJobOnHeap([&] () {
-            GenericImageRepresentationLocal<uint16_t, 1>::ScopedRepresentation rep(getDataContainer(), "reader.output");
-            FlatHierarchyMapper<uint16_t> fhm(rep->getParent(), cgt::svec3(p_numBlocks.getValue()));
-            fhm.selectLod(static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->getTF());
-
-            getDataContainer().addDataHandle("Flat Hierarchy", fhm._flatHierarchyDH);
-        }));
     }
 
 }

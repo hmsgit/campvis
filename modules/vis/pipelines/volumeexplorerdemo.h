@@ -59,15 +59,11 @@ namespace campvis {
         virtual std::string getName() const { return getId(); };
         /// \see AbstractPipeline::getId()
         static const std::string getId() { return "VolumeExplorerDemo"; };
-
-        void onProcessorValidated(AbstractProcessor* p);
-
+        
     protected:
         LightSourceProvider _lsp;
         GenericImageReader _imageReader;
         VolumeExplorer _ve;
-
-        IVec3Property p_numBlocks;
     };
 }
 
