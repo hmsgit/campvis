@@ -32,6 +32,7 @@ layout(location = 2) out vec4 out_FHN;       ///< outgoing fragment first hit no
 #include "tools/texture2d.frag"
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
+#include "modules/vis/glsl/voxelhierarchy.frag"
 
 uniform vec2 _viewportSizeRCP;
 uniform float _jitterStepSizeMultiplier;
@@ -103,7 +104,7 @@ vec8 loookupIntensity(in vec3 samplePosition) {
     // Step 1: Determine the 8 block neighborhood
     ivec3 rst0 = ivec3(floor(clamp(indexLookupPosition - 0.5, vec3(0.0), _indexTextureSize - 1.0)));
     vec3 rst = (indexLookupPosition - vec3(rst0) - 1.0);
-
+    
     // Step 1.5: Gather block information from the local 8-neighborhood
     vec4 blockInfos[8];
     blockInfos[0] = texelFetch(_indexTexture, rst0 + ivec3(0, 0, 0), 0);
@@ -205,6 +206,10 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // compute sample position
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
+        vec3 thisBlockLlf = floor((samplePosition * _indexTextureSize) / _nonNpotVolumeCompensationMultiplier);
+        vec3 thisBlockUrb = thisBlockLlf + vec3(1);
+        float thisBlockSize = texelFetch(_indexTexture, ivec3(thisBlockLlf), 0).w;
+
         // lookup intensity and TF
         vec8 intensityGradient = loookupIntensity(samplePosition);
         vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensityGradient.intensity.r);
@@ -219,16 +224,16 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 #endif
 
             // accomodate for variable sampling rates
-            color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
+            color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * (16/thisBlockSize) * SAMPLING_BASE_INTERVAL_RCP);
             result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a);
             result.a = result.a + (1.0 -result.a) * color.a;
-        }
 
-        // save first hit ray parameter for depth value calculation
-        if (firstHitT < 0.0 && result.a > 0.0) {
-            firstHitT = t;
-            out_FHP = vec4(samplePosition, 1.0);
-            //out_FHN = vec4(normalize(computeGradient(_volume, _volumeTextureParams, samplePosition)), 1.0);
+            // save first hit ray parameter for depth value calculation
+            if (firstHitT < 0.0 && result.a > 0.0) {
+                firstHitT = t;
+                out_FHP = vec4(samplePosition, 1.0);
+                out_FHN = vec4(gradient, 1.0);
+            }
         }
 
         // early ray termination
@@ -237,8 +242,12 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             t = tend;
         }
 
+        
+        float rayBlockIntersection = IntersectBoxOnlyTFar(samplePosition, direction, _nonNpotVolumeCompensationMultiplier * thisBlockLlf/_indexTextureSize, _nonNpotVolumeCompensationMultiplier * thisBlockUrb/_indexTextureSize);
+        jitterFloat(rayBlockIntersection, _samplingStepSize * _jitterStepSizeMultiplier);
+
         // advance to the next evaluation point along the ray
-        t += _samplingStepSize;
+        t += min(_samplingStepSize * (16/thisBlockSize), _samplingStepSize + rayBlockIntersection);
     }
 
     // calculate depth value from ray parameter
