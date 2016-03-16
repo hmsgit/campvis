@@ -402,8 +402,7 @@ namespace campvis {
                 blockSignificances[i] = significance;
             }
         });
-        LINFO("Block significances computed.");
-
+        
         // now start the optimization with our priority queue:
         float memoryCosts[5];
         memoryCosts[4] = float(sizeof(ElementType) * 1 * 1 * 1);
@@ -448,17 +447,10 @@ namespace campvis {
             }
         }
 
-        const size_t kbUsed = DIV_CEIL(memoryBudget, 1024);
-        const size_t kbOriginal = DIV_CEIL(cgt::hmul(_originalVolume->getSize()) * sizeof(ElementType), 1024);
-        LINFO("Block optimization complete, reduced " << kbOriginal << "KB into " << kbUsed << " KB (" << 100.0 * double(kbUsed) / double(kbOriginal) << "%).");
 
         std::vector<size_t> blockStatistics(5, 0);
         for (size_t i = 0; i < currentLevels.size(); ++i)
             ++(blockStatistics[currentLevels[i]]);
-
-        LINFO("Block usage statistics:");
-        for (size_t i = 0; i < blockStatistics.size(); ++i)
-            LINFO("Level " << i << " (" << levelSizes[i] << "): " << blockStatistics[i]);
 
         // now start packing the blocks into one texture
         typedef cgt::Vector4<uint16_t> IndexType;
@@ -525,7 +517,7 @@ namespace campvis {
             }
         }
 
-        int LAKSDJ[17] = { 0, 4, 3, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+        const int LAKSDJ[17] = { 0, 4, 3, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
 
         if (_computeGradientTexture) {
             gradientUnit.activate();
@@ -540,8 +532,6 @@ namespace campvis {
             }
         }
 
-        LINFO("Flat block hierarchy texture packing finished.");
-
         // upload the index texture to the GPU
         indexUnit.activate();
         _indexTexture->bind();
@@ -549,6 +539,13 @@ namespace campvis {
 
         tbb::tick_count endTime = tbb::tick_count::now();
         LINFO("Duration for LOD section: " << (endTime - startTime).seconds());
+
+        const size_t kbUsed = DIV_CEIL(memoryBudget, 1024);
+        const size_t kbOriginal = DIV_CEIL(cgt::hmul(_originalVolume->getSize()) * sizeof(ElementType), 1024);
+        LINFO("Block optimization complete, reduced " << kbOriginal << "KB into " << kbUsed << " KB (" << 100.0 * double(kbUsed) / double(kbOriginal) << "%).");
+        LINFO("Block usage statistics:");
+        for (size_t i = 0; i < blockStatistics.size(); ++i)
+            LINFO("Level " << i << " (" << levelSizes[i] << "): " << blockStatistics[i]);
 
         // putting the flat hierarchy texture into an ImageData/DataHandle just for convenience, so that it's easier to debug :)
         ImageData* id = new ImageData(3, targetTextureSize, 1);
@@ -716,7 +713,7 @@ namespace campvis {
                 }
 
                 // now cluster as long as possible until we have only 12 buckets left
-                while (histogram.size() > 16) {
+                while (histogram.size() > 32) {
                     // find minimum distance
                     size_t minDistancePairIndex = 0;
                     size_t minDistancePairDistance = std::abs(histogram[0]._count - histogram[1]._count);
